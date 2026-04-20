@@ -27,7 +27,7 @@ services:
     env_file:
       - ./apps/api/.env
     environment:
-      DATABASE_URL: postgresql://devgate:devgate@db:5432/devgate
+      DATABASE_URL: postgresql+psycopg://devgate:devgate@db:5432/devgate
     depends_on:
       db:
         condition: service_healthy
