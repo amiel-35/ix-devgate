@@ -67,3 +67,16 @@ def test_logout_clears_cookie(client, db_session):
     res = client.post("/auth/logout")
 
     assert res.status_code == 200
+
+
+def test_start_returns_429_over_rate_limit(client, db_session):
+    override_email_provider(FakeEmailProvider())
+    _make_user(db_session)
+
+    # login_start_limiter is 5 req / 600s per IP+email
+    for _ in range(5):
+        res = client.post("/auth/start", json={"email": "user@example.com"})
+        assert res.status_code == 200
+
+    res = client.post("/auth/start", json={"email": "user@example.com"})
+    assert res.status_code == 429

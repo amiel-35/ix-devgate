@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     SESSION_SECRET_KEY: str = "changeme"
     SESSION_TTL_DAYS: int = 7
 
+    COOKIE_SECURE: bool = False
+
     EMAIL_PROVIDER: str = "resend"
     RESEND_API_KEY: str = ""
 

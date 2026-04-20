@@ -50,3 +50,10 @@ def _reset_email_provider():
     from app.modules.email.provider import FakeEmailProvider
     override_email_provider(FakeEmailProvider())
     yield
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    from app.modules.auth.rate_limit import login_start_limiter
+    login_start_limiter._hits.clear()
+    yield

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session as DbSession
 
+from app.config import settings
 from app.database import get_db
 from app.modules.auth.rate_limit import login_start_limiter
 from app.modules.auth.schemas import (
@@ -22,7 +23,8 @@ def login_start(
     request: Request,
     db: DbSession = Depends(get_db),
 ):
-    key = f"{request.client.host if request.client else 'unknown'}|{body.email}"
+    normalized_email = body.email.strip().lower()
+    key = f"{request.client.host if request.client else 'unknown'}|{normalized_email}"
     login_start_limiter.check(key)
     return start_login(body.email, db, method=body.method)
 
@@ -34,7 +36,7 @@ def login_verify(body: LoginVerifyRequest, response: Response, db: DbSession = D
         key=SESSION_COOKIE,
         value=session.id,
         httponly=True,
-        secure=False,  # True in prod behind HTTPS; False here for TestClient HTTP
+        secure=settings.COOKIE_SECURE,
         samesite="lax",
         max_age=SESSION_TTL_SECONDS,
     )
@@ -43,5 +45,11 @@ def login_verify(body: LoginVerifyRequest, response: Response, db: DbSession = D
 
 @router.post("/logout")
 def logout(response: Response, current_session=Depends(get_current_session)):
-    response.delete_cookie(SESSION_COOKIE)
+    response.delete_cookie(
+        SESSION_COOKIE,
+        path="/",
+        samesite="lax",
+        secure=settings.COOKIE_SECURE,
+        httponly=True,
+    )
     return {"ok": True}
