@@ -8,6 +8,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session as DbSession, joinedload
 
+from app.modules.gateway.health import check_environment_health
+
 from app.database import get_db
 from app.modules.admin.schemas import (
     AuditEventResponse,
@@ -167,6 +169,26 @@ def create_environment(
           target_type="environment", target_id=env.id)
     db.commit()
     return {"id": env.id}
+
+
+@router.post("/environments/{env_id}/ping", status_code=200)
+async def ping_environment(
+    env_id: str,
+    db: DbSession = Depends(get_db),
+):
+    """Déclenche un health check immédiat sur l'upstream d'un environnement.
+    Retourne le statut observé. Ne contient jamais les credentials Cloudflare.
+    """
+    env = db.query(Environment).filter(Environment.id == env_id).first()
+    if not env:
+        raise NotFoundException()
+    snapshot = await check_environment_health(env, db)
+    return {
+        "environment_id": env.id,
+        "status": snapshot.status,
+        "observed_at": snapshot.observed_at.isoformat(),
+        "latency_ms": snapshot.metadata_json.get("latency_ms") if snapshot.metadata_json else None,
+    }
 
 
 # ── Accès (grants) ────────────────────────────────────────────────
