@@ -55,6 +55,7 @@ def get_environments_for_user(user: User, db: DbSession) -> list[dict]:
             "environment_name": env.name,
             "kind": env.kind,
             "url": f"https://{env.public_hostname}",
+            "gateway_url": f"/gateway/{env.id}/",
             "requires_app_auth": env.requires_app_auth,
             "status": status,
         })

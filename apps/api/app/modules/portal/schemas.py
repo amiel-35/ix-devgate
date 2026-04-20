@@ -14,6 +14,7 @@ class EnvironmentListItem(BaseModel):
     environment_name: str
     kind: str
     url: str
+    gateway_url: str  # Chemin gateway DevGate — navigation réelle
     requires_app_auth: bool
     status: str  # online | offline | unknown
 

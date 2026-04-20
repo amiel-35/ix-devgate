@@ -202,3 +202,18 @@ def test_revoke_session_of_other_user_does_nothing(client, db_session):
 
     assert res.status_code == 204
     assert db_session.get(SessionModel, "s-foreign") is not None
+
+
+def test_me_environments_gateway_url(client, db_session):
+    """Chaque environnement expose un gateway_url."""
+    _make_user(db_session)
+    _make_session(db_session)
+    _make_org_with_env(db_session)
+    client.cookies.set("devgate_session", "s-test")
+
+    res = client.get("/me/environments")
+
+    assert res.status_code == 200
+    envs = res.json()
+    assert len(envs) == 1
+    assert envs[0]["gateway_url"] == "/gateway/env-1/"
