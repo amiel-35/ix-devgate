@@ -1,6 +1,7 @@
 // E06 — Détail environnement
 // Référence visuelle : docs/ds/mockups/devgate-e06-detail-env.mockup.html
 // Note : upstream_hostname et service_token_ref ne sont JAMAIS renvoyés par l'API portal.
+// Le bouton "Ouvrir" passe par le gateway DevGate (/gateway/{id}/) — jamais directement vers Cloudflare.
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { serverPortalApi, ServerApiError } from "@/lib/api/server";
@@ -34,6 +35,10 @@ export default async function ResourceDetailPage({ params }: Props) {
   const hostname = env.url.replace(/^https?:\/\//, "");
   const orgSlug = toSlug(env.organization_name);
   const isOnline = env.status === "online";
+
+  // URL de navigation réelle : gateway DevGate (jamais le public_hostname directement)
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
+  const gatewayUrl = `${apiBase}${env.gateway_url}`;
 
   return (
     <main className={styles.main}>
@@ -101,15 +106,15 @@ export default async function ResourceDetailPage({ params }: Props) {
 
           <div className={styles.actions}>
             {isOnline && (
-              <Link
-                href={env.requires_app_auth ? `/resource/${id}/interstitial` : env.url}
+              <a
+                href={env.requires_app_auth ? `/resource/${id}/interstitial` : gatewayUrl}
                 className={styles.btnPrimary}
                 {...(!env.requires_app_auth
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
               >
                 Ouvrir la ressource ↗
-              </Link>
+              </a>
             )}
             <Link href={`/client/${orgSlug}`} className={styles.btnSecondary}>
               ← Retour aux ressources

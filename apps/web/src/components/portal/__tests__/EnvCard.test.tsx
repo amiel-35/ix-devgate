@@ -9,6 +9,7 @@ const BASE_ENV = {
   environment_name: "Staging principal",
   kind: "staging",
   url: "https://client-x.devgate.example.com",
+  gateway_url: "/gateway/env-1/",
   requires_app_auth: false,
   status: "online",
 };

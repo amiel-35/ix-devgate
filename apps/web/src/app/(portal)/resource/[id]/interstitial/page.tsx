@@ -1,7 +1,7 @@
 // E07 — Interstitiel double auth
 // Référence visuelle : docs/ds/mockups/devgate-e07-interstitiel.mockup.html
 // Affiché uniquement quand requires_app_auth=true, avant ouverture de la ressource.
-// L'URL cible est l'URL publique de l'environnement — jamais un hostname Cloudflare brut.
+// "Continuer" ouvre le gateway DevGate — jamais directement le hostname Cloudflare.
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { serverPortalApi, ServerApiError } from "@/lib/api/server";
@@ -27,6 +27,10 @@ export default async function InterstitialPage({ params }: Props) {
   const env = environments.find((e) => e.id === id);
   if (!env) notFound();
 
+  // URL de navigation : gateway DevGate (jamais le public_hostname directement)
+  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
+  const gatewayUrl = `${apiBase}${env.gateway_url}`;
+
   return (
     <div className={styles.wrap}>
       <div className={styles.card}>
@@ -42,7 +46,7 @@ export default async function InterstitialPage({ params }: Props) {
           WordPress ou votre outil métier.
         </div>
         <a
-          href={env.url}
+          href={gatewayUrl}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.btnPrimary}

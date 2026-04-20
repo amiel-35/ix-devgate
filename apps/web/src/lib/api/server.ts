@@ -61,6 +61,7 @@ export type EnvironmentItem = {
   environment_name: string;
   kind: string;
   url: string;
+  gateway_url: string; // Chemin gateway — ex: "/gateway/abc123/"
   requires_app_auth: boolean;
   status: string; // "online" | "offline" | "unknown"
 };
