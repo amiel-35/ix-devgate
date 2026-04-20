@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -18,7 +20,7 @@ class CreateEnvironmentRequest(BaseModel):
     project_id: str
     name: str
     slug: str
-    kind: str  # dev | staging | preview | internal
+    kind: Literal["dev", "staging", "preview", "internal"]
     public_hostname: str
     upstream_hostname: str | None = None
     cloudflare_tunnel_id: str | None = None
@@ -30,7 +32,7 @@ class CreateEnvironmentRequest(BaseModel):
 class CreateAccessGrantRequest(BaseModel):
     email: EmailStr
     organization_id: str
-    role: str  # client_member | reviewer | agency_admin
+    role: Literal["client_member", "reviewer", "agency_admin"]
     display_name: str | None = None
 
 

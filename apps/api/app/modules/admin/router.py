@@ -4,8 +4,8 @@ Toutes les routes exigent agency_admin.
 """
 from datetime import date, datetime, timezone
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session as DbSession
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session as DbSession, joinedload
 
 from app.database import get_db
 from app.modules.admin.schemas import (
@@ -35,7 +35,7 @@ router = APIRouter(dependencies=[Depends(require_agency_admin)])
 
 @router.get("/stats", response_model=StatsResponse)
 def get_stats(db: DbSession = Depends(get_db)):
-    today_start = datetime.combine(date.today(), datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_start = datetime.now(tz=timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     return StatsResponse(
         active_orgs=db.query(Organization).count(),
         active_envs=db.query(Environment).filter(Environment.status == "active").count(),
@@ -127,7 +127,11 @@ def create_project(
 
 @router.get("/environments")
 def list_environments(db: DbSession = Depends(get_db)):
-    envs = db.query(Environment).join(Project).join(Organization).all()
+    envs = (
+        db.query(Environment)
+        .options(joinedload(Environment.project).joinedload(Project.organization))
+        .all()
+    )
     return [
         {
             "id": e.id,
@@ -169,7 +173,11 @@ def create_environment(
 
 @router.get("/access-grants")
 def list_grants(db: DbSession = Depends(get_db)):
-    grants = db.query(AccessGrant).all()
+    grants = (
+        db.query(AccessGrant)
+        .options(joinedload(AccessGrant.user), joinedload(AccessGrant.organization))
+        .all()
+    )
     return [
         {
             "id": g.id,
@@ -191,6 +199,10 @@ def create_grant(
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
 ):
+    org = db.query(Organization).filter(Organization.id == body.organization_id).first()
+    if not org:
+        raise NotFoundException()
+
     user = db.query(User).filter(User.email == body.email).first()
     if not user:
         user = User(email=body.email, display_name=body.display_name, kind="client")
@@ -216,6 +228,8 @@ def revoke_grant(
     grant = db.query(AccessGrant).filter(AccessGrant.id == grant_id).first()
     if not grant:
         raise NotFoundException()
+    if grant.revoked_at is not None:
+        return  # Déjà révoqué, idempotent
     grant.revoked_at = datetime.now(tz=timezone.utc)
     db.commit()
     audit(db, actor_user_id=admin.id, event_type="admin.access_grant.revoked",
@@ -227,7 +241,7 @@ def revoke_grant(
 
 @router.get("/audit-events", response_model=list[AuditEventResponse])
 def list_audit_events(
-    limit: int = 50,
+    limit: int = Query(50, le=200),
     offset: int = 0,
     db: DbSession = Depends(get_db),
 ):
