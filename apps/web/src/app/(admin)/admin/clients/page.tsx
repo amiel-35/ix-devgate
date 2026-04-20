@@ -1,11 +1,11 @@
 // Back-office — Clients (organisations)
 import { redirect } from "next/navigation";
-import { serverAdminApi, AdminApiError } from "@/lib/api/server-admin";
+import { serverAdminApi, AdminApiError, type OrgItem, type ProjectItem } from "@/lib/api/server-admin";
 import { ClientsClient } from "./ClientsClient";
 
 export default async function AdminClientsPage() {
-  let orgs;
-  let projects;
+  let orgs: OrgItem[];
+  let projects: ProjectItem[];
 
   try {
     [orgs, projects] = await Promise.all([
