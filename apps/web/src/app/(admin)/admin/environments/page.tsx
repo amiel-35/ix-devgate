@@ -1,11 +1,24 @@
-// Back-office — Gestion des environnements
+// Back-office — Environnements
+import { redirect } from "next/navigation";
+import { serverAdminApi, AdminApiError, type AdminEnvItem, type OrgItem, type ProjectItem } from "@/lib/api/server-admin";
+import { EnvironmentsClient } from "./EnvironmentsClient";
+
 export default async function AdminEnvironmentsPage() {
-  // TODO: charger environnements via adminApi.environments.list()
-  // Inclure: type, tunnel CF, auth app, statut health
-  return (
-    <main>
-      {/* TODO: Table envs + drawer création (tunnel ref, service token ref) */}
-      <h1>Environnements</h1>
-    </main>
-  );
+  let envs: AdminEnvItem[];
+  let orgs: OrgItem[];
+  let projects: ProjectItem[];
+
+  try {
+    [envs, orgs, projects] = await Promise.all([
+      serverAdminApi.environments(),
+      serverAdminApi.organizations(),
+      serverAdminApi.projects(),
+    ]);
+  } catch (err) {
+    if (err instanceof AdminApiError && err.status === 401) redirect("/login");
+    if (err instanceof AdminApiError && err.status === 403) redirect("/access-denied");
+    redirect("/session-expired");
+  }
+
+  return <EnvironmentsClient initialEnvs={envs} orgs={orgs} initialProjects={projects} />;
 }
