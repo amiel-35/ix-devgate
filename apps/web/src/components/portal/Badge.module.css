@@ -1,0 +1,32 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* kind badges */
+.staging  { background: #cffafe; color: #0891b2; }
+.preview  { background: var(--color-warning-bg); color: var(--color-warning); }
+.dev      { background: var(--color-primary-s);  color: var(--color-primary); }
+.internal { background: var(--color-surface-2);  color: var(--color-text-muted); }
+
+/* status badges */
+.online  { background: var(--color-success-bg); color: var(--color-success); }
+.offline { background: var(--color-danger-bg);  color: var(--color-danger); }
+.unknown { background: var(--color-surface-2);  color: var(--color-text-muted); }
+
+/* auth badge */
+.auth { background: var(--color-warning-bg); color: var(--color-warning); }
