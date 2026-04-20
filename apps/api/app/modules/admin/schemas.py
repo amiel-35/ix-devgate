@@ -8,6 +8,12 @@ class CreateOrganizationRequest(BaseModel):
     support_email: str | None = None
 
 
+class CreateProjectRequest(BaseModel):
+    organization_id: str
+    name: str
+    slug: str
+
+
 class CreateEnvironmentRequest(BaseModel):
     project_id: str
     name: str
@@ -36,3 +42,10 @@ class AuditEventResponse(BaseModel):
     target_id: str | None
     metadata_json: dict | None
     created_at: str
+
+
+class StatsResponse(BaseModel):
+    active_orgs: int
+    active_envs: int
+    active_users: int
+    events_today: int

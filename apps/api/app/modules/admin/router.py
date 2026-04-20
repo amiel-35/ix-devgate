@@ -1,7 +1,9 @@
 """
-Back-office agence — CRUD clients, environnements, accès, audit.
+Back-office agence — CRUD clients, projets, environnements, accès, audit, stats.
 Toutes les routes exigent agency_admin.
 """
+from datetime import date, datetime, timezone
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session as DbSession
 
@@ -11,23 +13,68 @@ from app.modules.admin.schemas import (
     CreateAccessGrantRequest,
     CreateEnvironmentRequest,
     CreateOrganizationRequest,
+    CreateProjectRequest,
+    StatsResponse,
 )
 from app.modules.audit.service import audit
 from app.shared.deps import require_agency_admin
 from app.shared.exceptions import NotFoundException
 from app.shared.models import (
-    AccessGrant, AuditEvent, Environment,
-    Organization, Project, User,
+    AccessGrant,
+    AuditEvent,
+    Environment,
+    Organization,
+    Project,
+    User,
 )
 
 router = APIRouter(dependencies=[Depends(require_agency_admin)])
+
+
+# ── Stats ─────────────────────────────────────────────────────────
+
+@router.get("/stats", response_model=StatsResponse)
+def get_stats(db: DbSession = Depends(get_db)):
+    today_start = datetime.combine(date.today(), datetime.min.time()).replace(tzinfo=timezone.utc)
+    return StatsResponse(
+        active_orgs=db.query(Organization).count(),
+        active_envs=db.query(Environment).filter(Environment.status == "active").count(),
+        active_users=db.query(User).filter(User.status == "active").count(),
+        events_today=db.query(AuditEvent).filter(AuditEvent.created_at >= today_start).count(),
+    )
 
 
 # ── Organisations ─────────────────────────────────────────────────
 
 @router.get("/organizations")
 def list_organizations(db: DbSession = Depends(get_db)):
-    return db.query(Organization).all()
+    orgs = db.query(Organization).all()
+    result = []
+    for org in orgs:
+        env_count = (
+            db.query(Environment)
+            .join(Project)
+            .filter(Project.organization_id == org.id)
+            .count()
+        )
+        user_count = (
+            db.query(AccessGrant)
+            .filter(
+                AccessGrant.organization_id == org.id,
+                AccessGrant.revoked_at.is_(None),
+            )
+            .count()
+        )
+        result.append({
+            "id": org.id,
+            "name": org.name,
+            "slug": org.slug,
+            "branding_name": org.branding_name,
+            "support_email": org.support_email,
+            "env_count": env_count,
+            "user_count": user_count,
+        })
+    return result
 
 
 @router.post("/organizations", status_code=201)
@@ -42,15 +89,45 @@ def create_organization(
     audit(db, actor_user_id=admin.id, event_type="admin.organization.created",
           target_type="organization", target_id=org.id)
     db.commit()
-    return org
+    return {"id": org.id}
+
+
+# ── Projets ───────────────────────────────────────────────────────
+
+@router.get("/projects")
+def list_projects(org_id: str | None = None, db: DbSession = Depends(get_db)):
+    q = db.query(Project)
+    if org_id:
+        q = q.filter(Project.organization_id == org_id)
+    return [
+        {"id": p.id, "organization_id": p.organization_id, "name": p.name, "slug": p.slug}
+        for p in q.all()
+    ]
+
+
+@router.post("/projects", status_code=201)
+def create_project(
+    body: CreateProjectRequest,
+    db: DbSession = Depends(get_db),
+    admin=Depends(require_agency_admin),
+):
+    org = db.query(Organization).filter(Organization.id == body.organization_id).first()
+    if not org:
+        raise NotFoundException()
+    project = Project(**body.model_dump())
+    db.add(project)
+    db.commit()
+    audit(db, actor_user_id=admin.id, event_type="admin.project.created",
+          target_type="project", target_id=project.id)
+    db.commit()
+    return {"id": project.id}
 
 
 # ── Environnements ────────────────────────────────────────────────
 
 @router.get("/environments")
 def list_environments(db: DbSession = Depends(get_db)):
-    # Ne jamais retourner upstream_hostname ni service_token_ref
-    envs = db.query(Environment).all()
+    envs = db.query(Environment).join(Project).join(Organization).all()
     return [
         {
             "id": e.id,
@@ -63,6 +140,8 @@ def list_environments(db: DbSession = Depends(get_db)):
             "status": e.status,
             "cloudflare_tunnel_id": e.cloudflare_tunnel_id,
             "cloudflare_access_app_id": e.cloudflare_access_app_id,
+            "org_name": e.project.organization.name,
+            "project_name": e.project.name,
         }
         for e in envs
     ]
@@ -74,6 +153,9 @@ def create_environment(
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
 ):
+    project = db.query(Project).filter(Project.id == body.project_id).first()
+    if not project:
+        raise NotFoundException()
     env = Environment(**body.model_dump())
     db.add(env)
     db.commit()
@@ -87,7 +169,20 @@ def create_environment(
 
 @router.get("/access-grants")
 def list_grants(db: DbSession = Depends(get_db)):
-    return db.query(AccessGrant).all()
+    grants = db.query(AccessGrant).all()
+    return [
+        {
+            "id": g.id,
+            "user_id": g.user_id,
+            "user_email": g.user.email,
+            "organization_id": g.organization_id,
+            "org_name": g.organization.name,
+            "role": g.role,
+            "created_at": g.created_at.isoformat(),
+            "revoked_at": g.revoked_at.isoformat() if g.revoked_at else None,
+        }
+        for g in grants
+    ]
 
 
 @router.post("/access-grants", status_code=201)
@@ -98,7 +193,6 @@ def create_grant(
 ):
     user = db.query(User).filter(User.email == body.email).first()
     if not user:
-        # Créer l'utilisateur à la volée
         user = User(email=body.email, display_name=body.display_name, kind="client")
         db.add(user)
         db.flush()
@@ -119,7 +213,6 @@ def revoke_grant(
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
 ):
-    from datetime import datetime, timezone
     grant = db.query(AccessGrant).filter(AccessGrant.id == grant_id).first()
     if not grant:
         raise NotFoundException()
