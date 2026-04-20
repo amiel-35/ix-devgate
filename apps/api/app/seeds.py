@@ -30,6 +30,17 @@ def seed():
         db.flush()
         db.add(AccessGrant(user_id=admin.id, organization_id=org.id, role="agency_admin"))
 
+        # Owner personnel (CLAUDE.md userEmail)
+        amiel = User(
+            email="amiel@lavon.fr",
+            display_name="Amiel Lavon",
+            kind="agency",
+            status="active",
+        )
+        db.add(amiel)
+        db.flush()
+        db.add(AccessGrant(user_id=amiel.id, organization_id=org.id, role="agency_admin"))
+
         # Client démo
         client_org = Organization(name="Client X", slug="client-x")
         db.add(client_org)
