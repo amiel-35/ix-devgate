@@ -3,7 +3,8 @@ Gateway router — point d'entrée pour le trafic proxifié.
 L'URL publique est /gateway/{env_id}/{path:path}
 Le navigateur ne voit jamais l'upstream Cloudflare.
 """
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import Response
 from sqlalchemy.orm import Session as DbSession
 
 from app.database import get_db
@@ -13,8 +14,17 @@ from app.shared.models import User
 
 router = APIRouter()
 
+# Headers de transport à ne pas retransmettre au navigateur
+_EXCLUDED_RESPONSE_HEADERS = frozenset({
+    "transfer-encoding",
+    "content-length",   # recalculé par starlette
+})
 
-@router.api_route("/{env_id}/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+
+@router.api_route(
+    "/{env_id}/{path:path}",
+    methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+)
 async def gateway_proxy(
     env_id: str,
     path: str,
@@ -35,16 +45,14 @@ async def gateway_proxy(
         db=db,
     )
 
-    # Filtrer les headers de réponse sensibles
-    excluded = {"transfer-encoding", "content-encoding"}
-    response_headers = {
-        k: v for k, v in upstream_response.headers.items()
-        if k.lower() not in excluded
-    }
-
-    return Response(
+    # Construire la réponse en préservant les headers multi-valeurs (Set-Cookie, etc.)
+    response = Response(
         content=upstream_response.content,
         status_code=upstream_response.status_code,
-        headers=response_headers,
         media_type=upstream_response.headers.get("content-type"),
     )
+    for key, value in upstream_response.headers.multi_items():
+        if key.lower() not in _EXCLUDED_RESPONSE_HEADERS:
+            response.headers.append(key, value)
+
+    return response

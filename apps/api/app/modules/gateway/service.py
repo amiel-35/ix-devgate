@@ -70,15 +70,23 @@ async def proxy_request(
 
     upstream_url = f"https://{env.upstream_hostname}{path}"
 
-    # Injection des credentials Cloudflare Access service token
-    # Ces credentials ne sont JAMAIS renvoyés au navigateur
-    proxy_headers = {k: v for k, v in headers.items()
-                     if k.lower() not in ("host", "cookie")}
+    # Headers vers l'upstream :
+    # - on retire host, cookie (ne pas fuiter la session DevGate) et accept-encoding
+    # - on demande du contenu non compressé (identity) pour servir directement le navigateur
+    # - on ajoute X-DevGate-User pour tracabilité upstream
+    proxy_headers = {
+        k: v for k, v in headers.items()
+        if k.lower() not in ("host", "cookie", "accept-encoding")
+    }
+    proxy_headers["Accept-Encoding"] = "identity"
+    proxy_headers["X-DevGate-User"] = user.id
 
     if env.service_token_ref:
         cf_client_id, cf_client_secret = _get_service_token(env.service_token_ref)
-        proxy_headers["CF-Access-Client-Id"] = cf_client_id
-        proxy_headers["CF-Access-Client-Secret"] = cf_client_secret
+        if cf_client_id:
+            proxy_headers["CF-Access-Client-Id"] = cf_client_id
+        if cf_client_secret:
+            proxy_headers["CF-Access-Client-Secret"] = cf_client_secret
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
