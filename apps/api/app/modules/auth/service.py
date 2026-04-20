@@ -12,6 +12,7 @@ from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session as DbSession
 
+from app.config import settings
 from app.modules.audit.service import audit
 from app.modules.email import get_email_provider
 from app.shared.exceptions import (
@@ -79,7 +80,7 @@ def start_login(email: str, db: DbSession, method: str = "magic_link") -> dict:
           target_type="login_challenge", target_id=challenge.id)
     db.commit()
 
-    link = f"http://localhost:3000/verify?token={token}"
+    link = f"{settings.FRONTEND_BASE_URL}/verify?token={token}"
     provider.send_magic_link(to=user.email, link=link)
     return {"ok": True, "method": "magic_link"}
 
