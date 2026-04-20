@@ -1,13 +1,16 @@
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr
 
 
 class LoginStartRequest(BaseModel):
     email: EmailStr
+    method: Literal["magic_link", "otp"] = "magic_link"
 
 
 class LoginStartResponse(BaseModel):
     ok: bool
-    method: str  # magic_link | otp
+    method: str
 
 
 class LoginVerifyRequest(BaseModel):
