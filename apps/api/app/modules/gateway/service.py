@@ -55,6 +55,30 @@ def _get_service_token(token_ref: str) -> tuple[str, str]:
     return client_id, client_secret
 
 
+def get_upstream_proxy_headers(env: Environment, user_id: str, request_headers: dict) -> dict:
+    """Construit les headers à envoyer à l'upstream.
+
+    - Retire les headers de session et de transport
+    - Empêche le spoofing de X-DevGate-User côté client
+    - Injecte les credentials CF Access si service_token_ref configuré
+    """
+    proxy_headers = {
+        k: v for k, v in request_headers.items()
+        if k.lower() not in ("host", "cookie", "accept-encoding", "x-devgate-user")
+    }
+    proxy_headers["Accept-Encoding"] = "identity"
+    proxy_headers["X-DevGate-User"] = user_id
+
+    if env.service_token_ref:
+        cf_client_id, cf_client_secret = _get_service_token(env.service_token_ref)
+        if cf_client_id:
+            proxy_headers["CF-Access-Client-Id"] = cf_client_id
+        if cf_client_secret:
+            proxy_headers["CF-Access-Client-Secret"] = cf_client_secret
+
+    return proxy_headers
+
+
 async def proxy_request(
     env: Environment,
     method: str,
@@ -70,26 +94,10 @@ async def proxy_request(
 
     upstream_url = f"https://{env.upstream_hostname}{path}"
 
-    # Headers vers l'upstream :
-    # - on retire host, cookie (ne pas fuiter la session DevGate) et accept-encoding
-    # - on demande du contenu non compressé (identity) pour servir directement le navigateur
-    # - on ajoute X-DevGate-User pour tracabilité upstream
-    proxy_headers = {
-        k: v for k, v in headers.items()
-        if k.lower() not in ("host", "cookie", "accept-encoding")
-    }
-    proxy_headers["Accept-Encoding"] = "identity"
-    proxy_headers["X-DevGate-User"] = user.id
-
-    if env.service_token_ref:
-        cf_client_id, cf_client_secret = _get_service_token(env.service_token_ref)
-        if cf_client_id:
-            proxy_headers["CF-Access-Client-Id"] = cf_client_id
-        if cf_client_secret:
-            proxy_headers["CF-Access-Client-Secret"] = cf_client_secret
+    proxy_headers = get_upstream_proxy_headers(env, user.id, headers)
 
     try:
-        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
             response = await client.request(
                 method=method,
                 url=upstream_url,

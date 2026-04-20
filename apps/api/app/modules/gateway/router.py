@@ -15,8 +15,9 @@ from sqlalchemy.orm import Session as DbSession
 
 from app.database import get_db
 from app.modules.audit.service import audit
-from app.modules.gateway.service import proxy_request, resolve_environment
+from app.modules.gateway.service import proxy_request, resolve_environment, get_upstream_proxy_headers
 from app.shared.deps import get_current_user
+from app.shared.exceptions import ForbiddenException, NotFoundException
 from app.shared.models import Session as SessionModel, User
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,7 @@ async def gateway_ws_proxy(
 
     try:
         env = resolve_environment(env_id, user, db)
-    except Exception:
+    except (NotFoundException, ForbiddenException):
         await websocket.accept()
         await websocket.close(code=1008)
         return
@@ -114,6 +115,11 @@ async def gateway_ws_proxy(
         return
 
     upstream_ws_url = f"wss://{env.upstream_hostname}/{path}"
+
+    # Build upstream headers (includes CF Access credentials if configured)
+    upstream_headers = get_upstream_proxy_headers(env, user.id, {})
+    # Convert to list of (name, value) tuples for websockets library
+    ws_extra_headers = list(upstream_headers.items())
 
     await websocket.accept()
 
@@ -128,12 +134,18 @@ async def gateway_ws_proxy(
     db.commit()
 
     try:
-        async with websockets.connect(upstream_ws_url) as upstream_ws:
+        async with websockets.connect(upstream_ws_url, additional_headers=ws_extra_headers) as upstream_ws:
 
             async def client_to_upstream() -> None:
                 try:
-                    async for message in websocket.iter_bytes():
-                        await upstream_ws.send(message)
+                    while True:
+                        data = await websocket.receive()
+                        if data["type"] == "websocket.disconnect":
+                            break
+                        if "bytes" in data and data["bytes"] is not None:
+                            await upstream_ws.send(data["bytes"])
+                        elif "text" in data and data["text"] is not None:
+                            await upstream_ws.send(data["text"])
                 except (WebSocketDisconnect, Exception):
                     pass
                 finally:
