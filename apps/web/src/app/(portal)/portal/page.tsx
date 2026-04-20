@@ -1,39 +1,24 @@
 // E04 — Portail (accueil post-login)
 // Référence visuelle : docs/ds/mockups/devgate-e04-portal.mockup.html
-import { portalApi } from "@/lib/api/client";
+import { redirect } from "next/navigation";
+import { serverPortalApi, ServerApiError } from "@/lib/api/server";
+import { PortalDashboard } from "./PortalDashboard";
 
 export default async function PortalPage() {
-  // Données chargées côté serveur — le backend est la source de vérité
-  let environments: Awaited<ReturnType<typeof portalApi.environments>> = [];
+  let user;
+  let environments;
+
   try {
-    environments = await portalApi.environments();
-  } catch {
-    // Géré par les error boundaries ou les états vides
+    [user, environments] = await Promise.all([
+      serverPortalApi.me(),
+      serverPortalApi.environments(),
+    ]);
+  } catch (err) {
+    if (err instanceof ServerApiError && err.status === 401) {
+      redirect("/login");
+    }
+    redirect("/session-expired");
   }
 
-  if (environments.length === 0) {
-    // E08 — État vide
-    return (
-      <main>
-        {/* TODO: EmptyState component — référence E08 */}
-        <p>Aucun environnement disponible pour le moment.</p>
-      </main>
-    );
-  }
-
-  return (
-    <main>
-      {/* TODO: implémenter l'UI à partir du mockup E04 */}
-      {/* WelcomeBanner + EnvironmentGrid */}
-      <ul>
-        {environments.map((env) => (
-          <li key={env.id}>
-            <a href={`/client/${env.organization_name}`}>
-              {env.organization_name} — {env.environment_name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </main>
-  );
+  return <PortalDashboard user={user} environments={environments} />;
 }
