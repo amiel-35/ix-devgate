@@ -1,16 +1,21 @@
-// E11 — Accès refusé 403
-// Référence visuelle : docs/ds/mockups/devgate-e11-access-denied.mockup.html
 import Link from "next/link";
+import { StateCard } from "@/components/auth/StateCard";
+import { Button } from "@/components/shared/Button";
 
 export default function AccessDeniedPage() {
   return (
-    <main>
-      {/* TODO: implémenter l'UI à partir du mockup E11 */}
-      <h1>Accès non autorisé</h1>
-      <p>
-        Votre compte ne dispose pas d&apos;un accès actif à cette ressource.
-      </p>
-      <Link href="/portal">Retour à mon portail</Link>
-    </main>
+    <div className="auth-standalone-bg">
+      <StateCard
+        icon="✕"
+        tone="danger"
+        title="Accès non autorisé"
+        description="Votre compte ne dispose pas d'un accès actif à cette ressource. Si vous pensez que c'est une erreur, contactez l'agence."
+      >
+        <Link href="/portal" style={{ width: "100%" }}>
+          <Button>Retour à mon portail</Button>
+        </Link>
+        <Button variant="secondary">Contacter l&apos;agence</Button>
+      </StateCard>
+    </div>
   );
 }
