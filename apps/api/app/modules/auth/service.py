@@ -1,7 +1,7 @@
 """
 Module auth — magic link + OTP
 Règles :
-- challenge à durée courte (15 min)
+- challenge à durée courte (15 min pour magic link, 10 min pour OTP)
 - consommable une seule fois
 - session cookie HttpOnly Secure SameSite=Lax
 - tous les flux critiques produisent des AuditEvents
@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session as DbSession
 
 from app.modules.audit.service import audit
+from app.modules.email import get_email_provider
 from app.shared.exceptions import (
     ChallengeAlreadyUsedException,
     ChallengeExpiredException,
@@ -30,14 +31,41 @@ def _hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def start_login(email: str, db: DbSession) -> dict:
-    """Démarre un login : crée un challenge et envoie l'email."""
+def _generate_otp() -> str:
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+def start_login(email: str, db: DbSession, method: str = "magic_link") -> dict:
+    """Démarre un login : crée un challenge et envoie l'email.
+
+    Anti-enumeration : un email inconnu renvoie la même réponse qu'un connu,
+    mais sans créer de challenge ni envoyer d'email.
+    """
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        # Réponse identique pour éviter l'énumération d'emails
         audit(db, event_type="login.start.unknown_email", metadata={"email": email})
-        return {"ok": True, "method": "magic_link"}
+        db.commit()
+        return {"ok": True, "method": method}
 
+    provider = get_email_provider()
+
+    if method == "otp":
+        code = _generate_otp()
+        challenge = LoginChallenge(
+            user_id=user.id,
+            type="otp",
+            hashed_token=_hash_token(code),
+            expires_at=datetime.now(tz=timezone.utc) + timedelta(minutes=OTP_EXPIRY_MINUTES),
+        )
+        db.add(challenge)
+        db.flush()
+        audit(db, actor_user_id=user.id, event_type="login.otp.requested",
+              target_type="login_challenge", target_id=challenge.id)
+        db.commit()
+        provider.send_otp(to=user.email, code=code)
+        return {"ok": True, "method": "otp"}
+
+    # magic_link (default)
     token = secrets.token_urlsafe(32)
     challenge = LoginChallenge(
         user_id=user.id,
@@ -46,14 +74,13 @@ def start_login(email: str, db: DbSession) -> dict:
         expires_at=datetime.now(tz=timezone.utc) + timedelta(minutes=MAGIC_LINK_EXPIRY_MINUTES),
     )
     db.add(challenge)
-    db.commit()
-
+    db.flush()
     audit(db, actor_user_id=user.id, event_type="login.magic_link.requested",
           target_type="login_challenge", target_id=challenge.id)
+    db.commit()
 
-    # TODO: envoyer l'email via le provider configuré
-    # email_provider.send_magic_link(user.email, token, challenge.id)
-
+    link = f"http://localhost:3000/verify?token={token}"
+    provider.send_magic_link(to=user.email, link=link)
     return {"ok": True, "method": "magic_link"}
 
 

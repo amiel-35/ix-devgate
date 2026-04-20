@@ -41,3 +41,12 @@ def client(db_session):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app, raise_server_exceptions=False)
     app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_email_provider():
+    """Reset the email provider singleton between tests to avoid state leakage."""
+    from app.modules.email import override_email_provider
+    from app.modules.email.provider import FakeEmailProvider
+    override_email_provider(FakeEmailProvider())
+    yield
