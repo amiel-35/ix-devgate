@@ -4,7 +4,12 @@
 
 import { cookies } from "next/headers";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001";
+// API_INTERNAL_URL est utilisé par les Server Components (réseau Docker interne).
+// NEXT_PUBLIC_API_URL est utilisé par le navigateur (adresse accessible depuis l'extérieur).
+const API_BASE =
+  process.env.API_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  "http://localhost:8001";
 
 export class ServerApiError extends Error {
   constructor(

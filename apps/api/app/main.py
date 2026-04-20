@@ -17,7 +17,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",  # Next.js dev local (sans Docker)
+        "http://localhost:3001",  # Next.js dev via Docker (port mappé)
+    ],
     allow_credentials=True,  # nécessaire pour les cookies de session
     allow_methods=["*"],
     allow_headers=["*"],

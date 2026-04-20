@@ -59,7 +59,8 @@ services:
     env_file:
       - ./apps/web/.env.local
     environment:
-      NEXT_PUBLIC_API_URL: http://api:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8001   # URL accessible depuis le navigateur
+      API_INTERNAL_URL: http://api:8000            # URL interne Docker pour les Server Components
     depends_on:
       - api
     volumes:
