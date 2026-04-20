@@ -72,8 +72,6 @@ export type AdminEnvItem = {
   public_hostname: string;
   requires_app_auth: boolean;
   status: string;
-  cloudflare_tunnel_id: string | null;
-  cloudflare_access_app_id: string | null;
   org_name: string;
   project_name: string;
 };

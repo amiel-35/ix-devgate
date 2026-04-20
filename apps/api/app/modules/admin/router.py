@@ -5,6 +5,7 @@ Toutes les routes exigent agency_admin.
 from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session as DbSession, joinedload
 
 from app.database import get_db
@@ -49,32 +50,33 @@ def get_stats(db: DbSession = Depends(get_db)):
 @router.get("/organizations")
 def list_organizations(db: DbSession = Depends(get_db)):
     orgs = db.query(Organization).all()
-    result = []
-    for org in orgs:
-        env_count = (
-            db.query(Environment)
-            .join(Project)
-            .filter(Project.organization_id == org.id)
-            .count()
-        )
-        user_count = (
-            db.query(AccessGrant)
-            .filter(
-                AccessGrant.organization_id == org.id,
-                AccessGrant.revoked_at.is_(None),
-            )
-            .count()
-        )
-        result.append({
+
+    # Two aggregate queries instead of 2N individual ones
+    env_counts: dict[str, int] = dict(
+        db.query(Project.organization_id, func.count(Environment.id))
+        .join(Environment, Environment.project_id == Project.id, isouter=True)
+        .group_by(Project.organization_id)
+        .all()
+    )
+    user_counts: dict[str, int] = dict(
+        db.query(AccessGrant.organization_id, func.count(AccessGrant.id))
+        .filter(AccessGrant.revoked_at.is_(None))
+        .group_by(AccessGrant.organization_id)
+        .all()
+    )
+
+    return [
+        {
             "id": org.id,
             "name": org.name,
             "slug": org.slug,
             "branding_name": org.branding_name,
             "support_email": org.support_email,
-            "env_count": env_count,
-            "user_count": user_count,
-        })
-    return result
+            "env_count": env_counts.get(org.id, 0),
+            "user_count": user_counts.get(org.id, 0),
+        }
+        for org in orgs
+    ]
 
 
 @router.post("/organizations", status_code=201)
@@ -85,7 +87,7 @@ def create_organization(
 ):
     org = Organization(**body.model_dump())
     db.add(org)
-    db.commit()
+    db.flush()
     audit(db, actor_user_id=admin.id, event_type="admin.organization.created",
           target_type="organization", target_id=org.id)
     db.commit()
@@ -116,7 +118,7 @@ def create_project(
         raise NotFoundException()
     project = Project(**body.model_dump())
     db.add(project)
-    db.commit()
+    db.flush()
     audit(db, actor_user_id=admin.id, event_type="admin.project.created",
           target_type="project", target_id=project.id)
     db.commit()
@@ -142,8 +144,6 @@ def list_environments(db: DbSession = Depends(get_db)):
             "public_hostname": e.public_hostname,
             "requires_app_auth": e.requires_app_auth,
             "status": e.status,
-            "cloudflare_tunnel_id": e.cloudflare_tunnel_id,
-            "cloudflare_access_app_id": e.cloudflare_access_app_id,
             "org_name": e.project.organization.name,
             "project_name": e.project.name,
         }
@@ -162,7 +162,7 @@ def create_environment(
         raise NotFoundException()
     env = Environment(**body.model_dump())
     db.add(env)
-    db.commit()
+    db.flush()
     audit(db, actor_user_id=admin.id, event_type="admin.environment.created",
           target_type="environment", target_id=env.id)
     db.commit()
@@ -211,7 +211,7 @@ def create_grant(
 
     grant = AccessGrant(user_id=user.id, organization_id=body.organization_id, role=body.role)
     db.add(grant)
-    db.commit()
+    db.flush()
     audit(db, actor_user_id=admin.id, event_type="admin.access_grant.created",
           target_type="access_grant", target_id=grant.id,
           metadata={"email": body.email, "role": body.role})
@@ -231,7 +231,7 @@ def revoke_grant(
     if grant.revoked_at is not None:
         return  # Déjà révoqué, idempotent
     grant.revoked_at = datetime.now(tz=timezone.utc)
-    db.commit()
+    db.flush()
     audit(db, actor_user_id=admin.id, event_type="admin.access_grant.revoked",
           target_type="access_grant", target_id=grant_id)
     db.commit()

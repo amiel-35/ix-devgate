@@ -1,6 +1,14 @@
 // Client API — le frontend ne connaît jamais Cloudflare
 // Toutes les requêtes passent par FastAPI
 
+import type {
+  OrgItem,
+  ProjectItem,
+  AdminEnvItem,
+  GrantItem,
+  AdminAuditEvent,
+} from "./server-admin";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 class ApiError extends Error {
@@ -125,7 +133,7 @@ export type AdminCreateGrantPayload = {
 
 export const adminApi = {
   organizations: {
-    list: () => request<unknown[]>("/admin/organizations"),
+    list: () => request<OrgItem[]>("/admin/organizations"),
     create: (data: AdminCreateOrgPayload) =>
       request<{ id: string }>("/admin/organizations", {
         method: "POST",
@@ -134,7 +142,7 @@ export const adminApi = {
   },
   projects: {
     list: (orgId?: string) =>
-      request<unknown[]>(`/admin/projects${orgId ? `?org_id=${orgId}` : ""}`),
+      request<ProjectItem[]>(`/admin/projects${orgId ? `?org_id=${orgId}` : ""}`),
     create: (data: AdminCreateProjectPayload) =>
       request<{ id: string }>("/admin/projects", {
         method: "POST",
@@ -142,7 +150,7 @@ export const adminApi = {
       }),
   },
   environments: {
-    list: () => request<unknown[]>("/admin/environments"),
+    list: () => request<AdminEnvItem[]>("/admin/environments"),
     create: (data: AdminCreateEnvPayload) =>
       request<{ id: string }>("/admin/environments", {
         method: "POST",
@@ -150,7 +158,7 @@ export const adminApi = {
       }),
   },
   grants: {
-    list: () => request<unknown[]>("/admin/access-grants"),
+    list: () => request<GrantItem[]>("/admin/access-grants"),
     create: (data: AdminCreateGrantPayload) =>
       request<{ id: string }>("/admin/access-grants", {
         method: "POST",
@@ -164,7 +172,7 @@ export const adminApi = {
       const qs = new URLSearchParams(
         Object.entries(params ?? {}).map(([k, v]) => [k, String(v)]),
       ).toString();
-      return request<unknown[]>(`/admin/audit-events${qs ? `?${qs}` : ""}`);
+      return request<AdminAuditEvent[]>(`/admin/audit-events${qs ? `?${qs}` : ""}`);
     },
   },
 };
