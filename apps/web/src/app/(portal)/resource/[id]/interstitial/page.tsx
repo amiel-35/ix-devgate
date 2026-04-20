@@ -1,6 +1,12 @@
 // E07 — Interstitiel double auth
 // Référence visuelle : docs/ds/mockups/devgate-e07-interstitiel.mockup.html
-// Affiché quand requires_app_auth = true, avant redirection vers la ressource
+// Affiché uniquement quand requires_app_auth=true, avant ouverture de la ressource.
+// L'URL cible est l'URL publique de l'environnement — jamais un hostname Cloudflare brut.
+import Link from "next/link";
+import { redirect, notFound } from "next/navigation";
+import { serverPortalApi, ServerApiError } from "@/lib/api/server";
+import styles from "./interstitial.module.css";
+
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -8,21 +14,48 @@ interface Props {
 export default async function InterstitialPage({ params }: Props) {
   const { id } = await params;
 
-  // Le gateway DevGate est la porte d'entrée.
-  // L'application cible peut ensuite demander sa propre auth.
-  // L'URL de la ressource est construite côté serveur, jamais exposée ici.
+  let environments;
+  try {
+    environments = await serverPortalApi.environments();
+  } catch (err) {
+    if (err instanceof ServerApiError && err.status === 401) {
+      redirect("/login");
+    }
+    redirect("/session-expired");
+  }
+
+  const env = environments.find((e) => e.id === id);
+  if (!env) notFound();
 
   return (
-    <main>
-      {/* TODO: implémenter l'UI à partir du mockup E07 */}
-      <h1>La ressource va s&apos;ouvrir</h1>
-      <p>
-        Votre accès a été validé par DevGate. Cette ressource peut demander
-        une authentification supplémentaire.
-      </p>
-      {/* Le lien pointe vers le gateway, pas vers un hostname Cloudflare brut */}
-      <a href={`/api/gateway/${id}`}>Continuer vers la ressource</a>
-      <a href={`/resource/${id}`}>Retour aux détails</a>
-    </main>
+    <div className={styles.wrap}>
+      <div className={styles.card}>
+        <div className={styles.icon}>↗</div>
+        <h1 className={styles.title}>La ressource va s&apos;ouvrir</h1>
+        <p className={styles.sub}>
+          Votre accès à <strong>{env.environment_name}</strong> a été validé par DevGate.
+          Cette ressource va maintenant vous demander son propre login.
+        </p>
+        <div className={styles.notice}>
+          ℹ️ C&apos;est normal. DevGate contrôle l&apos;accès à l&apos;environnement.
+          L&apos;application peut ensuite avoir sa propre authentification — par exemple
+          WordPress ou votre outil métier.
+        </div>
+        <a
+          href={env.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.btnPrimary}
+        >
+          Continuer vers la ressource ↗
+        </a>
+        <Link href={`/resource/${id}`} className={styles.btnSecondary}>
+          ← Retour aux détails
+        </Link>
+        <p className={styles.note}>
+          Si vous n&apos;avez pas les identifiants de l&apos;application, contactez l&apos;agence.
+        </p>
+      </div>
+    </div>
   );
 }
