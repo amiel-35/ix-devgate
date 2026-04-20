@@ -1,7 +1,7 @@
 // Back-office — Dashboard
 // Référence visuelle : docs/ds/mockups/devgate-backoffice.mockup.html
 import { redirect } from "next/navigation";
-import { serverAdminApi, AdminApiError } from "@/lib/api/server-admin";
+import { serverAdminApi, AdminApiError, type StatsResponse, type AdminAuditEvent } from "@/lib/api/server-admin";
 import styles from "./admin.module.css";
 
 function formatDate(iso: string) {
@@ -14,8 +14,8 @@ function formatDate(iso: string) {
 }
 
 export default async function AdminDashboardPage() {
-  let stats;
-  let events;
+  let stats: StatsResponse;
+  let events: AdminAuditEvent[];
 
   try {
     [stats, events] = await Promise.all([
