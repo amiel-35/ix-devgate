@@ -1,0 +1,38 @@
+.page { padding: 32px 36px; max-width: 1100px; }
+.pageTitle { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 2px; }
+.pageSub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.sectionTitle { font-size: 15px; font-weight: 600; color: var(--color-text); }
+
+.table { width: 100%; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 16px; background: var(--color-surface-2); border-bottom: 1px solid var(--color-border); }
+.table td { padding: 11px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+
+.userEmail { font-weight: 500; }
+.dateText { font-size: 12px; color: var(--color-text-muted); }
+.emptyRow td { text-align: center; color: var(--color-text-muted); padding: 28px; font-size: 13px; }
+
+.roleMember { background: var(--color-primary-s); color: var(--color-primary); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: var(--radius-sm); }
+.roleAdmin { background: #ede9fe; color: #7c3aed; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: var(--radius-sm); }
+.roleRevoked { background: var(--color-danger-bg); color: var(--color-danger); font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: var(--radius-sm); }
+
+.btnRevoke { height: 30px; padding: 0 12px; background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; cursor: pointer; }
+.btnRevoke:hover { background: var(--color-danger-bg); }
+.btnRevoke:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; display: flex; align-items: center; justify-content: center; }
+.drawer { background: var(--color-surface); border-radius: var(--radius-lg); padding: 28px; width: 420px; box-shadow: var(--shadow-md); }
+.drawerTitle { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+.formGroup { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.label { font-size: 12px; font-weight: 500; color: var(--color-text-muted); }
+.input { height: 36px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; background: var(--color-surface); color: var(--color-text); width: 100%; }
+.input:focus { outline: none; border-color: var(--color-primary); }
+.select { height: 36px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; background: var(--color-surface); color: var(--color-text); width: 100%; }
+.drawerActions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.btnPrimary { height: 36px; padding: 0 16px; background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; }
+.btnPrimary:hover { background: var(--color-primary-h); }
+.btnPrimary:disabled { opacity: 0.55; cursor: not-allowed; }
+.btnSecondary { height: 36px; padding: 0 14px; background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; }
+.btnSecondary:hover { background: var(--color-surface-2); }
+.errorMsg { color: var(--color-danger); font-size: 12px; margin-top: 6px; }
