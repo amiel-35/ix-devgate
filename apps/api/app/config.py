@@ -12,8 +12,18 @@ class Settings(BaseSettings):
     SESSION_SECRET_KEY: str = "changeme"
     SESSION_TTL_DAYS: int = 7
 
-    EMAIL_PROVIDER: str = "resend"
+    COOKIE_SECURE: bool = False
+
+    EMAIL_PROVIDER: str = "fake"  # fake | smtp | resend
     RESEND_API_KEY: str = ""
+
+    # SMTP (dev : mailpit, prod : Resend remplacera)
+    SMTP_HOST: str = "localhost"
+    SMTP_PORT: int = 1025
+    SMTP_FROM: str = "DevGate <no-reply@devgate.local>"
+
+    # Frontend URL (pour construire les magic links)
+    FRONTEND_BASE_URL: str = "http://localhost:3000"
 
     # Cloudflare — jamais exposé vers le frontend
     CF_API_TOKEN: str = ""

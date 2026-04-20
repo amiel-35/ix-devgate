@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/client";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { OtpInput } from "@/components/auth/OtpInput";
+import { Button } from "@/components/shared/Button";
 
 export default function OtpContent() {
   const params = useSearchParams();
@@ -12,7 +15,7 @@ export default function OtpContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -27,25 +30,18 @@ export default function OtpContent() {
   }
 
   return (
-    <main>
-      {/* TODO: implémenter l'UI à partir du mockup E03 */}
-      <p>Code envoyé à {email}</p>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="otp">Code à 6 chiffres</label>
-        <input
-          id="otp"
-          type="text"
-          inputMode="numeric"
-          maxLength={6}
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-          required
-        />
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={loading || code.length !== 6}>
+    <AuthCard footer="Code à usage unique · Valable 10 minutes">
+      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>Entrez votre code</h1>
+      <p style={{ fontSize: 14, color: "var(--color-text-muted)", marginBottom: 20 }}>
+        Un code à 6 chiffres a été envoyé à <strong>{email}</strong>.
+      </p>
+      <form onSubmit={submit} noValidate>
+        <OtpInput value={code} onChange={setCode} />
+        {error && <p role="alert" style={{ color: "var(--color-danger)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
+        <Button type="submit" disabled={loading || code.length !== 6}>
           {loading ? "Vérification…" : "Valider"}
-        </button>
+        </Button>
       </form>
-    </main>
+    </AuthCard>
   );
 }

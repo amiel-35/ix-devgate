@@ -2325,3 +2325,25 @@ Ces éléments seront traités dans les plans suivants :
 - Gateway proxy vers ressource → **Plan 4**
 - Intégration Resend réelle (remplacement FakeEmailProvider) → **Plan 5 hardening**
 - CSRF token sur `/auth/verify` → **Plan 5 hardening**
+
+## Follow-ups découverts pendant l'exécution
+
+Ces points sont remontés par les code reviews et doivent être traités en **Plan 5 hardening** :
+
+### Security — timing side-channels (Task 4 review)
+- `start_login()` a un delta de latence observable entre unknown email (fast) et known email (DB inserts + email send). L'anti-enumeration au niveau réponse est correct mais timing-leak-able. Fix : déplacer l'envoi email hors de la request path (background task / outbox).
+- Email send est synchrone — si le provider plante, HTTP 500 + orphan challenge en base. Fix : try/except + audit `login.email.send_failed` + retour `{ok:True}` même en cas d'échec d'envoi.
+
+### Config — hard-coded URLs (Task 4 review)
+- `http://localhost:3000/verify?token=...` est en dur dans `service.py`. Fix : ajouter `FRONTEND_BASE_URL` dans `settings` (`config.py`) et l'utiliser pour construire le magic link.
+
+### Privacy — audit metadata (Task 4 review)
+- L'email brut est stocké dans `audit_events.metadata_json` pour le path `login.start.unknown_email`. RGPD concern. Fix : hash l'email ou le retirer (le `event_type` suffit comme signal).
+
+### Test coverage gaps (Task 4 review)
+- Pas de test pour `start_login(method="invalid")` (fall-through silencieux vers magic_link)
+- Pas de test pour email provider qui lève une exception
+- Pas de test pour case sensitivity sur `User.email`
+- Pas de test d'assertion explicite que l'audit row `unknown_email` est persistée
+
+Ces tests peuvent être ajoutés au Plan 5 hardening ou directement en début de Plan 2.

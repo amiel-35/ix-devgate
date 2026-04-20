@@ -1,0 +1,14 @@
+.group { display: flex; gap: 10px; justify-content: center; margin: 20px 0 24px; }
+.input {
+  width: 52px; height: 60px;
+  text-align: center;
+  font-size: 22px; font-weight: 700;
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.14s;
+}
+.input:focus { border-color: var(--color-primary); }
+.filled { border-color: var(--color-primary); background: var(--color-primary-s); }

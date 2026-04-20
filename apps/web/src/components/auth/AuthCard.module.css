@@ -1,0 +1,32 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 440px;
+  padding: 48px 40px 40px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.logo {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 15px; font-weight: 700;
+}
+
+.name { font-size: 15px; font-weight: 700; }
+
+.footer {
+  margin-top: 24px; padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+  text-align: center; font-size: 12px; color: var(--color-text-subtle);
+}

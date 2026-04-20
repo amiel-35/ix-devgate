@@ -1,14 +1,21 @@
-// E10 — Session expirée
-// Référence visuelle : docs/ds/mockups/devgate-e10-session-expired.mockup.html
 import Link from "next/link";
+import { StateCard } from "@/components/auth/StateCard";
+import { Button } from "@/components/shared/Button";
 
 export default function SessionExpiredPage() {
   return (
-    <main>
-      {/* TODO: implémenter l'UI à partir du mockup E10 */}
-      <h1>Votre session a expiré</h1>
-      <p>Vous avez été déconnecté automatiquement après 7 jours.</p>
-      <Link href="/login">Se reconnecter</Link>
-    </main>
+    <div className="auth-standalone-bg">
+      <StateCard
+        icon="⏱"
+        tone="warn"
+        title="Votre session a expiré"
+        description="Vous avez été déconnecté automatiquement après 7 jours. Votre compte est intact, reconnectez-vous pour retrouver vos ressources."
+        footer="Pas de panique — vos accès sont conservés."
+      >
+        <Link href="/login" style={{ width: "100%" }}>
+          <Button>Se reconnecter</Button>
+        </Link>
+      </StateCard>
+    </div>
   );
 }
