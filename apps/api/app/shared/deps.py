@@ -5,7 +5,7 @@ from fastapi import Cookie, Depends
 from sqlalchemy.orm import Session as DbSession
 
 from app.database import get_db
-from app.shared.exceptions import ForbiddenException, SessionExpiredException, UnauthorizedException
+from app.shared.exceptions import ForbiddenException, UnauthorizedException
 from app.shared.models import Session, User
 
 
@@ -19,10 +19,13 @@ def get_current_session(
     session = db.query(Session).filter(Session.id == devgate_session).first()
     if not session:
         raise UnauthorizedException()
-    if session.expires_at.replace(tzinfo=timezone.utc) < datetime.now(tz=timezone.utc):
-        raise SessionExpiredException()
 
-    # Mise à jour last_seen_at
+    expires_at = session.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    if expires_at < datetime.now(tz=timezone.utc):
+        raise UnauthorizedException()
+
     session.last_seen_at = datetime.now(tz=timezone.utc)
     db.commit()
     return session
