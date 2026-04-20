@@ -77,14 +77,18 @@ export function AccessClient({ initialGrants, orgs }: Props) {
   }
 
   async function handleRevoke(grantId: string) {
+    const snapshot = grants;
+    setGrants((prev) =>
+      prev.map((g) =>
+        g.id === grantId ? { ...g, revoked_at: new Date().toISOString() } : g,
+      ),
+    );
     setRevokingId(grantId);
     try {
       await adminApi.grants.revoke(grantId);
-      setGrants((prev) =>
-        prev.map((g) =>
-          g.id === grantId ? { ...g, revoked_at: new Date().toISOString() } : g,
-        ),
-      );
+    } catch (err) {
+      setGrants(snapshot);
+      setError(err instanceof Error ? err.message : "Erreur lors de la révocation");
     } finally {
       setRevokingId(null);
     }
