@@ -4,6 +4,8 @@ L'URL publique est /gateway/{env_id}/{path:path}
 Le navigateur ne voit jamais l'upstream Cloudflare.
 """
 import asyncio
+import logging
+from datetime import datetime, timezone
 
 import websockets
 import websockets.exceptions
@@ -12,9 +14,12 @@ from fastapi.responses import Response
 from sqlalchemy.orm import Session as DbSession
 
 from app.database import get_db
+from app.modules.audit.service import audit
 from app.modules.gateway.service import proxy_request, resolve_environment
 from app.shared.deps import get_current_user
 from app.shared.models import Session as SessionModel, User
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -70,15 +75,15 @@ async def gateway_ws_proxy(
     db: DbSession = Depends(get_db),
 ):
     """Proxy WebSocket bidirectionnel vers l'upstream."""
-    from datetime import datetime, timezone
-
     session_id = websocket.cookies.get("devgate_session")
     if not session_id:
+        await websocket.accept()
         await websocket.close(code=1008)  # Policy Violation
         return
 
     session = db.query(SessionModel).filter(SessionModel.id == session_id).first()
     if not session:
+        await websocket.accept()
         await websocket.close(code=1008)
         return
 
@@ -86,27 +91,41 @@ async def gateway_ws_proxy(
     if expires_at.tzinfo is None:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     if expires_at < datetime.now(tz=timezone.utc):
+        await websocket.accept()
         await websocket.close(code=1008)
         return
 
     user = db.query(User).filter(User.id == session.user_id).first()
     if not user:
+        await websocket.accept()
         await websocket.close(code=1008)
         return
 
     try:
         env = resolve_environment(env_id, user, db)
     except Exception:
+        await websocket.accept()
         await websocket.close(code=1008)
         return
 
     if not env.upstream_hostname:
+        await websocket.accept()
         await websocket.close(code=1011)  # Internal Error
         return
 
     upstream_ws_url = f"wss://{env.upstream_hostname}/{path}"
 
     await websocket.accept()
+
+    audit(
+        db,
+        actor_user_id=user.id,
+        event_type="gateway.resource.accessed",
+        target_type="environment",
+        target_id=env_id,
+        metadata={"transport": "websocket"},
+    )
+    db.commit()
 
     try:
         async with websockets.connect(upstream_ws_url) as upstream_ws:
@@ -115,8 +134,13 @@ async def gateway_ws_proxy(
                 try:
                     async for message in websocket.iter_bytes():
                         await upstream_ws.send(message)
-                except WebSocketDisconnect:
+                except (WebSocketDisconnect, Exception):
                     pass
+                finally:
+                    try:
+                        await upstream_ws.close()
+                    except Exception:
+                        pass
 
             async def upstream_to_client() -> None:
                 try:
@@ -125,8 +149,13 @@ async def gateway_ws_proxy(
                             await websocket.send_bytes(message)
                         else:
                             await websocket.send_text(message)
-                except websockets.exceptions.ConnectionClosed:
+                except (websockets.exceptions.ConnectionClosed, Exception):
                     pass
+                finally:
+                    try:
+                        await websocket.close()
+                    except Exception:
+                        pass
 
             await asyncio.gather(
                 client_to_upstream(),
@@ -137,7 +166,7 @@ async def gateway_ws_proxy(
     except websockets.exceptions.WebSocketException:
         pass
     except Exception:
-        pass
+        logger.error("Unexpected WS proxy error", exc_info=True)
     finally:
         try:
             await websocket.close()
