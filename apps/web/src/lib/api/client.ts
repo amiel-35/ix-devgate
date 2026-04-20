@@ -90,27 +90,69 @@ export const portalApi = {
 
 // ── Admin ────────────────────────────────────────────────────────
 
+export type AdminCreateOrgPayload = {
+  name: string;
+  slug: string;
+  branding_name?: string;
+  support_email?: string;
+};
+
+export type AdminCreateProjectPayload = {
+  organization_id: string;
+  name: string;
+  slug: string;
+};
+
+export type AdminCreateEnvPayload = {
+  project_id: string;
+  name: string;
+  slug: string;
+  kind: string;
+  public_hostname: string;
+  upstream_hostname?: string;
+  cloudflare_tunnel_id?: string;
+  cloudflare_access_app_id?: string;
+  service_token_ref?: string;
+  requires_app_auth?: boolean;
+};
+
+export type AdminCreateGrantPayload = {
+  email: string;
+  organization_id: string;
+  role: string;
+  display_name?: string;
+};
+
 export const adminApi = {
   organizations: {
     list: () => request<unknown[]>("/admin/organizations"),
-    create: (data: unknown) =>
-      request<unknown>("/admin/organizations", {
+    create: (data: AdminCreateOrgPayload) =>
+      request<{ id: string }>("/admin/organizations", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+  },
+  projects: {
+    list: (orgId?: string) =>
+      request<unknown[]>(`/admin/projects${orgId ? `?org_id=${orgId}` : ""}`),
+    create: (data: AdminCreateProjectPayload) =>
+      request<{ id: string }>("/admin/projects", {
         method: "POST",
         body: JSON.stringify(data),
       }),
   },
   environments: {
     list: () => request<unknown[]>("/admin/environments"),
-    create: (data: unknown) =>
-      request<unknown>("/admin/environments", {
+    create: (data: AdminCreateEnvPayload) =>
+      request<{ id: string }>("/admin/environments", {
         method: "POST",
         body: JSON.stringify(data),
       }),
   },
   grants: {
     list: () => request<unknown[]>("/admin/access-grants"),
-    create: (data: unknown) =>
-      request<unknown>("/admin/access-grants", {
+    create: (data: AdminCreateGrantPayload) =>
+      request<{ id: string }>("/admin/access-grants", {
         method: "POST",
         body: JSON.stringify(data),
       }),
