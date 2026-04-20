@@ -1,0 +1,71 @@
+<!-- @ds-toolkit slug:devgate-e02-magic-sent command:/ix_craft_mockup date:2026-04-20 version:1 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevGate · E02 Magic link envoyé</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#f4f6fa;--sur:#fff;--sur2:#f0f2f7;--bor:#e2e6ef;--txt:#111827;--muted:#6b7280;--sub:#9ca3af;--pri:#2563eb;--prih:#1d4ed8;--pris:#eff6ff;--ok:#16a34a;--okbg:#dcfce7;--r8:10px;--r20:24px;--sh:0 8px 40px rgba(0,0,0,.13);--f:'Inter',system-ui,sans-serif}
+    [data-theme=dark]{--bg:#0f1117;--sur:#1a1d27;--sur2:#252836;--bor:#2e3244;--txt:#f1f5f9;--muted:#94a3b8;--sub:#64748b;--pri:#3b82f6;--prih:#60a5fa;--pris:#1e3a5f;--ok:#22c55e;--okbg:#14532d}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--f);background:var(--bg);color:var(--txt);min-height:100vh;transition:background .25s,color .25s}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:40px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:2px;padding:0 14px;overflow-x:auto}
+    .nav-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap}
+    .nav a{font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;padding:3px 8px;border-radius:4px;white-space:nowrap;transition:background .1s,color .1s}
+    .nav a:hover{background:var(--sur2);color:var(--txt)}
+    .nav a.cur{background:var(--pris);color:var(--pri)}
+    .wrap{padding-top:40px;min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(ellipse 80% 60% at 60% -10%,rgba(37,99,235,.14) 0%,transparent 70%),radial-gradient(ellipse 60% 50% at -10% 80%,rgba(139,92,246,.09) 0%,transparent 60%),var(--bg);
+      padding:60px 20px}
+    [data-theme=dark] .wrap{background:radial-gradient(ellipse 80% 60% at 60% -10%,rgba(59,130,246,.2) 0%,transparent 70%),radial-gradient(ellipse 60% 50% at -10% 80%,rgba(139,92,246,.15) 0%,transparent 60%),var(--bg)}
+    .card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r20);box-shadow:var(--sh);width:100%;max-width:460px;padding:48px 40px 40px;text-align:center}
+    .icon{width:68px;height:68px;border-radius:50%;background:var(--okbg);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:28px}
+    h1{font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:10px}
+    .sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:26px;max-width:34ch;margin-left:auto;margin-right:auto}
+    .highlight{font-weight:600;color:var(--pri)}
+    .btn-p{width:100%;padding:11px 20px;font-family:var(--f);font-size:14px;font-weight:600;background:var(--pri);color:#fff;border:none;border-radius:var(--r8);cursor:pointer;transition:background .14s;margin-bottom:10px;display:block;text-decoration:none;text-align:center;line-height:1.5}
+    .btn-p:hover{background:var(--prih)}
+    .btn-s{width:100%;padding:10px 20px;font-family:var(--f);font-size:14px;font-weight:500;background:var(--sur2);color:var(--muted);border:1px solid var(--bor);border-radius:var(--r8);cursor:pointer;transition:background .14s;display:block;text-decoration:none;text-align:center;line-height:1.5}
+    .btn-s:hover{background:var(--bor);color:var(--txt)}
+    .note{margin-top:18px;font-size:13px;color:var(--sub)}
+    .note a{color:var(--pri);text-decoration:none;font-weight:500}
+    .note a:hover{text-decoration:underline}
+    .footer{margin-top:24px;padding-top:18px;border-top:1px solid var(--bor);font-size:12px;color:var(--sub)}
+    .dt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--sur);border:1px solid var(--bor);box-shadow:0 4px 16px rgba(0,0,0,.1);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .15s;z-index:200}
+    .dt:hover{transform:scale(1.1)}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-lbl">DevGate Portal</span>
+  <a href="devgate-e01-login.mockup.html">E01 Login</a>
+  <a href="devgate-e02-magic-sent.mockup.html" class="cur">E02 Magic link</a>
+  <a href="devgate-e03-otp.mockup.html">E03 OTP</a>
+  <a href="devgate-e04-portal.mockup.html">E04 Portail</a>
+  <a href="devgate-e05-client.mockup.html">E05 Page client</a>
+  <a href="devgate-e06-detail-env.mockup.html">E06 Détail env.</a>
+  <a href="devgate-e07-interstitiel.mockup.html">E07 Double auth</a>
+  <a href="devgate-e08-empty.mockup.html">E08 Vide</a>
+  <a href="devgate-e09-link-expired.mockup.html">E09 Lien expiré</a>
+  <a href="devgate-e10-session-expired.mockup.html">E10 Session exp.</a>
+  <a href="devgate-e11-access-denied.mockup.html">E11 Accès refusé</a>
+  <a href="devgate-e12-profile.mockup.html">E12 Profil</a>
+</nav>
+<div class="wrap">
+  <div class="card">
+    <div class="icon">✉️</div>
+    <h1>Vérifiez vos emails</h1>
+    <p class="sub">Un lien de connexion a été envoyé à <span class="highlight">marie@client-x.com</span>. Cliquez dessus pour accéder à votre espace DevGate.</p>
+    <a href="devgate-e04-portal.mockup.html" class="btn-p">Simuler l'ouverture du lien →</a>
+    <button class="btn-s">Renvoyer le lien</button>
+    <p class="note">
+      Pas reçu ? <a href="devgate-e03-otp.mockup.html">Utiliser un code OTP</a> ·
+      <a href="devgate-e01-login.mockup.html">Modifier l'adresse</a>
+    </p>
+    <div class="footer">Le lien expire dans 15 minutes · Usage unique</div>
+  </div>
+</div>
+<button class="dt" id="dt" onclick="toggleDark()">🌙</button>
+<script>function toggleDark(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('dt').textContent=d?'🌙':'☀️'}</script>
+</body></html>

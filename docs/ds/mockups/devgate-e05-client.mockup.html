@@ -1,0 +1,155 @@
+<!-- @ds-toolkit slug:devgate-e05-client command:/ix_craft_mockup date:2026-04-20 version:1 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>DevGate · E05 Page client</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f4f6fa;--sur:#fff;--sur2:#f0f2f7;--bor:#e2e6ef;--txt:#111827;--muted:#6b7280;--sub:#9ca3af;--pri:#2563eb;--prih:#1d4ed8;--pris:#eff6ff;--ok:#16a34a;--okbg:#dcfce7;--wa:#d97706;--wabg:#fef3c7;--da:#dc2626;--dabg:#fee2e2;--info:#0891b2;--infobg:#cffafe;--r4:6px;--r8:10px;--r12:16px;--sh-sm:0 1px 3px rgba(0,0,0,.07);--sh-md:0 4px 16px rgba(0,0,0,.09);--f:'Inter',system-ui,sans-serif}
+    [data-theme=dark]{--bg:#0f1117;--sur:#1a1d27;--sur2:#252836;--bor:#2e3244;--txt:#f1f5f9;--muted:#94a3b8;--sub:#64748b;--pri:#3b82f6;--prih:#60a5fa;--pris:#1e3a5f;--ok:#22c55e;--okbg:#14532d;--wa:#fbbf24;--wabg:#451a03;--da:#f87171;--dabg:#450a0a;--info:#22d3ee;--infobg:#164e63}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--f);background:var(--bg);color:var(--txt);min-height:100vh;transition:background .25s,color .25s}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:40px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:2px;padding:0 14px;overflow-x:auto}
+    .nav-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap}
+    .nav a{font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;padding:3px 8px;border-radius:4px;white-space:nowrap;transition:background .1s,color .1s}
+    .nav a:hover{background:var(--sur2);color:var(--txt)}
+    .nav a.cur{background:var(--pris);color:var(--pri)}
+    .hdr{position:sticky;top:40px;z-index:90;height:54px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 32px;box-shadow:var(--sh-sm)}
+    .brand{display:flex;align-items:center;gap:9px}
+    .logo{width:28px;height:28px;border-radius:var(--r4);background:linear-gradient(135deg,var(--pri),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+    .sep{width:1px;height:14px;background:var(--bor);margin:0 2px}
+    .btn-ghost{font-family:var(--f);font-size:12px;font-weight:500;color:var(--muted);background:none;border:1px solid var(--bor);border-radius:var(--r4);padding:4px 10px;cursor:pointer;transition:background .12s;text-decoration:none}
+    .btn-ghost:hover{background:var(--sur2)}
+    .ava{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+    .user-row{display:flex;align-items:center;gap:8px}
+    .layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 94px)}
+    .sidebar{border-right:1px solid var(--bor);padding:22px 14px;background:var(--sur)}
+    .sb-lbl{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+    .client-item{padding:10px 12px;border-radius:var(--r8);border:1px solid transparent;margin-bottom:7px;cursor:pointer}
+    .client-item.active{background:var(--pris);border-color:var(--pri)}
+    .client-item .cn{font-size:14px;font-weight:700;color:var(--txt)}
+    .client-item.active .cn{color:var(--pri)}
+    .client-item .cc{font-size:12px;color:var(--muted);margin-top:2px}
+    .main{padding:28px 32px}
+    .pg-title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px}
+    .pg-sub{font-size:13px;color:var(--muted);margin-bottom:18px}
+    .notice{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;border-radius:var(--r8);font-size:13px;line-height:1.5;margin-bottom:18px}
+    .notice-info{background:var(--infobg);color:var(--info)}
+    .cards{display:flex;flex-direction:column;gap:13px}
+    .card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r12);padding:18px 20px;transition:box-shadow .18s,border-color .18s}
+    .card:hover{box-shadow:var(--sh-md);border-color:var(--pri)}
+    .ct{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+    .org{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+    .proj{font-size:15px;font-weight:700;margin-bottom:2px}
+    .ename{font-size:13px;color:var(--muted)}
+    .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+    .bd{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .b-stg{background:var(--infobg);color:var(--info)}
+    .b-prv{background:var(--wabg);color:var(--wa)}
+    .b-on{background:var(--okbg);color:var(--ok)}
+    .b-off{background:var(--dabg);color:var(--da)}
+    .b-auth{background:var(--wabg);color:var(--wa)}
+    .meta{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+    .foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--bor)}
+    .eurl{font-size:11px;font-family:monospace;color:var(--sub);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .actions{display:flex;gap:8px}
+    .btn-acc{font-family:var(--f);font-size:12px;font-weight:600;background:var(--pri);color:#fff;border:none;border-radius:var(--r4);padding:6px 13px;cursor:pointer;text-decoration:none;display:inline-block}
+    .btn-acc:hover{background:var(--prih)}
+    .btn-acc.dis{opacity:.45;pointer-events:none}
+    .btn-sec{font-family:var(--f);font-size:12px;font-weight:500;color:var(--muted);background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r4);padding:5px 11px;cursor:pointer;text-decoration:none;display:inline-block}
+    .dt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--sur);border:1px solid var(--bor);box-shadow:0 4px 16px rgba(0,0,0,.1);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .15s;z-index:200}
+    .dt:hover{transform:scale(1.1)}
+    @media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--bor)}.main{padding:20px 14px}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-lbl">DevGate Portal</span>
+  <a href="devgate-e01-login.mockup.html">E01 Login</a>
+  <a href="devgate-e02-magic-sent.mockup.html">E02 Magic link</a>
+  <a href="devgate-e03-otp.mockup.html">E03 OTP</a>
+  <a href="devgate-e04-portal.mockup.html">E04 Portail</a>
+  <a href="devgate-e05-client.mockup.html" class="cur">E05 Page client</a>
+  <a href="devgate-e06-detail-env.mockup.html">E06 Détail env.</a>
+  <a href="devgate-e07-interstitiel.mockup.html">E07 Double auth</a>
+  <a href="devgate-e08-empty.mockup.html">E08 Vide</a>
+  <a href="devgate-e09-link-expired.mockup.html">E09 Lien expiré</a>
+  <a href="devgate-e10-session-expired.mockup.html">E10 Session exp.</a>
+  <a href="devgate-e11-access-denied.mockup.html">E11 Accès refusé</a>
+  <a href="devgate-e12-profile.mockup.html">E12 Profil</a>
+</nav>
+<header class="hdr">
+  <div class="brand">
+    <div class="logo">AG</div>
+    <span style="font-size:13px;font-weight:700;">Agence</span>
+    <div class="sep"></div>
+    <span style="font-size:13px;color:var(--muted);">Client X</span>
+  </div>
+  <div class="user-row">
+    <div class="ava">MC</div>
+    <span style="font-size:13px;font-weight:500;">Marie Chevalier</span>
+    <a href="devgate-e04-portal.mockup.html" class="btn-ghost">← Portail</a>
+  </div>
+</header>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-lbl">Mes clients</div>
+    <div class="client-item active">
+      <div class="cn">Client X</div>
+      <div class="cc">3 ressources</div>
+    </div>
+  </aside>
+  <main class="main">
+    <div class="pg-title">Client X</div>
+    <div class="pg-sub">Ressources de validation disponibles pour votre compte</div>
+    <div class="notice notice-info">ℹ️ Certaines ressources peuvent demander une authentification supplémentaire propre à l'application une fois ouvertes.</div>
+    <div class="cards">
+      <div class="card">
+        <div class="ct">
+          <div><div class="org">Refonte site corporate 2026</div><div class="proj">Staging principal</div><div class="ename">Environnement de recette avant mise en ligne</div></div>
+          <span class="badge b-stg"><span class="bd"></span>staging</span>
+        </div>
+        <div class="meta">
+          <span class="badge b-on"><span class="bd"></span>En ligne</span>
+          <span class="badge b-auth">🔒 Auth applicative requise</span>
+        </div>
+        <div class="foot">
+          <span class="eurl">client-x-staging.devgate.agence.com</span>
+          <div class="actions">
+            <a href="devgate-e06-detail-env.mockup.html" class="btn-sec">Détails</a>
+            <a href="devgate-e07-interstitiel.mockup.html" class="btn-acc">Ouvrir ↗</a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">
+          <div><div class="org">App mobile · Campagne acquisition</div><div class="proj">Preview feature/onboarding</div><div class="ename">Version preview de la nouvelle landing</div></div>
+          <span class="badge b-prv"><span class="bd"></span>preview</span>
+        </div>
+        <div class="meta"><span class="badge b-on"><span class="bd"></span>En ligne</span></div>
+        <div class="foot">
+          <span class="eurl">client-x-preview-42.devgate.agence.com</span>
+          <div class="actions">
+            <a href="devgate-e06-detail-env.mockup.html" class="btn-sec">Détails</a>
+            <a href="devgate-e07-interstitiel.mockup.html" class="btn-acc">Ouvrir ↗</a>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">
+          <div><div class="org">Espace membre</div><div class="proj">Preview sprint 3</div><div class="ename">Prototype en cours de déploiement</div></div>
+          <span class="badge b-prv"><span class="bd"></span>preview</span>
+        </div>
+        <div class="meta"><span class="badge b-off"><span class="bd"></span>Hors ligne</span></div>
+        <div class="foot">
+          <span class="eurl">client-x-member-s3.devgate.agence.com</span>
+          <span class="btn-acc dis">Indisponible</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<button class="dt" id="dt" onclick="toggleDark()">🌙</button>
+<script>function toggleDark(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('dt').textContent=d?'🌙':'☀️'}</script>
+</body></html>

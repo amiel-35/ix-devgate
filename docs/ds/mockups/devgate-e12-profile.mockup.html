@@ -1,0 +1,144 @@
+<!-- @ds-toolkit slug:devgate-e12-profile command:/ix_craft_mockup date:2026-04-20 version:1 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>DevGate · E12 Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f4f6fa;--sur:#fff;--sur2:#f0f2f7;--bor:#e2e6ef;--txt:#111827;--muted:#6b7280;--sub:#9ca3af;--pri:#2563eb;--prih:#1d4ed8;--pris:#eff6ff;--ok:#16a34a;--okbg:#dcfce7;--da:#dc2626;--dabg:#fee2e2;--info:#0891b2;--infobg:#cffafe;--r4:6px;--r8:10px;--r12:16px;--sh-sm:0 1px 3px rgba(0,0,0,.07);--sh-md:0 4px 16px rgba(0,0,0,.09);--f:'Inter',system-ui,sans-serif}
+    [data-theme=dark]{--bg:#0f1117;--sur:#1a1d27;--sur2:#252836;--bor:#2e3244;--txt:#f1f5f9;--muted:#94a3b8;--sub:#64748b;--pri:#3b82f6;--prih:#60a5fa;--pris:#1e3a5f;--ok:#22c55e;--okbg:#14532d;--da:#f87171;--dabg:#450a0a;--info:#22d3ee;--infobg:#164e63}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--f);background:var(--bg);color:var(--txt);min-height:100vh;transition:background .25s,color .25s}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:40px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:2px;padding:0 14px;overflow-x:auto}
+    .nav-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap}
+    .nav a{font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;padding:3px 8px;border-radius:4px;white-space:nowrap;transition:background .1s}
+    .nav a:hover{background:var(--sur2);color:var(--txt)}
+    .nav a.cur{background:var(--pris);color:var(--pri)}
+    .hdr{position:sticky;top:40px;z-index:90;height:54px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 32px;box-shadow:var(--sh-sm)}
+    .brand{display:flex;align-items:center;gap:9px}
+    .logo{width:28px;height:28px;border-radius:var(--r4);background:linear-gradient(135deg,var(--pri),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+    .sep{width:1px;height:14px;background:var(--bor);margin:0 2px}
+    .btn-ghost{font-family:var(--f);font-size:12px;font-weight:500;color:var(--muted);background:none;border:1px solid var(--bor);border-radius:var(--r4);padding:4px 10px;cursor:pointer;text-decoration:none}
+    .btn-ghost:hover{background:var(--sur2)}
+    .ava-sm{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+    .user-row{display:flex;align-items:center;gap:8px}
+    .main{padding:32px 36px;max-width:900px;margin:0 auto}
+    .pg-title{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px}
+    .pg-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+    /* profile card */
+    .profile-card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r12);padding:28px;text-align:center}
+    .ava-lg{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;margin:0 auto 14px}
+    .pname{font-size:18px;font-weight:700;margin-bottom:3px}
+    .pemail{font-size:13px;color:var(--muted);margin-bottom:14px}
+    .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px}
+    .b-info{background:var(--infobg);color:var(--info)}
+    .divider{height:1px;background:var(--bor);margin:20px 0}
+    .lbl{display:block;font-size:12px;font-weight:600;margin-bottom:5px;text-align:left}
+    .inp{width:100%;padding:9px 12px;font-family:var(--f);font-size:13px;background:var(--sur2);border:1.5px solid var(--bor);border-radius:var(--r8);color:var(--txt);outline:none;transition:border-color .14s;text-align:left}
+    .inp:focus{border-color:var(--pri)}
+    .fg{margin-bottom:14px;text-align:left}
+    .btn-p{width:100%;padding:10px 16px;font-family:var(--f);font-size:13px;font-weight:600;background:var(--pri);color:#fff;border:none;border-radius:var(--r8);cursor:pointer;transition:background .14s;margin-bottom:8px}
+    .btn-p:hover{background:var(--prih)}
+    .btn-danger{width:100%;padding:9px 16px;font-family:var(--f);font-size:13px;font-weight:500;background:none;color:var(--da);border:1px solid var(--da);border-radius:var(--r8);cursor:pointer;transition:background .14s}
+    .btn-danger:hover{background:var(--dabg)}
+    /* sessions */
+    .section-title{font-size:14px;font-weight:700;margin-bottom:12px}
+    .sessions{display:flex;flex-direction:column;gap:10px}
+    .session{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r8);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .session.current{border-color:var(--pri);background:var(--pris)}
+    .session-info .cur-lbl{font-size:10px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+    .session-info .device{font-size:13px;font-weight:600}
+    .session-info .meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .btn-revoke{font-family:var(--f);font-size:12px;font-weight:500;color:var(--da);background:none;border:1px solid var(--bor);border-radius:var(--r4);padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+    .btn-revoke:hover{background:var(--dabg);border-color:var(--da)}
+    .btn-revoke:disabled{opacity:.35;pointer-events:none}
+    .notice{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;border-radius:var(--r8);font-size:13px;line-height:1.5;margin-top:14px}
+    .notice-info{background:var(--infobg);color:var(--info)}
+    .dt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--sur);border:1px solid var(--bor);box-shadow:0 4px 16px rgba(0,0,0,.1);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .15s;z-index:200}
+    .dt:hover{transform:scale(1.1)}
+    @media(max-width:700px){.layout{grid-template-columns:1fr}.main{padding:20px 14px}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-lbl">DevGate Portal</span>
+  <a href="devgate-e01-login.mockup.html">E01 Login</a>
+  <a href="devgate-e02-magic-sent.mockup.html">E02 Magic link</a>
+  <a href="devgate-e03-otp.mockup.html">E03 OTP</a>
+  <a href="devgate-e04-portal.mockup.html">E04 Portail</a>
+  <a href="devgate-e05-client.mockup.html">E05 Page client</a>
+  <a href="devgate-e06-detail-env.mockup.html">E06 Détail env.</a>
+  <a href="devgate-e07-interstitiel.mockup.html">E07 Double auth</a>
+  <a href="devgate-e08-empty.mockup.html">E08 Vide</a>
+  <a href="devgate-e09-link-expired.mockup.html">E09 Lien expiré</a>
+  <a href="devgate-e10-session-expired.mockup.html">E10 Session exp.</a>
+  <a href="devgate-e11-access-denied.mockup.html">E11 Accès refusé</a>
+  <a href="devgate-e12-profile.mockup.html" class="cur">E12 Profil</a>
+</nav>
+<header class="hdr">
+  <div class="brand">
+    <div class="logo">AG</div>
+    <span style="font-size:13px;font-weight:700;">Agence</span>
+    <div class="sep"></div>
+    <span style="font-size:13px;color:var(--muted);">Mon profil</span>
+  </div>
+  <div class="user-row">
+    <div class="ava-sm">MC</div>
+    <span style="font-size:13px;font-weight:500;">Marie Chevalier</span>
+    <a href="devgate-e04-portal.mockup.html" class="btn-ghost">← Portail</a>
+  </div>
+</header>
+<main class="main">
+  <div class="pg-title">Mon profil</div>
+  <div class="pg-sub">Informations personnelles et sessions actives</div>
+  <div class="layout">
+    <div>
+      <div class="profile-card">
+        <div class="ava-lg">MC</div>
+        <div class="pname">Marie Chevalier</div>
+        <div class="pemail">marie@client-x.com</div>
+        <span class="badge b-info">client_member</span>
+        <div class="divider"></div>
+        <div class="fg">
+          <label class="lbl">Nom affiché</label>
+          <input class="inp" type="text" value="Marie Chevalier"/>
+        </div>
+        <button class="btn-p">Mettre à jour</button>
+        <button class="btn-danger">Se déconnecter</button>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Sessions actives</div>
+      <div class="sessions">
+        <div class="session current">
+          <div class="session-info">
+            <div class="cur-lbl">Session actuelle</div>
+            <div class="device">Chrome · macOS</div>
+            <div class="meta">IP 82.64.12.4 · Créée le 14 avr. 2026 · Expire dans 6 jours</div>
+          </div>
+          <button class="btn-revoke" disabled>Révoquer</button>
+        </div>
+        <div class="session">
+          <div class="session-info">
+            <div class="device">Safari · iPhone</div>
+            <div class="meta">IP 90.12.44.8 · Créée le 16 avr. 2026 · Expire dans 5 jours</div>
+          </div>
+          <button class="btn-revoke" onclick="this.closest('.session').style.opacity='.4';this.textContent='Révoquée'">Révoquer</button>
+        </div>
+        <div class="session">
+          <div class="session-info">
+            <div class="device">Firefox · Windows</div>
+            <div class="meta">IP 41.88.3.210 · Créée le 17 avr. 2026 · Expire dans 4 jours</div>
+          </div>
+          <button class="btn-revoke" onclick="this.closest('.session').style.opacity='.4';this.textContent='Révoquée'">Révoquer</button>
+        </div>
+      </div>
+      <div class="notice notice-info">ℹ️ Chaque session est valide 7 jours. La révocation est immédiate.</div>
+    </div>
+  </div>
+</main>
+<button class="dt" id="dt" onclick="toggleDark()">🌙</button>
+<script>function toggleDark(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('dt').textContent=d?'🌙':'☀️'}</script>
+</body></html>

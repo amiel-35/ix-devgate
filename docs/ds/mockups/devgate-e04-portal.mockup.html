@@ -1,0 +1,180 @@
+<!-- @ds-toolkit slug:devgate-e04-portal command:/ix_craft_mockup date:2026-04-20 version:1 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>DevGate · E04 Portail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f4f6fa;--sur:#fff;--sur2:#f0f2f7;--bor:#e2e6ef;--txt:#111827;--muted:#6b7280;--sub:#9ca3af;--pri:#2563eb;--prih:#1d4ed8;--pris:#eff6ff;--ok:#16a34a;--okbg:#dcfce7;--wa:#d97706;--wabg:#fef3c7;--da:#dc2626;--dabg:#fee2e2;--info:#0891b2;--infobg:#cffafe;--r4:6px;--r8:10px;--r12:16px;--sh-sm:0 1px 3px rgba(0,0,0,.07);--sh-md:0 4px 16px rgba(0,0,0,.09);--f:'Inter',system-ui,sans-serif}
+    [data-theme=dark]{--bg:#0f1117;--sur:#1a1d27;--sur2:#252836;--bor:#2e3244;--txt:#f1f5f9;--muted:#94a3b8;--sub:#64748b;--pri:#3b82f6;--prih:#60a5fa;--pris:#1e3a5f;--ok:#22c55e;--okbg:#14532d;--wa:#fbbf24;--wabg:#451a03;--da:#f87171;--dabg:#450a0a;--info:#22d3ee;--infobg:#164e63}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--f);background:var(--bg);color:var(--txt);min-height:100vh;transition:background .25s,color .25s}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:40px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:2px;padding:0 14px;overflow-x:auto}
+    .nav-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap}
+    .nav a{font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;padding:3px 8px;border-radius:4px;white-space:nowrap;transition:background .1s,color .1s}
+    .nav a:hover{background:var(--sur2);color:var(--txt)}
+    .nav a.cur{background:var(--pris);color:var(--pri)}
+    /* header */
+    .hdr{position:sticky;top:40px;z-index:90;height:56px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 36px;box-shadow:var(--sh-sm)}
+    .brand{display:flex;align-items:center;gap:9px}
+    .logo{width:30px;height:30px;border-radius:var(--r4);background:linear-gradient(135deg,var(--pri),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700}
+    .brand-name{font-size:14px;font-weight:700}
+    .sep{width:1px;height:15px;background:var(--bor);margin:0 2px}
+    .portal-lbl{font-size:13px;color:var(--muted)}
+    .user-row{display:flex;align-items:center;gap:8px}
+    .ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+    .uname{font-size:13px;font-weight:500}
+    .btn-ghost{font-family:var(--f);font-size:12px;font-weight:500;color:var(--muted);background:none;border:1px solid var(--bor);border-radius:var(--r4);padding:4px 10px;cursor:pointer;transition:background .12s;text-decoration:none}
+    .btn-ghost:hover{background:var(--sur2)}
+    /* main */
+    .main{padding:36px;max-width:1060px;margin:0 auto}
+    /* welcome banner */
+    .banner{background:linear-gradient(135deg,#1e3a5f,#1e2d4f);border-radius:var(--r12);padding:26px 30px;color:#fff;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    [data-theme=dark] .banner{background:linear-gradient(135deg,#1e2d4f,#151e33)}
+    .banner h2{font-size:19px;font-weight:700;margin-bottom:5px}
+    .banner p{font-size:14px;color:rgba(255,255,255,.72);line-height:1.5}
+    .banner-metrics{display:flex;gap:20px;flex-shrink:0}
+    .bm{text-align:center}
+    .bm .v{font-size:26px;font-weight:700}
+    .bm .l{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+    .btn-w{margin-top:12px;font-family:var(--f);font-size:13px;font-weight:600;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:var(--r4);padding:7px 14px;cursor:pointer}
+    .btn-w:hover{background:rgba(255,255,255,.24)}
+    /* filters */
+    .filter-bar{display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+    .f-inp{flex:1;max-width:240px;padding:8px 10px 8px 32px;font-family:var(--f);font-size:13px;background:var(--sur);border:1px solid var(--bor);border-radius:var(--r8);color:var(--txt);outline:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:9px center}
+    .chip{font-family:var(--f);font-size:12px;font-weight:500;padding:4px 11px;border-radius:20px;border:1px solid var(--bor);background:var(--sur);color:var(--muted);cursor:pointer;transition:all .12s}
+    .chip.on{background:var(--pris);border-color:var(--pri);color:var(--pri)}
+    /* grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+    .card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r12);padding:18px 20px;transition:box-shadow .18s,border-color .18s,transform .14s;text-decoration:none;color:inherit;display:block}
+    .card:hover{box-shadow:var(--sh-md);border-color:var(--pri);transform:translateY(-1px)}
+    .ct{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+    .org{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+    .proj{font-size:15px;font-weight:700;margin-bottom:1px}
+    .ename{font-size:13px;color:var(--muted)}
+    .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+    .bd{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .b-stg{background:var(--infobg);color:var(--info)}
+    .b-prv{background:var(--wabg);color:var(--wa)}
+    .b-dev{background:var(--pris);color:var(--pri)}
+    .b-on{background:var(--okbg);color:var(--ok)}
+    .b-off{background:var(--dabg);color:var(--da)}
+    .b-auth{background:var(--wabg);color:var(--wa)}
+    .meta{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+    .foot{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--bor)}
+    .eurl{font-size:11px;font-family:monospace;color:var(--sub);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .btn-acc{font-family:var(--f);font-size:12px;font-weight:600;background:var(--pri);color:#fff;border:none;border-radius:var(--r4);padding:6px 13px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}
+    .btn-acc:hover{background:var(--prih)}
+    .btn-acc.dis{opacity:.45;pointer-events:none}
+    .pg-title{font-size:19px;font-weight:700;letter-spacing:-.3px;margin-bottom:3px}
+    .pg-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+    .dt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--sur);border:1px solid var(--bor);box-shadow:0 4px 16px rgba(0,0,0,.1);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .15s;z-index:200}
+    .dt:hover{transform:scale(1.1)}
+    @media(max-width:600px){.main{padding:20px 14px}.banner-metrics{display:none}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-lbl">DevGate Portal</span>
+  <a href="devgate-e01-login.mockup.html">E01 Login</a>
+  <a href="devgate-e02-magic-sent.mockup.html">E02 Magic link</a>
+  <a href="devgate-e03-otp.mockup.html">E03 OTP</a>
+  <a href="devgate-e04-portal.mockup.html" class="cur">E04 Portail</a>
+  <a href="devgate-e05-client.mockup.html">E05 Page client</a>
+  <a href="devgate-e06-detail-env.mockup.html">E06 Détail env.</a>
+  <a href="devgate-e07-interstitiel.mockup.html">E07 Double auth</a>
+  <a href="devgate-e08-empty.mockup.html">E08 Vide</a>
+  <a href="devgate-e09-link-expired.mockup.html">E09 Lien expiré</a>
+  <a href="devgate-e10-session-expired.mockup.html">E10 Session exp.</a>
+  <a href="devgate-e11-access-denied.mockup.html">E11 Accès refusé</a>
+  <a href="devgate-e12-profile.mockup.html">E12 Profil</a>
+</nav>
+<header class="hdr">
+  <div class="brand">
+    <div class="logo">AG</div>
+    <div class="brand-name">Agence</div>
+    <div class="sep"></div>
+    <div class="portal-lbl">DevGate</div>
+  </div>
+  <div class="user-row">
+    <div class="ava">MC</div>
+    <div class="uname">Marie Chevalier</div>
+    <a href="devgate-e12-profile.mockup.html" class="btn-ghost">Mon profil</a>
+    <button class="btn-ghost">Déconnexion</button>
+  </div>
+</header>
+<main class="main">
+  <div class="banner">
+    <div>
+      <h2>Bonjour Marie, vos accès sont prêts.</h2>
+      <p>Vous êtes connectée à l'espace de validation de <strong>Client X</strong>. Retrouvez ci-dessous les ressources disponibles.</p>
+      <a href="devgate-e05-client.mockup.html"><button class="btn-w">Voir les ressources →</button></a>
+    </div>
+    <div class="banner-metrics">
+      <div class="bm"><div class="v">3</div><div class="l">Environnements</div></div>
+      <div class="bm"><div class="v">7j</div><div class="l">Session valide</div></div>
+    </div>
+  </div>
+
+  <div class="pg-title">Mes environnements</div>
+  <div class="pg-sub">3 ressources accessibles · Client X</div>
+
+  <div class="filter-bar">
+    <input class="f-inp" type="text" placeholder="Rechercher…"/>
+    <button class="chip on">Tous</button>
+    <button class="chip">Staging</button>
+    <button class="chip">Preview</button>
+  </div>
+
+  <div class="grid">
+    <a href="devgate-e05-client.mockup.html" class="card">
+      <div class="ct">
+        <div><div class="org">Client X</div><div class="proj">Refonte site corporate</div><div class="ename">Staging principal</div></div>
+        <span class="badge b-stg"><span class="bd"></span>staging</span>
+      </div>
+      <div class="meta">
+        <span class="badge b-on"><span class="bd"></span>En ligne</span>
+        <span class="badge b-auth">🔒 Auth requise</span>
+      </div>
+      <div class="foot">
+        <span class="eurl">client-x-staging.devgate.agence.com</span>
+        <span class="btn-acc">Accéder ↗</span>
+      </div>
+    </a>
+    <a href="devgate-e07-interstitiel.mockup.html" class="card">
+      <div class="ct">
+        <div><div class="org">Client X</div><div class="proj">App mobile</div><div class="ename">Preview feature/onboarding</div></div>
+        <span class="badge b-prv"><span class="bd"></span>preview</span>
+      </div>
+      <div class="meta">
+        <span class="badge b-on"><span class="bd"></span>En ligne</span>
+      </div>
+      <div class="foot">
+        <span class="eurl">client-x-preview-42.devgate.agence.com</span>
+        <span class="btn-acc">Accéder ↗</span>
+      </div>
+    </a>
+    <div class="card" style="cursor:default">
+      <div class="ct">
+        <div><div class="org">Client X</div><div class="proj">Espace membre</div><div class="ename">Preview sprint 3</div></div>
+        <span class="badge b-prv"><span class="bd"></span>preview</span>
+      </div>
+      <div class="meta">
+        <span class="badge b-off"><span class="bd"></span>Hors ligne</span>
+      </div>
+      <div class="foot">
+        <span class="eurl">client-x-member-s3.devgate.agence.com</span>
+        <span class="btn-acc dis">Indisponible</span>
+      </div>
+    </div>
+  </div>
+</main>
+<button class="dt" id="dt" onclick="toggleDark()">🌙</button>
+<script>
+  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on')}));
+  function toggleDark(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('dt').textContent=d?'🌙':'☀️'}
+</script>
+</body></html>

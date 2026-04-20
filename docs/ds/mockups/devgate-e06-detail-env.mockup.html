@@ -1,0 +1,145 @@
+<!-- @ds-toolkit slug:devgate-e06-detail-env command:/ix_craft_mockup date:2026-04-20 version:1 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>DevGate · E06 Détail environnement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#f4f6fa;--sur:#fff;--sur2:#f0f2f7;--bor:#e2e6ef;--txt:#111827;--muted:#6b7280;--sub:#9ca3af;--pri:#2563eb;--prih:#1d4ed8;--pris:#eff6ff;--ok:#16a34a;--okbg:#dcfce7;--wa:#d97706;--wabg:#fef3c7;--da:#dc2626;--dabg:#fee2e2;--info:#0891b2;--infobg:#cffafe;--r4:6px;--r8:10px;--r12:16px;--sh-sm:0 1px 3px rgba(0,0,0,.07);--sh-md:0 4px 16px rgba(0,0,0,.09);--f:'Inter',system-ui,sans-serif}
+    [data-theme=dark]{--bg:#0f1117;--sur:#1a1d27;--sur2:#252836;--bor:#2e3244;--txt:#f1f5f9;--muted:#94a3b8;--sub:#64748b;--pri:#3b82f6;--prih:#60a5fa;--pris:#1e3a5f;--ok:#22c55e;--okbg:#14532d;--wa:#fbbf24;--wabg:#451a03;--da:#f87171;--dabg:#450a0a;--info:#22d3ee;--infobg:#164e63}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--f);background:var(--bg);color:var(--txt);min-height:100vh;transition:background .25s,color .25s}
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:40px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:2px;padding:0 14px;overflow-x:auto}
+    .nav-lbl{font-size:10px;font-weight:700;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-right:4px;white-space:nowrap}
+    .nav a{font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;padding:3px 8px;border-radius:4px;white-space:nowrap;transition:background .1s}
+    .nav a:hover{background:var(--sur2);color:var(--txt)}
+    .nav a.cur{background:var(--pris);color:var(--pri)}
+    .hdr{position:sticky;top:40px;z-index:90;height:54px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;padding:0 32px;box-shadow:var(--sh-sm)}
+    .brand{display:flex;align-items:center;gap:9px}
+    .logo{width:28px;height:28px;border-radius:var(--r4);background:linear-gradient(135deg,var(--pri),#7c3aed);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700}
+    .sep{width:1px;height:14px;background:var(--bor);margin:0 2px}
+    .btn-ghost{font-family:var(--f);font-size:12px;font-weight:500;color:var(--muted);background:none;border:1px solid var(--bor);border-radius:var(--r4);padding:4px 10px;cursor:pointer;text-decoration:none}
+    .btn-ghost:hover{background:var(--sur2)}
+    .ava{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+    .user-row{display:flex;align-items:center;gap:8px}
+    .main{padding:32px 36px;max-width:1000px;margin:0 auto}
+    .breadcrumb{font-size:13px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+    .breadcrumb a{color:var(--pri);text-decoration:none;font-weight:500}
+    .breadcrumb a:hover{text-decoration:underline}
+    .breadcrumb span{color:var(--sub)}
+    .layout{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:start}
+    .title{font-size:24px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+    .desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:18px}
+    .notice{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;border-radius:var(--r8);font-size:13px;line-height:1.5;margin-bottom:12px}
+    .notice-ok{background:var(--okbg);color:var(--ok)}
+    .notice-warn{background:var(--wabg);color:var(--wa)}
+    .meta-table{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r8);overflow:hidden;margin-bottom:20px}
+    .meta-row{display:flex;padding:11px 16px;border-bottom:1px solid var(--bor);font-size:13px}
+    .meta-row:last-child{border-bottom:none}
+    .mk{width:150px;flex-shrink:0;color:var(--muted);font-weight:500}
+    .mv{color:var(--txt)}
+    .mv.mono{font-family:monospace;font-size:12px}
+    .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+    .bd{width:6px;height:6px;border-radius:50%;background:currentColor}
+    .b-stg{background:var(--infobg);color:var(--info)}
+    .b-on{background:var(--okbg);color:var(--ok)}
+    .b-auth{background:var(--wabg);color:var(--wa)}
+    .actions{display:flex;gap:10px;margin-top:4px}
+    .btn-p{font-family:var(--f);font-size:13px;font-weight:600;background:var(--pri);color:#fff;border:none;border-radius:var(--r8);padding:10px 20px;cursor:pointer;text-decoration:none;display:inline-block}
+    .btn-p:hover{background:var(--prih)}
+    .btn-s{font-family:var(--f);font-size:13px;font-weight:500;background:var(--sur2);color:var(--muted);border:1px solid var(--bor);border-radius:var(--r8);padding:9px 18px;cursor:pointer;text-decoration:none;display:inline-block}
+    .btn-s:hover{background:var(--bor);color:var(--txt)}
+    .status-panel{display:grid;gap:11px}
+    .tile{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r8);padding:14px 16px}
+    .tile .lbl{font-size:10px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+    .tile .val{font-size:14px;font-weight:700}
+    .tile .sub2{font-size:12px;color:var(--muted);margin-top:3px}
+    .dt{position:fixed;bottom:22px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--sur);border:1px solid var(--bor);box-shadow:0 4px 16px rgba(0,0,0,.1);cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;transition:transform .15s;z-index:200}
+    .dt:hover{transform:scale(1.1)}
+    @media(max-width:700px){.layout{grid-template-columns:1fr}.main{padding:20px 14px}}
+  </style>
+</head>
+<body>
+<nav class="nav">
+  <span class="nav-lbl">DevGate Portal</span>
+  <a href="devgate-e01-login.mockup.html">E01 Login</a>
+  <a href="devgate-e02-magic-sent.mockup.html">E02 Magic link</a>
+  <a href="devgate-e03-otp.mockup.html">E03 OTP</a>
+  <a href="devgate-e04-portal.mockup.html">E04 Portail</a>
+  <a href="devgate-e05-client.mockup.html">E05 Page client</a>
+  <a href="devgate-e06-detail-env.mockup.html" class="cur">E06 Détail env.</a>
+  <a href="devgate-e07-interstitiel.mockup.html">E07 Double auth</a>
+  <a href="devgate-e08-empty.mockup.html">E08 Vide</a>
+  <a href="devgate-e09-link-expired.mockup.html">E09 Lien expiré</a>
+  <a href="devgate-e10-session-expired.mockup.html">E10 Session exp.</a>
+  <a href="devgate-e11-access-denied.mockup.html">E11 Accès refusé</a>
+  <a href="devgate-e12-profile.mockup.html">E12 Profil</a>
+</nav>
+<header class="hdr">
+  <div class="brand">
+    <div class="logo">AG</div>
+    <span style="font-size:13px;font-weight:700;">Agence</span>
+    <div class="sep"></div>
+    <span style="font-size:13px;color:var(--muted);">Détail environnement</span>
+  </div>
+  <div class="user-row">
+    <div class="ava">MC</div>
+    <span style="font-size:13px;font-weight:500;">Marie Chevalier</span>
+    <a href="devgate-e05-client.mockup.html" class="btn-ghost">← Retour</a>
+  </div>
+</header>
+<main class="main">
+  <div class="breadcrumb">
+    <a href="devgate-e04-portal.mockup.html">Portail</a>
+    <span>›</span>
+    <a href="devgate-e05-client.mockup.html">Client X</a>
+    <span>›</span>
+    <span style="color:var(--txt);font-weight:500;">Staging principal</span>
+  </div>
+  <div class="layout">
+    <div>
+      <div class="title">Staging principal</div>
+      <p class="desc">Environnement de recette principal pour la validation avant mise en ligne. Disponible pour les équipes de validation du client.</p>
+      <div class="notice notice-ok">✅ Tunnel actif — 2 réplicas connectés. Statut confirmé il y a 3 minutes.</div>
+      <div class="notice notice-warn">⚠️ Cette ressource demande une authentification WordPress après l'ouverture via DevGate.</div>
+      <div class="meta-table">
+        <div class="meta-row"><div class="mk">Projet</div><div class="mv">Refonte site corporate 2026</div></div>
+        <div class="meta-row"><div class="mk">Type</div><div class="mv"><span class="badge b-stg">staging</span></div></div>
+        <div class="meta-row"><div class="mk">URL publique</div><div class="mv mono">client-x-staging.devgate.agence.com</div></div>
+        <div class="meta-row"><div class="mk">Statut</div><div class="mv"><span class="badge b-on"><span class="bd"></span>En ligne</span></div></div>
+        <div class="meta-row"><div class="mk">Auth applicative</div><div class="mv">Requise (login WordPress)</div></div>
+        <div class="meta-row"><div class="mk">Votre session</div><div class="mv">Valide · expire dans 6 jours</div></div>
+      </div>
+      <div class="actions">
+        <a href="devgate-e07-interstitiel.mockup.html" class="btn-p">Ouvrir la ressource ↗</a>
+        <a href="devgate-e05-client.mockup.html" class="btn-s">← Retour aux ressources</a>
+      </div>
+    </div>
+    <div class="status-panel">
+      <div class="tile">
+        <div class="lbl">Tunnel</div>
+        <div class="val" style="color:var(--ok);">🟢 Actif</div>
+        <div class="sub2">2 réplicas · cf-env-x-a1b2</div>
+      </div>
+      <div class="tile">
+        <div class="lbl">Auth DevGate</div>
+        <div class="val" style="color:var(--ok);">✅ Validée</div>
+        <div class="sub2">Accès accordé</div>
+      </div>
+      <div class="tile">
+        <div class="lbl">Auth applicative</div>
+        <div class="val" style="color:var(--wa);">⚠️ Requise</div>
+        <div class="sub2">Login WordPress après ouverture</div>
+      </div>
+      <div class="tile">
+        <div class="lbl">Dernière vérif.</div>
+        <div class="val">Il y a 3 min</div>
+        <div class="sub2">Actualisé automatiquement</div>
+      </div>
+    </div>
+  </div>
+</main>
+<button class="dt" id="dt" onclick="toggleDark()">🌙</button>
+<script>function toggleDark(){const d=document.documentElement.getAttribute('data-theme')==='dark';document.documentElement.setAttribute('data-theme',d?'light':'dark');document.getElementById('dt').textContent=d?'🌙':'☀️'}</script>
+</body></html>

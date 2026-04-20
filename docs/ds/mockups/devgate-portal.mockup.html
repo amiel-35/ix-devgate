@@ -1,0 +1,983 @@
+<!-- @ds-toolkit slug:devgate-portal command:/ix_craft_mockup date:2026-04-20 version:2 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevGate Portal — Mockup v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --color-bg:          #f4f6fa;
+      --color-surface:     #ffffff;
+      --color-surface-2:   #f0f2f7;
+      --color-border:      #e2e6ef;
+      --color-text:        #111827;
+      --color-text-muted:  #6b7280;
+      --color-text-subtle: #9ca3af;
+      --color-primary:     #2563eb;
+      --color-primary-h:   #1d4ed8;
+      --color-primary-s:   #eff6ff;
+      --color-success:     #16a34a;
+      --color-success-bg:  #dcfce7;
+      --color-warning:     #d97706;
+      --color-warning-bg:  #fef3c7;
+      --color-danger:      #dc2626;
+      --color-danger-bg:   #fee2e2;
+      --color-info:        #0891b2;
+      --color-info-bg:     #cffafe;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,.14);
+      --font: 'Inter', system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg:          #0f1117;
+      --color-surface:     #1a1d27;
+      --color-surface-2:   #252836;
+      --color-border:      #2e3244;
+      --color-text:        #f1f5f9;
+      --color-text-muted:  #94a3b8;
+      --color-text-subtle: #64748b;
+      --color-primary:     #3b82f6;
+      --color-primary-h:   #60a5fa;
+      --color-primary-s:   #1e3a5f;
+      --color-success:     #22c55e;
+      --color-success-bg:  #14532d;
+      --color-warning:     #fbbf24;
+      --color-warning-bg:  #451a03;
+      --color-danger:      #f87171;
+      --color-danger-bg:   #450a0a;
+      --color-info:        #22d3ee;
+      --color-info-bg:     #164e63;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      transition: background .25s, color .25s;
+    }
+
+    /* ─── Dev nav ────────────────────────────────────────────── */
+    .dev-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; gap: 4px;
+      padding: 0 20px; height: 44px;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+    .dev-nav-label {
+      font-size: 10px; font-weight: 700; color: var(--color-text-subtle);
+      letter-spacing: .1em; text-transform: uppercase;
+      margin-right: 6px; white-space: nowrap;
+    }
+    .dev-nav a {
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      color: var(--color-text-muted); text-decoration: none;
+      padding: 4px 10px; border-radius: var(--radius-sm);
+      white-space: nowrap; transition: background .12s, color .12s;
+    }
+    .dev-nav a:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .dev-nav a.active { background: var(--color-primary-s); color: var(--color-primary); }
+    .dev-nav-sep { width: 1px; height: 18px; background: var(--color-border); margin: 0 4px; flex-shrink: 0; }
+
+    .view-root { padding-top: 44px; }
+
+    /* ─── Screen wrapper ─────────────────────────────────────── */
+    .screen { display: none; min-height: calc(100vh - 44px); }
+    .screen.active { display: block; }
+
+    /* ─── Standalone bg (login / errors) ────────────────────── */
+    .standalone-bg {
+      min-height: calc(100vh - 44px);
+      background:
+        radial-gradient(ellipse 80% 60% at 60% -10%, rgba(37,99,235,.15) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(139,92,246,.10) 0%, transparent 60%),
+        var(--color-bg);
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px 20px;
+    }
+    [data-theme="dark"] .standalone-bg {
+      background:
+        radial-gradient(ellipse 80% 60% at 60% -10%, rgba(59,130,246,.2) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at -10% 80%, rgba(139,92,246,.16) 0%, transparent 60%),
+        var(--color-bg);
+    }
+
+    /* ─── Auth card ──────────────────────────────────────────── */
+    .auth-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      width: 100%; max-width: 440px;
+      padding: 48px 40px 40px;
+    }
+    .agency-badge {
+      display: inline-flex; align-items: center; gap: 9px;
+      margin-bottom: 28px;
+    }
+    .agency-logo {
+      width: 36px; height: 36px; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 15px; font-weight: 700;
+    }
+    .agency-name { font-size: 15px; font-weight: 700; }
+    .auth-title { font-size: 22px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 6px; }
+    .auth-sub { font-size: 14px; color: var(--color-text-muted); line-height: 1.55; margin-bottom: 28px; }
+
+    /* ─── Forms ──────────────────────────────────────────────── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--color-text); margin-bottom: 5px; letter-spacing: .02em; }
+    .form-input {
+      width: 100%; padding: 10px 14px;
+      font-family: var(--font); font-size: 14px;
+      background: var(--color-surface-2); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md); color: var(--color-text);
+      outline: none; transition: border-color .14s, box-shadow .14s;
+    }
+    .form-input::placeholder { color: var(--color-text-subtle); }
+    .form-input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+    .btn-primary {
+      width: 100%; padding: 11px 20px;
+      font-family: var(--font); font-size: 14px; font-weight: 600;
+      background: var(--color-primary); color: #fff;
+      border: none; border-radius: var(--radius-md); cursor: pointer;
+      transition: background .14s; margin-top: 6px;
+    }
+    .btn-primary:hover { background: var(--color-primary-h); }
+    .btn-secondary {
+      width: 100%; padding: 10px 20px; margin-top: 10px;
+      font-family: var(--font); font-size: 14px; font-weight: 500;
+      background: var(--color-surface-2); color: var(--color-text-muted);
+      border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer;
+      transition: background .14s, color .14s;
+    }
+    .btn-secondary:hover { background: var(--color-border); color: var(--color-text); }
+    .btn-link {
+      background: none; border: none; padding: 0; cursor: pointer;
+      font-family: var(--font); font-size: 13px;
+      color: var(--color-primary); font-weight: 500;
+    }
+    .btn-link:hover { text-decoration: underline; }
+    .auth-footer {
+      margin-top: 24px; padding-top: 20px;
+      border-top: 1px solid var(--color-border);
+      text-align: center; font-size: 12px; color: var(--color-text-subtle);
+    }
+    .auth-divider {
+      display: flex; align-items: center; gap: 10px;
+      margin: 18px 0; font-size: 12px; color: var(--color-text-subtle);
+    }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--color-border);
+    }
+
+    /* ─── State card (confirmations / errors) ────────────────── */
+    .state-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      width: 100%; max-width: 480px;
+      padding: 48px 40px 40px;
+      text-align: center;
+    }
+    .state-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .state-icon.ok      { background: var(--color-success-bg); }
+    .state-icon.warn    { background: var(--color-warning-bg); }
+    .state-icon.danger  { background: var(--color-danger-bg); }
+    .state-icon.info    { background: var(--color-info-bg); }
+    .state-title { font-size: 22px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 10px; }
+    .state-sub { font-size: 14px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 24px; max-width: 36ch; margin-left: auto; margin-right: auto; }
+    .state-actions { display: flex; flex-direction: column; gap: 10px; }
+    .state-actions .btn-primary, .state-actions .btn-secondary { margin: 0; }
+    .state-note { margin-top: 16px; font-size: 12px; color: var(--color-text-subtle); }
+
+    /* ─── OTP inputs ─────────────────────────────────────────── */
+    .otp-group { display: flex; gap: 10px; justify-content: center; margin: 20px 0 24px; }
+    .otp-input {
+      width: 52px; height: 60px;
+      text-align: center; font-family: var(--font); font-size: 22px; font-weight: 700;
+      background: var(--color-surface-2); border: 2px solid var(--color-border);
+      border-radius: var(--radius-md); color: var(--color-text); outline: none;
+      transition: border-color .14s;
+    }
+    .otp-input:focus { border-color: var(--color-primary); }
+    .otp-input.filled { border-color: var(--color-primary); background: var(--color-primary-s); }
+    .otp-timer { font-size: 13px; color: var(--color-text-muted); margin-bottom: 8px; }
+
+    /* ─── Portal header ──────────────────────────────────────── */
+    .portal-header {
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 40px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: var(--shadow-sm);
+      position: sticky; top: 44px; z-index: 100;
+    }
+    .portal-brand { display: flex; align-items: center; gap: 10px; }
+    .portal-brand .agency-logo { width: 32px; height: 32px; font-size: 13px; }
+    .portal-brand .brand-name { font-size: 14px; font-weight: 700; }
+    .portal-brand .sep { width: 1px; height: 16px; background: var(--color-border); margin: 0 2px; }
+    .portal-brand .portal-label { font-size: 13px; color: var(--color-text-muted); }
+    .user-pill { display: flex; align-items: center; gap: 9px; }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+    }
+    .user-name { font-size: 13px; font-weight: 500; }
+    .btn-ghost {
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      color: var(--color-text-muted); background: none;
+      border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      padding: 5px 10px; cursor: pointer; transition: background .12s;
+    }
+    .btn-ghost:hover { background: var(--color-surface-2); }
+
+    /* ─── Portal layout ──────────────────────────────────────── */
+    .portal-main { padding: 36px 40px; max-width: 1100px; margin: 0 auto; }
+    .page-title { font-size: 20px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 4px; }
+    .page-sub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 28px; }
+
+    /* ─── Welcome banner ─────────────────────────────────────── */
+    .welcome-banner {
+      background: linear-gradient(135deg, #1e3a5f 0%, #1e2d4f 100%);
+      border-radius: var(--radius-lg); padding: 28px 32px;
+      color: #fff; margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    }
+    [data-theme="dark"] .welcome-banner { background: linear-gradient(135deg, #1e2d4f 0%, #151e33 100%); }
+    .welcome-banner h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .welcome-banner p { font-size: 14px; color: rgba(255,255,255,.75); line-height: 1.55; }
+    .welcome-metrics { display: flex; gap: 20px; flex-shrink: 0; }
+    .welcome-metric { text-align: center; }
+    .welcome-metric .val { font-size: 28px; font-weight: 700; }
+    .welcome-metric .lbl { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
+    .btn-white {
+      margin-top: 14px;
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      background: rgba(255,255,255,.15); color: #fff;
+      border: 1px solid rgba(255,255,255,.25); border-radius: var(--radius-sm);
+      padding: 8px 16px; cursor: pointer; transition: background .14s;
+    }
+    .btn-white:hover { background: rgba(255,255,255,.25); }
+
+    /* ─── Badges ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 20px; white-space: nowrap;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .b-staging  { background: var(--color-info-bg);    color: var(--color-info); }
+    .b-preview  { background: var(--color-warning-bg); color: var(--color-warning); }
+    .b-dev      { background: var(--color-primary-s);  color: var(--color-primary); }
+    .b-internal { background: var(--color-surface-2);  color: var(--color-text-muted); }
+    .b-online   { background: var(--color-success-bg); color: var(--color-success); }
+    .b-offline  { background: var(--color-danger-bg);  color: var(--color-danger); }
+    .b-auth     { background: var(--color-warning-bg); color: var(--color-warning); }
+
+    /* ─── Env cards ──────────────────────────────────────────── */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+    .filter-input {
+      flex: 1; max-width: 260px; padding: 8px 12px 8px 34px;
+      font-family: var(--font); font-size: 13px;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); color: var(--color-text); outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 10px center;
+    }
+    .filter-chip {
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      padding: 5px 12px; border-radius: 20px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface); color: var(--color-text-muted);
+      cursor: pointer; transition: all .12s;
+    }
+    .filter-chip.active { background: var(--color-primary-s); border-color: var(--color-primary); color: var(--color-primary); }
+
+    .env-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .env-card {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg); padding: 20px 22px;
+      transition: box-shadow .18s, border-color .18s, transform .14s;
+    }
+    .env-card:hover { box-shadow: var(--shadow-md); border-color: var(--color-primary); transform: translateY(-1px); }
+    .env-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .env-org { font-size: 11px; font-weight: 600; color: var(--color-text-subtle); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+    .env-project { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+    .env-name { font-size: 13px; color: var(--color-text-muted); }
+    .env-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+    .env-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--color-border); }
+    .env-url { font-size: 11px; font-family: monospace; color: var(--color-text-subtle); max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-access {
+      font-family: var(--font); font-size: 13px; font-weight: 600;
+      background: var(--color-primary); color: #fff;
+      border: none; border-radius: var(--radius-sm); padding: 7px 14px;
+      cursor: pointer; transition: background .12s; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-access:hover { background: var(--color-primary-h); }
+    .btn-access-ghost {
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      color: var(--color-text-muted); background: none;
+      border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      padding: 6px 12px; cursor: pointer; transition: background .12s;
+    }
+    .btn-access-ghost:hover { background: var(--color-surface-2); }
+
+    /* ─── Detail page ────────────────────────────────────────── */
+    .detail-layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+    .detail-breadcrumb { font-size: 13px; color: var(--color-text-muted); margin-bottom: 12px; }
+    .detail-breadcrumb span { color: var(--color-text-subtle); margin: 0 6px; }
+    .detail-title { font-size: 26px; font-weight: 700; letter-spacing: -.4px; margin-bottom: 6px; }
+    .detail-desc { font-size: 14px; color: var(--color-text-muted); line-height: 1.6; margin-bottom: 20px; }
+    .detail-meta-table { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 20px; }
+    .detail-meta-row { display: flex; padding: 11px 18px; border-bottom: 1px solid var(--color-border); font-size: 13px; }
+    .detail-meta-row:last-child { border-bottom: none; }
+    .detail-meta-key { width: 160px; flex-shrink: 0; color: var(--color-text-muted); font-weight: 500; }
+    .detail-meta-val { color: var(--color-text); font-family: inherit; }
+    .detail-meta-val.mono { font-family: monospace; font-size: 12px; }
+    .detail-actions { display: flex; gap: 10px; }
+    .detail-actions .btn-primary { width: auto; margin: 0; padding: 10px 20px; }
+    .detail-actions .btn-secondary { width: auto; margin: 0; padding: 9px 18px; }
+
+    .status-panel { display: grid; gap: 12px; }
+    .status-tile {
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: 16px 18px;
+    }
+    .status-tile .lbl { font-size: 11px; font-weight: 600; color: var(--color-text-subtle); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+    .status-tile .val { font-size: 15px; font-weight: 700; }
+    .status-tile .sub { font-size: 12px; color: var(--color-text-muted); margin-top: 3px; }
+
+    .notice {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 12px 16px; border-radius: var(--radius-md);
+      font-size: 13px; line-height: 1.55; margin-bottom: 16px;
+    }
+    .notice-ok      { background: var(--color-success-bg); color: var(--color-success); }
+    .notice-warn    { background: var(--color-warning-bg); color: var(--color-warning); }
+    .notice-danger  { background: var(--color-danger-bg);  color: var(--color-danger); }
+    .notice-info    { background: var(--color-info-bg);    color: var(--color-info); }
+
+    /* ─── Profile page ───────────────────────────────────────── */
+    .profile-layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+    .profile-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 28px; text-align: center; }
+    .profile-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #fff; margin: 0 auto 14px; }
+    .profile-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .profile-email { font-size: 13px; color: var(--color-text-muted); margin-bottom: 16px; }
+    .profile-section-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+    .session-list { display: flex; flex-direction: column; gap: 10px; }
+    .session-item { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .session-item.current { border-color: var(--color-primary); background: var(--color-primary-s); }
+    .session-info .si-device { font-size: 13px; font-weight: 600; }
+    .session-info .si-meta { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+    .session-info .si-current { font-size: 11px; font-weight: 600; color: var(--color-primary); }
+    .btn-revoke-session { font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--color-danger); background: none; border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+
+    /* ─── Dark toggle ────────────────────────────────────────── */
+    .dark-toggle {
+      position: fixed; bottom: 24px; right: 24px; z-index: 300;
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-md); cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s;
+    }
+    .dark-toggle:hover { transform: scale(1.1); }
+
+    @media (max-width: 700px) {
+      .portal-main { padding: 24px 16px; }
+      .portal-header { padding: 0 16px; }
+      .auth-card, .state-card { padding: 32px 24px 28px; }
+      .detail-layout, .profile-layout { grid-template-columns: 1fr; }
+      .welcome-metrics { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Dev nav -->
+<nav class="dev-nav">
+  <span class="dev-nav-label">Portal</span>
+  <a href="#" class="active" onclick="show('login',this)">E1 Login</a>
+  <a href="#" onclick="show('magic-sent',this)">E2 Magic link</a>
+  <a href="#" onclick="show('otp',this)">E3 OTP</a>
+  <a href="#" onclick="show('portal',this)">E4 Portail</a>
+  <a href="#" onclick="show('client',this)">E5 Page client</a>
+  <a href="#" onclick="show('detail',this)">E6 Détail env.</a>
+  <a href="#" onclick="show('interstitiel',this)">E7 Double auth</a>
+  <div class="dev-nav-sep"></div>
+  <span class="dev-nav-label">États</span>
+  <a href="#" onclick="show('empty',this)">E8 Vide</a>
+  <a href="#" onclick="show('link-expired',this)">E9 Lien expiré</a>
+  <a href="#" onclick="show('session-expired',this)">E10 Session exp.</a>
+  <a href="#" onclick="show('access-denied',this)">E11 Accès refusé</a>
+  <div class="dev-nav-sep"></div>
+  <a href="#" onclick="show('profile',this)">E12 Profil</a>
+</nav>
+
+<div class="view-root">
+
+  <!-- ══ E1 — LOGIN ══════════════════════════════════════════ -->
+  <div id="screen-login" class="screen active">
+    <div class="standalone-bg">
+      <div class="auth-card">
+        <div class="agency-badge">
+          <div class="agency-logo">AG</div>
+          <div class="agency-name">Agence</div>
+        </div>
+        <h1 class="auth-title">Accéder à votre espace</h1>
+        <p class="auth-sub">Saisissez votre email professionnel pour recevoir un lien de connexion sécurisé. Aucun mot de passe requis.</p>
+        <div class="form-group">
+          <label class="form-label" for="e1-email">Adresse email</label>
+          <input id="e1-email" class="form-input" type="email" placeholder="vous@example.com" value="marie@client-x.com" />
+        </div>
+        <button class="btn-primary" onclick="show('magic-sent', document.querySelector('.dev-nav a:nth-child(4)'))">Recevoir mon lien sécurisé</button>
+        <div class="auth-divider">ou</div>
+        <button class="btn-secondary" onclick="show('otp', document.querySelector('.dev-nav a:nth-child(5)'))">Utiliser un code à usage unique</button>
+        <div class="auth-footer">Accès sécurisé · Aucun mot de passe · DevGate</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E2 — MAGIC LINK ENVOYÉ ══════════════════════════════ -->
+  <div id="screen-magic-sent" class="screen">
+    <div class="standalone-bg">
+      <div class="state-card">
+        <div class="state-icon ok">✉️</div>
+        <div class="state-title">Vérifiez vos emails</div>
+        <p class="state-sub">Un lien de connexion a été envoyé à <strong>marie@client-x.com</strong>. Cliquez dessus pour accéder à votre espace DevGate.</p>
+        <div class="state-actions">
+          <button class="btn-primary" onclick="show('portal', document.querySelector('.dev-nav a:nth-child(6)'))">Simuler l'ouverture du lien →</button>
+          <button class="btn-secondary">Renvoyer le lien</button>
+        </div>
+        <p class="state-note">
+          Vous n'avez pas reçu l'email ?
+          <button class="btn-link" onclick="show('otp', document.querySelector('.dev-nav a:nth-child(5)'))">Utiliser un code OTP</button>
+          ·
+          <button class="btn-link" onclick="show('login', document.querySelector('.dev-nav a:nth-child(2)'))">Modifier l'adresse</button>
+        </p>
+        <div class="auth-footer" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border);">Le lien expire dans 15 minutes · Usage unique</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E3 — OTP ═════════════════════════════════════════════ -->
+  <div id="screen-otp" class="screen">
+    <div class="standalone-bg">
+      <div class="auth-card" style="max-width:420px;">
+        <div class="agency-badge">
+          <div class="agency-logo">AG</div>
+          <div class="agency-name">Agence</div>
+        </div>
+        <h1 class="auth-title">Entrez votre code</h1>
+        <p class="auth-sub">Un code à 6 chiffres a été envoyé à <strong>marie@client-x.com</strong>.</p>
+        <div class="otp-timer">⏱ Expire dans <strong>09:42</strong></div>
+        <div class="otp-group">
+          <input class="otp-input filled" maxlength="1" value="3" />
+          <input class="otp-input filled" maxlength="1" value="7" />
+          <input class="otp-input filled" maxlength="1" value="1" />
+          <input class="otp-input" maxlength="1" value="" placeholder="·" />
+          <input class="otp-input" maxlength="1" value="" placeholder="·" />
+          <input class="otp-input" maxlength="1" value="" placeholder="·" />
+        </div>
+        <button class="btn-primary" onclick="show('portal', document.querySelector('.dev-nav a:nth-child(6)'))">Valider le code</button>
+        <button class="btn-secondary">Renvoyer un nouveau code</button>
+        <div class="auth-divider">ou</div>
+        <button class="btn-secondary" onclick="show('magic-sent', document.querySelector('.dev-nav a:nth-child(4)'))">Recevoir un magic link à la place</button>
+        <div class="auth-footer">Code à usage unique · Valable 10 minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E4 — PORTAIL (accueil post-login) ════════════════════ -->
+  <div id="screen-portal" class="screen">
+    <header class="portal-header">
+      <div class="portal-brand">
+        <div class="agency-logo" style="width:30px;height:30px;font-size:12px;">AG</div>
+        <div class="brand-name">Agence</div>
+        <div class="sep"></div>
+        <div class="portal-label">DevGate</div>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar">MC</div>
+        <div class="user-name">Marie Chevalier</div>
+        <button class="btn-ghost" onclick="show('profile', document.querySelector('.dev-nav a:last-child'))">Mon profil</button>
+        <button class="btn-ghost">Déconnexion</button>
+      </div>
+    </header>
+    <div class="portal-main">
+      <div class="welcome-banner">
+        <div>
+          <h2>Bonjour Marie, vos accès sont prêts.</h2>
+          <p>Vous êtes connectée à l'espace de validation de <strong>Client X</strong>. Retrouvez ci-dessous les ressources actuellement disponibles.</p>
+          <button class="btn-white">Voir les ressources →</button>
+        </div>
+        <div class="welcome-metrics">
+          <div class="welcome-metric"><div class="val">3</div><div class="lbl">Environnements</div></div>
+          <div class="welcome-metric"><div class="val">7j</div><div class="lbl">Session valide</div></div>
+        </div>
+      </div>
+
+      <div class="page-title">Mes environnements</div>
+      <div class="page-sub">3 ressources accessibles · Client X</div>
+
+      <div class="filter-bar">
+        <input class="filter-input" type="text" placeholder="Rechercher…" />
+        <button class="filter-chip active">Tous</button>
+        <button class="filter-chip">Staging</button>
+        <button class="filter-chip">Preview</button>
+      </div>
+
+      <div class="env-grid">
+        <div class="env-card" onclick="show('client', document.querySelector('.dev-nav a:nth-child(7)'))">
+          <div class="env-card-top">
+            <div>
+              <div class="env-org">Client X</div>
+              <div class="env-project">Refonte site corporate</div>
+              <div class="env-name">Staging principal</div>
+            </div>
+            <span class="badge b-staging"><span class="badge-dot"></span>staging</span>
+          </div>
+          <div class="env-meta">
+            <span class="badge b-online"><span class="badge-dot"></span>En ligne</span>
+            <span class="badge b-auth">🔒 Auth requise</span>
+          </div>
+          <div class="env-footer">
+            <span class="env-url">client-x-staging.devgate.agence.com</span>
+            <button class="btn-access">Accéder ↗</button>
+          </div>
+        </div>
+        <div class="env-card">
+          <div class="env-card-top">
+            <div>
+              <div class="env-org">Client X</div>
+              <div class="env-project">App mobile</div>
+              <div class="env-name">Preview feature/onboarding</div>
+            </div>
+            <span class="badge b-preview"><span class="badge-dot"></span>preview</span>
+          </div>
+          <div class="env-meta">
+            <span class="badge b-online"><span class="badge-dot"></span>En ligne</span>
+          </div>
+          <div class="env-footer">
+            <span class="env-url">client-x-preview-42.devgate.agence.com</span>
+            <button class="btn-access" onclick="show('interstitiel', document.querySelector('.dev-nav a:nth-child(9)'))">Accéder ↗</button>
+          </div>
+        </div>
+        <div class="env-card">
+          <div class="env-card-top">
+            <div>
+              <div class="env-org">Client X</div>
+              <div class="env-project">Espace membre</div>
+              <div class="env-name">Preview sprint 3</div>
+            </div>
+            <span class="badge b-preview"><span class="badge-dot"></span>preview</span>
+          </div>
+          <div class="env-meta">
+            <span class="badge b-offline"><span class="badge-dot"></span>Hors ligne</span>
+          </div>
+          <div class="env-footer">
+            <span class="env-url">client-x-member-s3.devgate.agence.com</span>
+            <button class="btn-access" style="opacity:.45;pointer-events:none;">Indisponible</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E5 — PAGE CLIENT ═════════════════════════════════════ -->
+  <div id="screen-client" class="screen">
+    <header class="portal-header">
+      <div class="portal-brand">
+        <div class="agency-logo" style="width:30px;height:30px;font-size:12px;">AG</div>
+        <div class="brand-name">Agence</div>
+        <div class="sep"></div>
+        <div class="portal-label">Client X</div>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar">MC</div>
+        <div class="user-name">Marie Chevalier</div>
+        <button class="btn-ghost" onclick="show('portal', document.querySelector('.dev-nav a:nth-child(6)'))">← Mon portail</button>
+      </div>
+    </header>
+    <div class="portal-main">
+      <div class="page-title">Client X</div>
+      <div class="page-sub">Ressources de validation disponibles pour votre compte</div>
+
+      <div style="display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start;">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--color-text-subtle);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Vos clients</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="background:var(--color-primary-s);border:1px solid var(--color-primary);border-radius:var(--radius-md);padding:12px 14px;">
+              <div style="font-size:14px;font-weight:700;color:var(--color-primary);">Client X</div>
+              <div style="font-size:12px;color:var(--color-text-muted);margin-top:2px;">3 ressources</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="notice notice-info">ℹ️ Certaines ressources peuvent demander une authentification supplémentaire propre à l'application une fois ouvertes.</div>
+
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="env-card" style="cursor:pointer;" onclick="show('detail', document.querySelector('.dev-nav a:nth-child(8)'))">
+              <div class="env-card-top">
+                <div>
+                  <div class="env-org">Refonte site corporate 2026</div>
+                  <div class="env-project">Staging principal</div>
+                  <div class="env-name">Environnement de recette avant mise en ligne</div>
+                </div>
+                <span class="badge b-staging"><span class="badge-dot"></span>staging</span>
+              </div>
+              <div class="env-meta">
+                <span class="badge b-online"><span class="badge-dot"></span>En ligne</span>
+                <span class="badge b-auth">🔒 Auth applicative requise</span>
+              </div>
+              <div class="env-footer">
+                <span class="env-url">client-x-staging.devgate.agence.com</span>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn-access-ghost">Détails</button>
+                  <button class="btn-access">Ouvrir ↗</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="env-card">
+              <div class="env-card-top">
+                <div>
+                  <div class="env-org">App mobile · Campagne acquisition</div>
+                  <div class="env-project">Preview feature/onboarding</div>
+                  <div class="env-name">Version preview de la nouvelle landing</div>
+                </div>
+                <span class="badge b-preview"><span class="badge-dot"></span>preview</span>
+              </div>
+              <div class="env-meta">
+                <span class="badge b-online"><span class="badge-dot"></span>En ligne</span>
+              </div>
+              <div class="env-footer">
+                <span class="env-url">client-x-preview-42.devgate.agence.com</span>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn-access-ghost">Détails</button>
+                  <button class="btn-access" onclick="show('interstitiel', document.querySelector('.dev-nav a:nth-child(9)'))">Ouvrir ↗</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="env-card">
+              <div class="env-card-top">
+                <div>
+                  <div class="env-org">Espace membre</div>
+                  <div class="env-project">Preview sprint 3</div>
+                  <div class="env-name">Prototype en cours de déploiement</div>
+                </div>
+                <span class="badge b-preview"><span class="badge-dot"></span>preview</span>
+              </div>
+              <div class="env-meta">
+                <span class="badge b-offline"><span class="badge-dot"></span>Hors ligne</span>
+              </div>
+              <div class="env-footer">
+                <span class="env-url">client-x-member-s3.devgate.agence.com</span>
+                <button class="btn-access" style="opacity:.45;pointer-events:none;">Indisponible</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E6 — DÉTAIL ENVIRONNEMENT ════════════════════════════ -->
+  <div id="screen-detail" class="screen">
+    <header class="portal-header">
+      <div class="portal-brand">
+        <div class="agency-logo" style="width:30px;height:30px;font-size:12px;">AG</div>
+        <div class="brand-name">Agence</div>
+        <div class="sep"></div>
+        <div class="portal-label">Détail environnement</div>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar">MC</div>
+        <div class="user-name">Marie Chevalier</div>
+        <button class="btn-ghost" onclick="show('client', document.querySelector('.dev-nav a:nth-child(7)'))">← Retour</button>
+      </div>
+    </header>
+    <div class="portal-main">
+      <div class="detail-breadcrumb">
+        <button class="btn-link" onclick="show('portal', document.querySelector('.dev-nav a:nth-child(6)'))">Portail</button>
+        <span>›</span>
+        <button class="btn-link" onclick="show('client', document.querySelector('.dev-nav a:nth-child(7)'))">Client X</button>
+        <span>›</span>
+        Staging principal
+      </div>
+
+      <div class="detail-layout">
+        <div>
+          <div class="detail-title">Staging principal</div>
+          <p class="detail-desc">Environnement de recette principal pour la validation avant mise en ligne. Disponible pour les équipes de validation du client.</p>
+
+          <div class="notice notice-ok">✅ Tunnel actif — 2 réplicas connectés. Statut confirmé il y a 3 minutes.</div>
+          <div class="notice notice-warn">⚠️ Cette ressource demande une authentification propre à l'application WordPress après l'ouverture via DevGate.</div>
+
+          <div class="detail-meta-table">
+            <div class="detail-meta-row"><div class="detail-meta-key">Projet</div><div class="detail-meta-val">Refonte site corporate 2026</div></div>
+            <div class="detail-meta-row"><div class="detail-meta-key">Type</div><div class="detail-meta-val"><span class="badge b-staging">staging</span></div></div>
+            <div class="detail-meta-row"><div class="detail-meta-key">URL publique</div><div class="detail-meta-val mono">client-x-staging.devgate.agence.com</div></div>
+            <div class="detail-meta-row"><div class="detail-meta-key">Statut</div><div class="detail-meta-val"><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></div></div>
+            <div class="detail-meta-row"><div class="detail-meta-key">Auth applicative</div><div class="detail-meta-val">Requise (login WordPress)</div></div>
+            <div class="detail-meta-row"><div class="detail-meta-key">Votre session</div><div class="detail-meta-val">Valide · expire dans 6 jours</div></div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="btn-primary" onclick="show('interstitiel', document.querySelector('.dev-nav a:nth-child(9)'))">Ouvrir la ressource ↗</button>
+            <button class="btn-secondary" onclick="show('client', document.querySelector('.dev-nav a:nth-child(7)'))">← Retour aux ressources</button>
+          </div>
+        </div>
+
+        <div class="status-panel">
+          <div class="status-tile">
+            <div class="lbl">Tunnel</div>
+            <div class="val" style="color:var(--color-success);">🟢 Actif</div>
+            <div class="sub">2 réplicas · cf-env-x-a1b2</div>
+          </div>
+          <div class="status-tile">
+            <div class="lbl">Auth DevGate</div>
+            <div class="val" style="color:var(--color-success);">✅ Validée</div>
+            <div class="sub">Accès accordé</div>
+          </div>
+          <div class="status-tile">
+            <div class="lbl">Auth applicative</div>
+            <div class="val" style="color:var(--color-warning);">⚠️ Requise</div>
+            <div class="sub">Login WordPress après ouverture</div>
+          </div>
+          <div class="status-tile">
+            <div class="lbl">Dernière vérif.</div>
+            <div class="val">Il y a 3 min</div>
+            <div class="sub">Actualisé automatiquement</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E7 — INTERSTITIEL DOUBLE AUTH ════════════════════════ -->
+  <div id="screen-interstitiel" class="screen">
+    <div class="standalone-bg">
+      <div class="state-card">
+        <div class="state-icon info">↗</div>
+        <div class="state-title">La ressource va s'ouvrir</div>
+        <p class="state-sub">Votre accès à <strong>Staging principal</strong> a été validé par DevGate. Cette ressource va maintenant vous demander son propre login — par exemple WordPress ou votre outil métier.</p>
+        <div class="notice notice-info" style="text-align:left;margin-bottom:20px;">ℹ️ C'est normal. DevGate contrôle l'accès à l'environnement. L'application peut ensuite avoir sa propre authentification.</div>
+        <div class="state-actions">
+          <button class="btn-primary">Continuer vers la ressource ↗</button>
+          <button class="btn-secondary" onclick="show('detail', document.querySelector('.dev-nav a:nth-child(8)'))">← Retour aux détails</button>
+        </div>
+        <p class="state-note">Si vous n'avez pas les identifiants de l'application, contactez l'agence.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E8 — ÉTAT VIDE ════════════════════════════════════════ -->
+  <div id="screen-empty" class="screen">
+    <header class="portal-header">
+      <div class="portal-brand">
+        <div class="agency-logo" style="width:30px;height:30px;font-size:12px;">AG</div>
+        <div class="brand-name">Agence</div>
+        <div class="sep"></div>
+        <div class="portal-label">DevGate</div>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar">JD</div>
+        <div class="user-name">Jean Dupont</div>
+        <button class="btn-ghost">Déconnexion</button>
+      </div>
+    </header>
+    <div class="portal-main" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 104px);">
+      <div class="state-card" style="box-shadow:none;border:1px solid var(--color-border);">
+        <div class="state-icon warn">📭</div>
+        <div class="state-title">Aucune ressource visible</div>
+        <p class="state-sub">Votre compte est bien reconnu, mais aucune ressource active n'est disponible pour le moment. Si vous attendez un accès, contactez l'agence.</p>
+        <div class="state-actions">
+          <button class="btn-primary">Contacter l'agence</button>
+          <button class="btn-secondary">Actualiser</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E9 — LIEN EXPIRÉ ═════════════════════════════════════ -->
+  <div id="screen-link-expired" class="screen">
+    <div class="standalone-bg">
+      <div class="state-card">
+        <div class="state-icon danger">!</div>
+        <div class="state-title">Ce lien n'est plus valide</div>
+        <p class="state-sub">Le lien de connexion a expiré ou a déjà été utilisé. Vous pouvez en demander un nouveau en quelques secondes.</p>
+        <div class="form-group" style="text-align:left;margin-bottom:0;">
+          <label class="form-label">Adresse email</label>
+          <input class="form-input" type="email" value="marie@client-x.com" />
+        </div>
+        <div class="state-actions" style="margin-top:16px;">
+          <button class="btn-primary" onclick="show('magic-sent', document.querySelector('.dev-nav a:nth-child(4)'))">Recevoir un nouveau lien</button>
+          <button class="btn-secondary" onclick="show('otp', document.querySelector('.dev-nav a:nth-child(5)'))">Utiliser un code OTP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E10 — SESSION EXPIRÉE ════════════════════════════════ -->
+  <div id="screen-session-expired" class="screen">
+    <div class="standalone-bg">
+      <div class="state-card">
+        <div class="state-icon warn">⏱</div>
+        <div class="state-title">Votre session a expiré</div>
+        <p class="state-sub">Vous avez été déconnecté automatiquement après 7 jours. Votre compte est intact, reconnectez-vous pour retrouver vos ressources.</p>
+        <div class="form-group" style="text-align:left;margin-bottom:0;">
+          <label class="form-label">Adresse email</label>
+          <input class="form-input" type="email" value="marie@client-x.com" />
+        </div>
+        <div class="state-actions" style="margin-top:16px;">
+          <button class="btn-primary" onclick="show('magic-sent', document.querySelector('.dev-nav a:nth-child(4)'))">Recevoir un nouveau lien</button>
+          <button class="btn-secondary" onclick="show('otp', document.querySelector('.dev-nav a:nth-child(5)'))">Utiliser un code OTP</button>
+        </div>
+        <p class="state-note">Pas de panique — vos accès sont conservés.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E11 — ACCÈS REFUSÉ 403 ═══════════════════════════════ -->
+  <div id="screen-access-denied" class="screen">
+    <div class="standalone-bg">
+      <div class="state-card">
+        <div class="state-icon danger">✕</div>
+        <div class="state-title">Accès non autorisé</div>
+        <p class="state-sub">Votre compte ne dispose pas d'un accès actif à cette ressource. Si vous pensez que c'est une erreur, contactez l'agence.</p>
+        <div class="notice notice-danger" style="text-align:left;">
+          Ressource : <strong>client-x-staging.devgate.agence.com</strong><br />
+          Utilisateur : marie@client-x.com<br />
+          Motif : aucun grant actif pour cet environnement.
+        </div>
+        <div class="state-actions">
+          <button class="btn-primary" onclick="show('portal', document.querySelector('.dev-nav a:nth-child(6)'))">Retour à mon portail</button>
+          <button class="btn-secondary">Contacter l'agence</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ E12 — PROFIL / SESSIONS ══════════════════════════════ -->
+  <div id="screen-profile" class="screen">
+    <header class="portal-header">
+      <div class="portal-brand">
+        <div class="agency-logo" style="width:30px;height:30px;font-size:12px;">AG</div>
+        <div class="brand-name">Agence</div>
+        <div class="sep"></div>
+        <div class="portal-label">Mon profil</div>
+      </div>
+      <div class="user-pill">
+        <div class="user-avatar">MC</div>
+        <div class="user-name">Marie Chevalier</div>
+        <button class="btn-ghost" onclick="show('portal', document.querySelector('.dev-nav a:nth-child(6)'))">← Retour</button>
+      </div>
+    </header>
+    <div class="portal-main">
+      <div class="page-title">Mon profil</div>
+      <div class="page-sub">Informations et sessions actives</div>
+
+      <div class="profile-layout">
+        <div>
+          <div class="profile-card">
+            <div class="profile-avatar">MC</div>
+            <div class="profile-name">Marie Chevalier</div>
+            <div class="profile-email">marie@client-x.com</div>
+            <div class="badge b-staging" style="margin:0 auto;">client_member</div>
+            <div style="margin-top:20px;text-align:left;">
+              <div class="form-group">
+                <label class="form-label">Nom affiché</label>
+                <input class="form-input" value="Marie Chevalier" />
+              </div>
+            </div>
+            <button class="btn-primary" style="margin-top:4px;">Mettre à jour</button>
+            <button class="btn-secondary" style="margin-top:10px;color:var(--color-danger);border-color:var(--color-danger);">Se déconnecter</button>
+          </div>
+        </div>
+        <div>
+          <div class="profile-section-title">Sessions actives</div>
+          <div class="session-list">
+            <div class="session-item current">
+              <div class="session-info">
+                <div class="si-current">Session actuelle</div>
+                <div class="si-device">Chrome · macOS</div>
+                <div class="si-meta">IP 82.64.12.4 · Créée le 14 avr. 2026 · Expire dans 6 jours</div>
+              </div>
+              <button class="btn-revoke-session" style="opacity:.4;pointer-events:none;">Révoquer</button>
+            </div>
+            <div class="session-item">
+              <div class="session-info">
+                <div class="si-device">Safari · iPhone</div>
+                <div class="si-meta">IP 90.12.44.8 · Créée le 16 avr. 2026 · Expire dans 5 jours</div>
+              </div>
+              <button class="btn-revoke-session">Révoquer</button>
+            </div>
+            <div class="session-item">
+              <div class="session-info">
+                <div class="si-device">Firefox · Windows</div>
+                <div class="si-meta">IP 41.88.3.210 · Créée le 17 avr. 2026 · Expire dans 4 jours</div>
+              </div>
+              <button class="btn-revoke-session">Révoquer</button>
+            </div>
+          </div>
+          <div class="notice notice-info" style="margin-top:16px;">ℹ️ Chaque session est valide 7 jours. Révocation immédiate possible depuis cette page.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /view-root -->
+
+<!-- Dark toggle -->
+<button class="dark-toggle" id="dark-toggle" onclick="toggleDark()">🌙</button>
+
+<script>
+  function show(id, navEl) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    document.querySelectorAll('.dev-nav a').forEach(a => a.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  document.querySelectorAll('.filter-chip').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+
+  function toggleDark() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+    document.getElementById('dark-toggle').textContent = dark ? '🌙' : '☀️';
+  }
+</script>
+</body>
+</html>

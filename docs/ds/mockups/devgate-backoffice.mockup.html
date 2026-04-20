@@ -1,0 +1,961 @@
+<!-- @ds-toolkit slug:devgate-backoffice command:/ix_craft_mockup date:2026-04-19 version:1 -->
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevGate — Back-office v1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --color-bg:          #f4f6fa;
+      --color-surface:     #ffffff;
+      --color-surface-2:   #f0f2f7;
+      --color-border:      #e2e6ef;
+      --color-text:        #111827;
+      --color-text-muted:  #6b7280;
+      --color-text-subtle: #9ca3af;
+      --color-primary:     #2563eb;
+      --color-primary-h:   #1d4ed8;
+      --color-primary-s:   #eff6ff;
+      --color-success:     #16a34a;
+      --color-success-bg:  #dcfce7;
+      --color-warning:     #d97706;
+      --color-warning-bg:  #fef3c7;
+      --color-danger:      #dc2626;
+      --color-danger-bg:   #fee2e2;
+      --color-info:        #0891b2;
+      --color-info-bg:     #cffafe;
+      --color-purple:      #7c3aed;
+      --color-purple-bg:   #ede9fe;
+      --radius-sm:  6px;
+      --radius-md:  10px;
+      --radius-lg:  16px;
+      --sidebar-w: 232px;
+      --header-h:  56px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.09);
+      --font: 'Inter', system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg:          #0f1117;
+      --color-surface:     #1a1d27;
+      --color-surface-2:   #252836;
+      --color-border:      #2e3244;
+      --color-text:        #f1f5f9;
+      --color-text-muted:  #94a3b8;
+      --color-text-subtle: #64748b;
+      --color-primary:     #3b82f6;
+      --color-primary-h:   #60a5fa;
+      --color-primary-s:   #1e3a5f;
+      --color-success:     #22c55e;
+      --color-success-bg:  #14532d;
+      --color-warning:     #fbbf24;
+      --color-warning-bg:  #451a03;
+      --color-danger:      #f87171;
+      --color-danger-bg:   #450a0a;
+      --color-info:        #22d3ee;
+      --color-info-bg:     #164e63;
+      --color-purple:      #a78bfa;
+      --color-purple-bg:   #2e1065;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      transition: background .25s, color .25s;
+    }
+
+    /* ─── Layout shell ───────────────────────────────────────── */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      background: var(--color-surface);
+      border-right: 1px solid var(--color-border);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
+    }
+    .sidebar-brand {
+      height: var(--header-h);
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+    .brand-logo {
+      width: 30px; height: 30px; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 700;
+    }
+    .brand-text { font-size: 14px; font-weight: 700; color: var(--color-text); }
+    .brand-sub  { font-size: 11px; color: var(--color-text-subtle); margin-top: 1px; }
+
+    .sidebar-section {
+      padding: 16px 10px 6px;
+    }
+    .sidebar-label {
+      font-size: 10px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-text-subtle);
+      padding: 0 8px; margin-bottom: 4px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 500; color: var(--color-text-muted);
+      cursor: pointer; transition: background .12s, color .12s;
+      user-select: none;
+    }
+    .nav-item:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .nav-item.active { background: var(--color-primary-s); color: var(--color-primary); }
+    .nav-item .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+    .nav-item .nav-badge {
+      margin-left: auto; font-size: 10px; font-weight: 700;
+      background: var(--color-danger); color: #fff;
+      padding: 1px 6px; border-radius: 20px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto; padding: 14px 10px;
+      border-top: 1px solid var(--color-border);
+    }
+    .user-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: var(--radius-sm);
+    }
+    .user-ava {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .user-info .user-n { font-size: 12px; font-weight: 600; color: var(--color-text); }
+    .user-info .user-r { font-size: 11px; color: var(--color-text-subtle); }
+
+    /* Main area */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1; display: flex; flex-direction: column; min-width: 0;
+    }
+    .topbar {
+      height: var(--header-h);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      position: sticky; top: 0; z-index: 40;
+      box-shadow: var(--shadow-sm);
+    }
+    .topbar-title { font-size: 15px; font-weight: 700; color: var(--color-text); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .btn { font-family: var(--font); cursor: pointer; border: none; transition: background .14s, transform .1s; }
+    .btn:active { transform: scale(.97); }
+    .btn-sm {
+      font-size: 13px; font-weight: 500;
+      padding: 7px 14px; border-radius: var(--radius-sm);
+    }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: var(--color-primary-h); }
+    .btn-outline {
+      background: var(--color-surface); color: var(--color-text-muted);
+      border: 1px solid var(--color-border) !important;
+    }
+    .btn-outline:hover { background: var(--color-surface-2); color: var(--color-text); }
+
+    /* Content pages */
+    .page { display: none; padding: 28px; }
+    .page.active { display: block; }
+
+    /* ─── Stat cards ─────────────────────────────────────────── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md); padding: 18px 20px;
+    }
+    .stat-label { font-size: 12px; font-weight: 500; color: var(--color-text-muted); margin-bottom: 8px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: var(--color-text); margin-bottom: 4px; }
+    .stat-delta { font-size: 12px; color: var(--color-text-subtle); }
+    .stat-delta .up   { color: var(--color-success); }
+    .stat-delta .down { color: var(--color-danger); }
+
+    /* ─── Section header ─────────────────────────────────────── */
+    .section-hd {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-hd h2 { font-size: 15px; font-weight: 700; color: var(--color-text); }
+    .section-hd p  { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; }
+
+    /* ─── Table ──────────────────────────────────────────────── */
+    .table-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden; margin-bottom: 28px;
+    }
+    .table-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .t-search {
+      flex: 1; max-width: 240px;
+      padding: 7px 10px 7px 32px;
+      font-family: var(--font); font-size: 13px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      color: var(--color-text); outline: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: 9px center;
+      transition: border-color .14s;
+    }
+    .t-search:focus { border-color: var(--color-primary); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-size: 11px; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--color-text-subtle);
+      padding: 10px 16px; text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    tbody tr { border-bottom: 1px solid var(--color-border); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--color-surface-2); }
+    td { padding: 12px 16px; font-size: 13px; color: var(--color-text); vertical-align: middle; }
+    td.muted { color: var(--color-text-muted); }
+    td.mono { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px; color: var(--color-text-subtle); }
+
+    /* ─── Badges ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: 20px; white-space: nowrap;
+    }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .b-staging  { background: var(--color-info-bg);    color: var(--color-info); }
+    .b-preview  { background: var(--color-warning-bg); color: var(--color-warning); }
+    .b-dev      { background: var(--color-primary-s);  color: var(--color-primary); }
+    .b-internal { background: var(--color-surface-2);  color: var(--color-text-muted); }
+    .b-online   { background: var(--color-success-bg); color: var(--color-success); }
+    .b-offline  { background: var(--color-danger-bg);  color: var(--color-danger); }
+    .b-client   { background: var(--color-info-bg);    color: var(--color-info); }
+    .b-agency   { background: var(--color-purple-bg);  color: var(--color-purple); }
+    .b-active   { background: var(--color-success-bg); color: var(--color-success); }
+    .b-revoked  { background: var(--color-danger-bg);  color: var(--color-danger); }
+    .b-warning  { background: var(--color-warning-bg); color: var(--color-warning); }
+
+    /* ─── Row actions ────────────────────────────────────────── */
+    .row-actions { display: flex; gap: 6px; }
+    .action-btn {
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      padding: 4px 10px; border-radius: var(--radius-sm);
+      cursor: pointer; transition: background .12s;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface); color: var(--color-text-muted);
+    }
+    .action-btn:hover { background: var(--color-surface-2); color: var(--color-text); }
+    .action-btn.danger { color: var(--color-danger); }
+    .action-btn.danger:hover { background: var(--color-danger-bg); border-color: var(--color-danger); }
+
+    /* ─── Audit log ──────────────────────────────────────────── */
+    .audit-list { display: flex; flex-direction: column; gap: 0; }
+    .audit-row {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 12px 16px; border-bottom: 1px solid var(--color-border);
+      transition: background .1s;
+    }
+    .audit-row:last-child { border-bottom: none; }
+    .audit-row:hover { background: var(--color-surface-2); }
+    .audit-icon {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0; margin-top: 1px;
+    }
+    .audit-icon.login   { background: var(--color-primary-s); }
+    .audit-icon.grant   { background: var(--color-success-bg); }
+    .audit-icon.revoke  { background: var(--color-danger-bg); }
+    .audit-icon.access  { background: var(--color-info-bg); }
+    .audit-icon.admin   { background: var(--color-purple-bg); }
+    .audit-body { flex: 1; min-width: 0; }
+    .audit-msg { font-size: 13px; color: var(--color-text); line-height: 1.4; }
+    .audit-msg strong { font-weight: 600; }
+    .audit-meta { font-size: 11px; color: var(--color-text-subtle); margin-top: 3px; }
+    .audit-time { font-size: 12px; color: var(--color-text-subtle); white-space: nowrap; flex-shrink: 0; margin-top: 4px; }
+
+    /* ─── Empty state ────────────────────────────────────────── */
+    .empty { text-align: center; padding: 40px; color: var(--color-text-muted); font-size: 13px; }
+
+    /* ─── Dark toggle ────────────────────────────────────────── */
+    .dark-toggle {
+      position: fixed; bottom: 24px; right: 24px; z-index: 200;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--color-surface); border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-md); cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s;
+    }
+    .dark-toggle:hover { transform: scale(1.1); }
+
+    /* ─── Modal drawer ───────────────────────────────────────── */
+    .drawer-overlay {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,.4); backdrop-filter: blur(2px);
+      justify-content: flex-end;
+    }
+    .drawer-overlay.open { display: flex; }
+    .drawer {
+      background: var(--color-surface);
+      border-left: 1px solid var(--color-border);
+      width: 420px; max-width: 100vw;
+      padding: 28px 24px;
+      overflow-y: auto;
+      animation: slideIn .2s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .drawer-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .drawer-sub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--color-text); margin-bottom: 5px; }
+    .form-input, .form-select {
+      width: 100%; padding: 9px 12px;
+      font-family: var(--font); font-size: 13px;
+      background: var(--color-surface-2); border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm); color: var(--color-text);
+      outline: none; transition: border-color .14s;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--color-primary); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .drawer-footer {
+      display: flex; gap: 10px; margin-top: 24px;
+      padding-top: 20px; border-top: 1px solid var(--color-border);
+    }
+    .drawer-footer .btn { flex: 1; padding: 10px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; }
+
+    @media (max-width: 900px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .sidebar { transform: translateX(-100%); }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">AG</div>
+      <div>
+        <div class="brand-text">DevGate</div>
+        <div class="brand-sub">Back-office agence</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Vue générale</div>
+      <div class="nav-item active" onclick="nav('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Gestion</div>
+      <div class="nav-item" onclick="nav('clients', this)">
+        <span class="nav-icon">🏢</span> Clients
+      </div>
+      <div class="nav-item" onclick="nav('environments', this)">
+        <span class="nav-icon">🖥️</span> Environnements
+      </div>
+      <div class="nav-item" onclick="nav('grants', this)">
+        <span class="nav-icon">🔑</span> Accès
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Activité</div>
+      <div class="nav-item" onclick="nav('audit', this)">
+        <span class="nav-icon">📋</span> Audit log
+        <span class="nav-badge">3</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-ava">AL</div>
+        <div class="user-info">
+          <div class="user-n">Amiel L.</div>
+          <div class="user-r">agency_admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ═════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- ── Topbar ── -->
+    <header class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn btn-sm btn-outline" onclick="openDrawer('env')">+ Environnement</button>
+        <button class="btn btn-sm btn-primary" onclick="openDrawer('grant')">+ Accès</button>
+      </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE — DASHBOARD
+    ══════════════════════════════════════════════════════ -->
+    <div id="page-dashboard" class="page active">
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Clients actifs</div>
+          <div class="stat-value">4</div>
+          <div class="stat-delta"><span class="up">+1</span> ce mois</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Environnements</div>
+          <div class="stat-value">12</div>
+          <div class="stat-delta"><span class="up">+3</span> ce mois</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tunnels actifs</div>
+          <div class="stat-value">11</div>
+          <div class="stat-delta"><span class="down">1 hors ligne</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Accès actifs</div>
+          <div class="stat-value">27</div>
+          <div class="stat-delta"><span class="up">+5</span> cette semaine</div>
+        </div>
+      </div>
+
+      <!-- Tunnel health -->
+      <div class="section-hd">
+        <div>
+          <h2>Statut des tunnels</h2>
+          <p>Actualisé à 14:32</p>
+        </div>
+        <button class="btn btn-sm btn-outline">Actualiser</button>
+      </div>
+
+      <div class="table-wrap" style="margin-bottom:28px">
+        <table>
+          <thead>
+            <tr>
+              <th>Environnement</th>
+              <th>Client · Projet</th>
+              <th>Tunnel CF</th>
+              <th>Statut</th>
+              <th>Réplicas</th>
+              <th>Dernière vérif.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Staging principal</strong></td>
+              <td class="muted">Client X · Refonte site</td>
+              <td class="mono">cf-env-x-a1b2</td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td class="muted">2</td>
+              <td class="muted">Il y a 2 min</td>
+            </tr>
+            <tr>
+              <td><strong>Preview feature/onboarding</strong></td>
+              <td class="muted">Client X · App mobile</td>
+              <td class="mono">cf-env-x-c3d4</td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td class="muted">1</td>
+              <td class="muted">Il y a 2 min</td>
+            </tr>
+            <tr>
+              <td><strong>Dev intégration paiement</strong></td>
+              <td class="muted">Client Y · E-commerce v2</td>
+              <td class="mono">cf-env-y-e5f6</td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td class="muted">1</td>
+              <td class="muted">Il y a 3 min</td>
+            </tr>
+            <tr>
+              <td><strong>Staging recette client</strong></td>
+              <td class="muted">Client Y · E-commerce v2</td>
+              <td class="mono">cf-env-y-g7h8</td>
+              <td><span class="badge b-offline"><span class="badge-dot"></span>Hors ligne</span></td>
+              <td class="muted">0</td>
+              <td class="muted">Il y a 18 min</td>
+            </tr>
+            <tr>
+              <td><strong>Preview sprint 4</strong></td>
+              <td class="muted">Client Z · SaaS dashboard</td>
+              <td class="mono">cf-env-z-i9j0</td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td class="muted">1</td>
+              <td class="muted">Il y a 2 min</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Recent audit events on dashboard -->
+      <div class="section-hd">
+        <div><h2>Activité récente</h2></div>
+        <button class="btn btn-sm btn-outline" onclick="nav('audit', document.querySelector('.nav-item:nth-child(4)'))">Voir tout</button>
+      </div>
+      <div class="table-wrap">
+        <div class="audit-list" id="dashboard-audit">
+          <!-- injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE — CLIENTS
+    ══════════════════════════════════════════════════════ -->
+    <div id="page-clients" class="page">
+      <div class="section-hd">
+        <div><h2>Clients</h2><p>Organisations et projets</p></div>
+        <button class="btn btn-sm btn-primary">+ Client</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="t-search" type="text" placeholder="Rechercher…" />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Organisation</th>
+              <th>Slug</th>
+              <th>Projets</th>
+              <th>Utilisateurs</th>
+              <th>Branding</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Client X</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">client-x@example.com</span></td>
+              <td class="mono">client-x</td>
+              <td class="muted">2 projets</td>
+              <td class="muted">3 users</td>
+              <td><span class="badge b-active">Actif</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn">Projets</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Client Y</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">client-y@example.com</span></td>
+              <td class="mono">client-y</td>
+              <td class="muted">1 projet</td>
+              <td class="muted">2 users</td>
+              <td><span class="badge b-active">Actif</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn">Projets</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Client Z</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">client-z@example.com</span></td>
+              <td class="mono">client-z</td>
+              <td class="muted">1 projet</td>
+              <td class="muted">1 user</td>
+              <td><span class="badge b-warning">En cours</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn">Projets</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Client W</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">client-w@example.com</span></td>
+              <td class="mono">client-w</td>
+              <td class="muted">0 projets</td>
+              <td class="muted">1 user</td>
+              <td><span class="badge b-staging">À configurer</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn">Projets</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE — ENVIRONMENTS
+    ══════════════════════════════════════════════════════ -->
+    <div id="page-environments" class="page">
+      <div class="section-hd">
+        <div><h2>Environnements</h2><p>12 environnements · 11 en ligne</p></div>
+        <button class="btn btn-sm btn-primary" onclick="openDrawer('env')">+ Environnement</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="t-search" type="text" placeholder="Rechercher…" />
+          <button class="btn btn-sm btn-outline">Tous</button>
+          <button class="btn btn-sm btn-outline">Staging</button>
+          <button class="btn btn-sm btn-outline">Preview</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Client · Projet</th>
+              <th>Type</th>
+              <th>URL publique</th>
+              <th>Tunnel</th>
+              <th>Auth app</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Staging principal</strong></td>
+              <td class="muted">Client X · Refonte site</td>
+              <td><span class="badge b-staging">staging</span></td>
+              <td class="mono">client-x-staging.devgate…</td>
+              <td class="mono">cf-env-x-a1b2</td>
+              <td><span class="badge b-warning">Requise</span></td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn danger">Supprimer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Preview feature/onboarding</strong></td>
+              <td class="muted">Client X · App mobile</td>
+              <td><span class="badge b-preview">preview</span></td>
+              <td class="mono">client-x-preview-42.devgate…</td>
+              <td class="mono">cf-env-x-c3d4</td>
+              <td><span class="badge b-active">Non</span></td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn danger">Supprimer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Dev intégration paiement</strong></td>
+              <td class="muted">Client Y · E-commerce v2</td>
+              <td><span class="badge b-dev">dev</span></td>
+              <td class="mono">client-y-dev-payment.devgate…</td>
+              <td class="mono">cf-env-y-e5f6</td>
+              <td><span class="badge b-warning">Requise</span></td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn danger">Supprimer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Staging recette client</strong></td>
+              <td class="muted">Client Y · E-commerce v2</td>
+              <td><span class="badge b-staging">staging</span></td>
+              <td class="mono">client-y-staging.devgate…</td>
+              <td class="mono">cf-env-y-g7h8</td>
+              <td><span class="badge b-active">Non</span></td>
+              <td><span class="badge b-offline"><span class="badge-dot"></span>Hors ligne</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn danger">Supprimer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Preview sprint 4</strong></td>
+              <td class="muted">Client Z · SaaS dashboard</td>
+              <td><span class="badge b-preview">preview</span></td>
+              <td class="mono">client-z-preview-4.devgate…</td>
+              <td class="mono">cf-env-z-i9j0</td>
+              <td><span class="badge b-active">Non</span></td>
+              <td><span class="badge b-online"><span class="badge-dot"></span>En ligne</span></td>
+              <td><div class="row-actions"><button class="action-btn">Éditer</button><button class="action-btn danger">Supprimer</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE — GRANTS
+    ══════════════════════════════════════════════════════ -->
+    <div id="page-grants" class="page">
+      <div class="section-hd">
+        <div><h2>Accès</h2><p>Gestion des droits utilisateurs</p></div>
+        <button class="btn btn-sm btn-primary" onclick="openDrawer('grant')">+ Accès</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="t-search" type="text" placeholder="Rechercher par email ou client…" />
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Organisation</th>
+              <th>Rôle</th>
+              <th>Type</th>
+              <th>Accordé le</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Sophie Lambert</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">sophie@client-x.com</span></td>
+              <td class="muted">Client X</td>
+              <td><span class="badge b-client">client_member</span></td>
+              <td><span class="badge b-client">client</span></td>
+              <td class="muted">12 avr. 2026</td>
+              <td><span class="badge b-active"><span class="badge-dot"></span>Actif</span></td>
+              <td><div class="row-actions"><button class="action-btn danger" onclick="revokeRow(this)">Révoquer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Marc Dupont</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">marc@client-x.com</span></td>
+              <td class="muted">Client X</td>
+              <td><span class="badge b-client">reviewer</span></td>
+              <td><span class="badge b-client">client</span></td>
+              <td class="muted">10 avr. 2026</td>
+              <td><span class="badge b-active"><span class="badge-dot"></span>Actif</span></td>
+              <td><div class="row-actions"><button class="action-btn danger" onclick="revokeRow(this)">Révoquer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Julie Martin</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">julie@client-y.com</span></td>
+              <td class="muted">Client Y</td>
+              <td><span class="badge b-client">client_member</span></td>
+              <td><span class="badge b-client">client</span></td>
+              <td class="muted">8 avr. 2026</td>
+              <td><span class="badge b-active"><span class="badge-dot"></span>Actif</span></td>
+              <td><div class="row-actions"><button class="action-btn danger" onclick="revokeRow(this)">Révoquer</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Thomas Roux</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">thomas@client-y.com</span></td>
+              <td class="muted">Client Y</td>
+              <td><span class="badge b-client">reviewer</span></td>
+              <td><span class="badge b-client">client</span></td>
+              <td class="muted">1 avr. 2026</td>
+              <td><span class="badge b-revoked"><span class="badge-dot"></span>Révoqué</span></td>
+              <td><div class="row-actions"><button class="action-btn">Rétablir</button></div></td>
+            </tr>
+            <tr>
+              <td><strong>Amiel L.</strong><br/><span style="font-size:11px;color:var(--color-text-subtle)">amiel@agence.fr</span></td>
+              <td class="muted">— (agence)</td>
+              <td><span class="badge b-agency">agency_admin</span></td>
+              <td><span class="badge b-agency">agency</span></td>
+              <td class="muted">1 jan. 2026</td>
+              <td><span class="badge b-active"><span class="badge-dot"></span>Actif</span></td>
+              <td><div class="row-actions"><button class="action-btn" style="opacity:.4;pointer-events:none">Révoquer</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE — AUDIT LOG
+    ══════════════════════════════════════════════════════ -->
+    <div id="page-audit" class="page">
+      <div class="section-hd">
+        <div><h2>Audit log</h2><p>Historique des événements système</p></div>
+        <button class="btn btn-sm btn-outline">Exporter CSV</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <input class="t-search" type="text" placeholder="Filtrer les événements…" />
+          <button class="btn btn-sm btn-outline">Tous</button>
+          <button class="btn btn-sm btn-outline">Auth</button>
+          <button class="btn btn-sm btn-outline">Accès</button>
+          <button class="btn btn-sm btn-outline">Admin</button>
+        </div>
+        <div class="audit-list" id="full-audit">
+          <!-- injected by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ══ DRAWERS ══════════════════════════════════════════════ -->
+
+<!-- Drawer: Nouvel environnement -->
+<div class="drawer-overlay" id="drawer-env" onclick="if(event.target===this)closeDrawer('env')">
+  <div class="drawer">
+    <div class="drawer-title">Ajouter un environnement</div>
+    <div class="drawer-sub">Configurer un nouvel environnement et son tunnel Cloudflare.</div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Client</label>
+        <select class="form-select">
+          <option>Client X</option>
+          <option>Client Y</option>
+          <option>Client Z</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Projet</label>
+        <select class="form-select">
+          <option>Refonte site corporate</option>
+          <option>App mobile React Native</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nom de l'environnement</label>
+      <input class="form-input" type="text" placeholder="ex. Staging sprint 5" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select">
+          <option>staging</option>
+          <option>preview</option>
+          <option>dev</option>
+          <option>internal</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Slug URL</label>
+        <input class="form-input" type="text" placeholder="client-x-staging-5" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Upstream Cloudflare (hostname tunnel)</label>
+      <input class="form-input" type="text" placeholder="https://cf-env-x-xxxx.cfargotunnel.com" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Cloudflare Tunnel ID</label>
+      <input class="form-input" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">CF Access App ID</label>
+        <input class="form-input" type="text" placeholder="app_xxx…" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Service token ref</label>
+        <input class="form-input" type="text" placeholder="svc_tok_env_xxx" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" style="width:15px;height:15px" />
+        Auth applicative requise (double auth)
+      </label>
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-primary" onclick="closeDrawer('env')">Créer l'environnement</button>
+      <button class="btn btn-outline" onclick="closeDrawer('env')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Drawer: Nouvel accès -->
+<div class="drawer-overlay" id="drawer-grant" onclick="if(event.target===this)closeDrawer('grant')">
+  <div class="drawer">
+    <div class="drawer-title">Accorder un accès</div>
+    <div class="drawer-sub">Inviter un utilisateur et lui associer une organisation.</div>
+
+    <div class="form-group">
+      <label class="form-label">Email utilisateur</label>
+      <input class="form-input" type="email" placeholder="utilisateur@example.com" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Organisation</label>
+        <select class="form-select">
+          <option>Client X</option>
+          <option>Client Y</option>
+          <option>Client Z</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rôle</label>
+        <select class="form-select">
+          <option>client_member</option>
+          <option>reviewer</option>
+          <option>agency_admin</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nom affiché (optionnel)</label>
+      <input class="form-input" type="text" placeholder="Prénom Nom" />
+    </div>
+
+    <div class="drawer-footer">
+      <button class="btn btn-primary" onclick="closeDrawer('grant')">Envoyer l'invitation</button>
+      <button class="btn btn-outline" onclick="closeDrawer('grant')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dark mode -->
+<button class="dark-toggle" id="dark-toggle" onclick="toggleDark()">🌙</button>
+
+<script>
+  /* ── Navigation ── */
+  const titles = {
+    dashboard: 'Dashboard',
+    clients: 'Clients',
+    environments: 'Environnements',
+    grants: 'Accès',
+    audit: 'Audit log'
+  };
+  function nav(id, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('topbar-title').textContent = titles[id];
+  }
+
+  /* ── Audit data ── */
+  const auditEvents = [
+    { type: 'login',  icon: '🔐', cls: 'login',  msg: '<strong>Sophie Lambert</strong> s'est connectée avec un magic link', meta: 'IP 82.64.12.4 · User-agent Chrome 124', time: 'Il y a 5 min' },
+    { type: 'grant',  icon: '✅', cls: 'grant',  msg: '<strong>Amiel L.</strong> a accordé l'accès à <strong>Julie Martin</strong> sur Client Y', meta: 'Rôle : client_member', time: 'Il y a 12 min' },
+    { type: 'access', icon: '🌐', cls: 'access', msg: '<strong>Marc Dupont</strong> a accédé à <strong>Staging principal</strong>', meta: 'client-x-staging.devgate.agence.com · 200 OK · 142 ms', time: 'Il y a 18 min' },
+    { type: 'revoke', icon: '🚫', cls: 'revoke', msg: '<strong>Amiel L.</strong> a révoqué l'accès de <strong>Thomas Roux</strong>', meta: 'Organisation : Client Y', time: 'Hier 17:04' },
+    { type: 'admin',  icon: '⚙️', cls: 'admin',  msg: '<strong>Amiel L.</strong> a créé l'environnement <strong>Preview sprint 4</strong>', meta: 'Projet : SaaS dashboard · Type : preview', time: 'Hier 14:22' },
+    { type: 'login',  icon: '🔐', cls: 'login',  msg: '<strong>Julie Martin</strong> s'est connectée avec un magic link', meta: 'IP 90.12.44.8 · User-agent Safari 17', time: 'Hier 11:30' },
+    { type: 'access', icon: '🌐', cls: 'access', msg: '<strong>Sophie Lambert</strong> a accédé à <strong>Preview feature/onboarding</strong>', meta: 'client-x-preview-42.devgate.agence.com · 200 OK · 98 ms', time: 'Hier 10:05' },
+    { type: 'admin',  icon: '⚙️', cls: 'admin',  msg: '<strong>Amiel L.</strong> a ajouté le client <strong>Client W</strong>', meta: 'Slug : client-w', time: '17 avr. 09:15' },
+  ];
+
+  function renderAudit(containerId, limit) {
+    const events = limit ? auditEvents.slice(0, limit) : auditEvents;
+    document.getElementById(containerId).innerHTML = events.map(e => `
+      <div class="audit-row">
+        <div class="audit-icon ${e.cls}">${e.icon}</div>
+        <div class="audit-body">
+          <div class="audit-msg">${e.msg}</div>
+          <div class="audit-meta">${e.meta}</div>
+        </div>
+        <div class="audit-time">${e.time}</div>
+      </div>
+    `).join('');
+  }
+
+  renderAudit('dashboard-audit', 4);
+  renderAudit('full-audit', 0);
+
+  /* ── Grant revoke ── */
+  function revokeRow(btn) {
+    const row = btn.closest('tr');
+    const statusCell = row.querySelector('td:nth-child(6)');
+    statusCell.innerHTML = '<span class="badge b-revoked"><span class="badge-dot"></span>Révoqué</span>';
+    btn.textContent = 'Rétablir';
+    btn.classList.remove('danger');
+  }
+
+  /* ── Drawers ── */
+  function openDrawer(id) { document.getElementById('drawer-' + id).classList.add('open'); }
+  function closeDrawer(id) { document.getElementById('drawer-' + id).classList.remove('open'); }
+
+  /* ── Dark mode ── */
+  function toggleDark() {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+    document.getElementById('dark-toggle').textContent = dark ? '🌙' : '☀️';
+  }
+</script>
+</body>
+</html>

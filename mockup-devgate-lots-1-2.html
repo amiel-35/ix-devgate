@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevGate - Mockup lots 1 et 2</title>
+    <style>
+      :root {
+        --ink: #15212c;
+        --ink-soft: #4b6073;
+        --line: rgba(16, 32, 46, 0.12);
+        --paper: #f5f1e8;
+        --paper-strong: #fffdfa;
+        --brand: #b34f2e;
+        --brand-deep: #872f16;
+        --brand-tint: rgba(179, 79, 46, 0.12);
+        --sage: #dfe7db;
+        --mist: #edf2ef;
+        --ok: #1f7a52;
+        --warn: #b96f18;
+        --danger: #a0352e;
+        --shadow: 0 18px 45px rgba(27, 40, 52, 0.12);
+        --radius-xl: 28px;
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+        --max: 1420px;
+        --title: "Georgia", "Times New Roman", serif;
+        --body: "Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--body);
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(179, 79, 46, 0.18), transparent 33%),
+          radial-gradient(circle at 85% 18%, rgba(109, 140, 111, 0.14), transparent 24%),
+          linear-gradient(180deg, #efe7d8 0%, #f8f4ee 32%, #f6f3ee 100%);
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .shell {
+        width: min(var(--max), calc(100vw - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        padding: 40px 0 28px;
+      }
+
+      .hero-inner {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 28px;
+        align-items: stretch;
+      }
+
+      .hero-card,
+      .notes-card {
+        background: rgba(255, 253, 250, 0.76);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: var(--shadow);
+        border-radius: 30px;
+      }
+
+      .hero-card {
+        padding: 34px;
+      }
+
+      .notes-card {
+        padding: 24px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid rgba(179, 79, 46, 0.28);
+        color: var(--brand-deep);
+        background: rgba(255, 255, 255, 0.54);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        font-family: var(--title);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      h1 {
+        margin-top: 18px;
+        font-size: clamp(2.3rem, 4vw, 4.2rem);
+        line-height: 0.96;
+        max-width: 9.5em;
+      }
+
+      .hero-card p {
+        margin: 18px 0 0;
+        max-width: 46rem;
+        color: var(--ink-soft);
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .mini-stat {
+        padding: 16px 18px;
+        background: rgba(255, 255, 255, 0.74);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+        border-radius: 18px;
+      }
+
+      .mini-stat strong {
+        display: block;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ink-soft);
+      }
+
+      .mini-stat span {
+        display: block;
+        margin-top: 8px;
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+
+      .notes-card h2 {
+        font-size: 1.5rem;
+      }
+
+      .notes-card ul {
+        margin: 18px 0 0;
+        padding-left: 18px;
+        color: var(--ink-soft);
+        line-height: 1.7;
+      }
+
+      .notes-card li + li {
+        margin-top: 8px;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 12px;
+        border-radius: 999px;
+        background: rgba(21, 33, 44, 0.06);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 0 28px;
+      }
+
+      .nav a {
+        text-decoration: none;
+        padding: 11px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.62);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      .screen-section {
+        padding: 10px 0 36px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .section-head p {
+        margin: 10px 0 0;
+        color: var(--ink-soft);
+        max-width: 62ch;
+        line-height: 1.65;
+      }
+
+      .section-tag {
+        font-size: 12px;
+        color: var(--brand-deep);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .screen-frame {
+        position: relative;
+        background: #fcfaf6;
+        border: 1px solid rgba(17, 27, 38, 0.08);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+      }
+
+      .screen-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.74);
+      }
+
+      .window-dots {
+        display: flex;
+        gap: 8px;
+      }
+
+      .window-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        background: #ead7cf;
+      }
+
+      .window-dots span:nth-child(2) {
+        background: #e2c889;
+      }
+
+      .window-dots span:nth-child(3) {
+        background: #c6d7c7;
+      }
+
+      .toolbar-label {
+        color: var(--ink-soft);
+        font-size: 13px;
+      }
+
+      .screen-body {
+        padding: 30px;
+      }
+
+      .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+      }
+
+      .badge.explicit {
+        background: rgba(31, 122, 82, 0.1);
+        color: var(--ok);
+      }
+
+      .badge.inferred {
+        background: rgba(185, 111, 24, 0.12);
+        color: var(--warn);
+      }
+
+      .badge.placeholder {
+        background: rgba(160, 53, 46, 0.09);
+        color: var(--danger);
+      }
+
+      .login-layout {
+        display: grid;
+        grid-template-columns: 1.08fr 0.92fr;
+        min-height: 700px;
+      }
+
+      .login-brand {
+        padding: 40px;
+        background:
+          linear-gradient(135deg, rgba(179, 79, 46, 0.92), rgba(104, 37, 18, 0.98)),
+          linear-gradient(180deg, #8b321d, #6c2413);
+        color: #fff4ec;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .login-brand .logo {
+        width: 54px;
+        height: 54px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        font-family: var(--title);
+        font-size: 1.45rem;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .login-brand h3 {
+        font-size: clamp(2rem, 3.2vw, 3.3rem);
+        line-height: 0.94;
+        margin-top: 24px;
+      }
+
+      .login-brand p {
+        color: rgba(255, 244, 236, 0.82);
+        line-height: 1.72;
+        max-width: 34rem;
+      }
+
+      .brand-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .brand-footer .chip {
+        background: rgba(255, 255, 255, 0.11);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #fff4ec;
+      }
+
+      .login-panel {
+        padding: 46px 38px;
+        display: flex;
+        align-items: center;
+        background:
+          radial-gradient(circle at right top, rgba(223, 231, 219, 0.55), transparent 32%),
+          linear-gradient(180deg, #fffdfa 0%, #f7f2eb 100%);
+      }
+
+      .auth-card {
+        width: min(430px, 100%);
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.84);
+        border: 1px solid rgba(17, 27, 38, 0.08);
+        border-radius: 28px;
+        padding: 28px;
+        box-shadow: 0 18px 35px rgba(25, 38, 49, 0.09);
+      }
+
+      .auth-card h3 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+
+      .auth-card p {
+        margin: 0 0 24px;
+        color: var(--ink-soft);
+        line-height: 1.6;
+      }
+
+      .field-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ink-soft);
+        margin-bottom: 10px;
+      }
+
+      .field {
+        width: 100%;
+        border: 1px solid rgba(21, 33, 44, 0.12);
+        background: #fffdfa;
+        border-radius: 16px;
+        padding: 15px 16px;
+        font: inherit;
+        color: var(--ink);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      }
+
+      .field-hint {
+        margin-top: 10px;
+        color: var(--ink-soft);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .primary-btn,
+      .secondary-btn,
+      .ghost-link {
+        appearance: none;
+        border: none;
+        cursor: default;
+        font: inherit;
+      }
+
+      .primary-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 22px;
+        border-radius: 16px;
+        padding: 15px 18px;
+        color: #fff;
+        background: linear-gradient(180deg, var(--brand) 0%, var(--brand-deep) 100%);
+        box-shadow: 0 12px 24px rgba(135, 47, 22, 0.22);
+        font-weight: 700;
+      }
+
+      .secondary-btn {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 14px;
+        border-radius: 16px;
+        padding: 14px 18px;
+        color: var(--ink);
+        background: rgba(223, 231, 219, 0.66);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+      }
+
+      .micro-copy {
+        margin-top: 20px;
+        color: var(--ink-soft);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .notice {
+        border-radius: 18px;
+        padding: 16px 18px;
+        font-size: 14px;
+        line-height: 1.65;
+        border: 1px solid transparent;
+      }
+
+      .notice.ok {
+        background: rgba(31, 122, 82, 0.08);
+        color: var(--ok);
+        border-color: rgba(31, 122, 82, 0.14);
+      }
+
+      .notice.warn {
+        background: rgba(185, 111, 24, 0.1);
+        color: #8a5915;
+        border-color: rgba(185, 111, 24, 0.15);
+      }
+
+      .notice.danger {
+        background: rgba(160, 53, 46, 0.09);
+        color: var(--danger);
+        border-color: rgba(160, 53, 46, 0.14);
+      }
+
+      .portal-shell {
+        min-height: 760px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.72)),
+          linear-gradient(180deg, #f9f6f1 0%, #f2ece3 100%);
+      }
+
+      .portal-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 22px 28px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .brand-mark {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        color: #fff8f2;
+        background: linear-gradient(180deg, var(--brand), var(--brand-deep));
+        font-family: var(--title);
+        font-size: 1.1rem;
+      }
+
+      .brand-lockup strong {
+        display: block;
+        font-size: 1rem;
+      }
+
+      .brand-lockup span {
+        display: block;
+        font-size: 13px;
+        color: var(--ink-soft);
+        margin-top: 2px;
+      }
+
+      .user-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.84);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+      }
+
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: var(--sage);
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .portal-grid {
+        display: grid;
+        grid-template-columns: 290px minmax(0, 1fr);
+        gap: 0;
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--line);
+        padding: 26px 18px 28px;
+        background: rgba(250, 246, 240, 0.72);
+      }
+
+      .sidebar h4,
+      .main-panel h4 {
+        margin: 0 0 12px;
+        font-size: 14px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        font-family: var(--body);
+      }
+
+      .client-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .client-card {
+        padding: 15px 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(21, 33, 44, 0.07);
+        background: rgba(255, 255, 255, 0.68);
+      }
+
+      .client-card.active {
+        background: rgba(179, 79, 46, 0.1);
+        border-color: rgba(179, 79, 46, 0.2);
+      }
+
+      .client-card strong {
+        display: block;
+      }
+
+      .client-card span {
+        display: block;
+        margin-top: 6px;
+        color: var(--ink-soft);
+        font-size: 14px;
+      }
+
+      .main-panel {
+        padding: 28px;
+      }
+
+      .hero-banner {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 22px;
+        border-radius: 26px;
+        padding: 26px;
+        background:
+          linear-gradient(135deg, rgba(17, 27, 38, 0.96), rgba(35, 53, 70, 0.92)),
+          linear-gradient(180deg, #14212c, #233546);
+        color: #f8f4eb;
+      }
+
+      .hero-banner p {
+        color: rgba(248, 244, 235, 0.78);
+        line-height: 1.65;
+      }
+
+      .hero-metrics {
+        display: grid;
+        gap: 12px;
+      }
+
+      .metric-card {
+        padding: 16px 18px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .metric-card strong {
+        display: block;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(248, 244, 235, 0.7);
+      }
+
+      .metric-card span {
+        display: block;
+        margin-top: 8px;
+        font-size: 1.2rem;
+      }
+
+      .resource-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      .resource-card {
+        padding: 20px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+        box-shadow: 0 10px 22px rgba(28, 40, 51, 0.05);
+      }
+
+      .resource-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 14px;
+      }
+
+      .resource-kind {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: var(--brand-tint);
+        color: var(--brand-deep);
+      }
+
+      .resource-meta {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+        color: var(--ink-soft);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .resource-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .resource-actions .primary-btn,
+      .resource-actions .secondary-btn {
+        width: auto;
+        margin-top: 0;
+        padding-inline: 16px;
+      }
+
+      .empty-state,
+      .error-state,
+      .auth-state {
+        min-height: 560px;
+        display: grid;
+        place-items: center;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.88)),
+          linear-gradient(180deg, #f9f6f1, #f2ece3);
+      }
+
+      .state-card {
+        width: min(620px, 100%);
+        text-align: center;
+        background: rgba(255, 255, 255, 0.86);
+        border: 1px solid rgba(21, 33, 44, 0.08);
+        border-radius: 30px;
+        padding: 36px;
+        box-shadow: var(--shadow);
+      }
+
+      .state-mark {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 18px;
+        border-radius: 24px;
+        display: grid;
+        place-items: center;
+        font-family: var(--title);
+        font-size: 1.8rem;
+      }
+
+      .state-mark.ok {
+        background: rgba(31, 122, 82, 0.1);
+        color: var(--ok);
+      }
+
+      .state-mark.warn {
+        background: rgba(185, 111, 24, 0.1);
+        color: var(--warn);
+      }
+
+      .state-mark.danger {
+        background: rgba(160, 53, 46, 0.1);
+        color: var(--danger);
+      }
+
+      .state-card h3 {
+        font-size: 2.2rem;
+      }
+
+      .state-card p {
+        margin: 14px auto 0;
+        color: var(--ink-soft);
+        line-height: 1.7;
+        max-width: 44ch;
+      }
+
+      .state-actions {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+      }
+
+      .footnote {
+        padding: 20px 0 40px;
+        color: var(--ink-soft);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .footnote strong {
+        color: var(--ink);
+      }
+
+      @media (max-width: 1120px) {
+        .hero-inner,
+        .login-layout,
+        .hero-banner,
+        .resource-grid,
+        .portal-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--line);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .hero-card,
+        .notes-card,
+        .screen-body,
+        .main-panel,
+        .login-brand,
+        .login-panel {
+          padding: 22px;
+        }
+
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .portal-topbar {
+          flex-direction: column;
+          align-items: start;
+        }
+
+        .section-head {
+          flex-direction: column;
+          align-items: start;
+        }
+
+        .resource-actions {
+          flex-direction: column;
+        }
+
+        .state-card {
+          padding: 26px 22px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <section class="hero">
+        <div class="hero-inner">
+          <div class="hero-card">
+            <div class="eyebrow">DevGate · Mockup HTML standalone</div>
+            <h1>Portail d’accès agence pour ressources de validation client.</h1>
+            <p>
+              Ce mockup traduit les écrans demandés dans
+              <code>product-spec-devgate-lots-1-2.md</code>. Il couvre la couche
+              visible du produit : login, validation, portail, vue client,
+              état vide, erreur de login et cas de ressource avec auth
+              applicative.
+            </p>
+            <div class="hero-grid">
+              <div class="mini-stat">
+                <strong>Explicitement demandé</strong>
+                <span>branding agence, logique par client, ressources affichées directement</span>
+              </div>
+              <div class="mini-stat">
+                <strong>Inféré depuis la spec</strong>
+                <span>vocabulaire, hiérarchie visuelle, ton premium sobre, structure du portail</span>
+              </div>
+              <div class="mini-stat">
+                <strong>Placeholder assumé</strong>
+                <span>microcopy exacte, volume réel de ressources, statut visible aux clients</span>
+              </div>
+            </div>
+          </div>
+          <aside class="notes-card">
+            <h2>Direction visuelle retenue</h2>
+            <ul>
+              <li>Univers agence chaleureux, éditorial, pas “outil infra”.</li>
+              <li>Palette terracotta / crème / vert sauge, compatible logo et fond personnalisables.</li>
+              <li>Écrans pensés mobile et desktop sans dépendance externe.</li>
+              <li>Les zones encore non arbitrées restent signalées par badges.</li>
+            </ul>
+            <div class="chips">
+              <span class="chip">Logo</span>
+              <span class="chip">Nom</span>
+              <span class="chip">Couleurs</span>
+              <span class="chip">Background</span>
+              <span class="chip">Police</span>
+              <span class="chip">Page client par ressources</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <nav class="nav">
+        <a href="#login">Login</a>
+        <a href="#validation">Validation login</a>
+        <a href="#portal">Portail</a>
+        <a href="#client">Page client</a>
+        <a href="#empty">État vide</a>
+        <a href="#error">Erreur login</a>
+        <a href="#auth-app">Auth applicative</a>
+      </nav>
+
+      <section class="screen-section" id="login">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E1</div>
+            <h2>Login DevGate</h2>
+            <p>Écran public brandé agence. L’intention est de rassurer, cadrer le contexte et faire démarrer un login sans mot de passe partagé.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">devgate.agence.com</div>
+          </div>
+          <div class="screen-body login-layout">
+            <div class="login-brand">
+              <div>
+                <div class="logo">DG</div>
+                <h3>Valider. Relire. Ouvrir le bon environnement.</h3>
+                <p>
+                  DevGate centralise l’accès aux ressources de validation de
+                  l’agence. Vous ne voyez que les espaces qui vous concernent,
+                  dans une interface simple et sans configuration technique.
+                </p>
+                <div class="brand-footer">
+                  <span class="chip">Agence Mercure Studio</span>
+                  <span class="chip">Accès sécurisé</span>
+                  <span class="chip">Sans mot de passe partagé</span>
+                </div>
+              </div>
+              <div class="notice warn">
+                Élément inféré : la promesse éditoriale et le ton de
+                réassurance peuvent encore évoluer.
+              </div>
+            </div>
+            <div class="login-panel">
+              <div class="auth-card">
+                <div class="badge-row">
+                  <span class="badge explicit">Explicite · branding agence</span>
+                  <span class="badge explicit">Explicite · login simple</span>
+                  <span class="badge inferred">Inféré · magic link principal</span>
+                </div>
+                <h3>Accéder à vos ressources</h3>
+                <p>
+                  Entrez votre adresse email professionnelle. Nous vous envoyons
+                  un lien sécurisé pour ouvrir votre espace.
+                </p>
+                <label class="field-label" for="email">Adresse email</label>
+                <input class="field" id="email" type="email" value="marie@clientx.com" />
+                <div class="field-hint">
+                  Vous pourrez retrouver ensuite les ressources de votre client
+                  directement depuis votre portail.
+                </div>
+                <button class="primary-btn">Recevoir mon lien sécurisé</button>
+                <button class="secondary-btn">Utiliser un code à usage unique</button>
+                <div class="micro-copy">
+                  Placeholder : wording exact de sécurité, mentions légales et
+                  support.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-section" id="validation">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E2</div>
+            <h2>Validation du login</h2>
+            <p>Écran de confirmation après la demande. Il peut aussi devenir un écran de saisie OTP selon le mode finalement retenu.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">Validation du lien sécurisé</div>
+          </div>
+          <div class="screen-body empty-state">
+            <div class="state-card">
+              <div class="badge-row" style="justify-content:center;">
+                <span class="badge explicit">Explicite · écran de validation</span>
+                <span class="badge inferred">Inféré · magic link d’abord</span>
+                <span class="badge placeholder">Placeholder · fallback OTP</span>
+              </div>
+              <div class="state-mark ok">✦</div>
+              <h3>Votre lien est en route</h3>
+              <p>
+                Nous avons envoyé un accès sécurisé à
+                <strong>marie@clientx.com</strong>. Ouvrez votre email puis
+                revenez ici. Si besoin, vous pourrez demander un nouveau lien ou
+                basculer vers un code à usage unique.
+              </p>
+              <div class="state-actions">
+                <button class="primary-btn" style="width:auto;">Renvoyer le lien</button>
+                <button class="secondary-btn" style="width:auto;">Utiliser un code OTP</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-section" id="portal">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E3</div>
+            <h2>Portail après login</h2>
+            <p>Point d’arrivée sobre et contrôlé. Le portail oriente vers le client actif et évite d’exposer trop tôt des détails techniques.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">Portail DevGate</div>
+          </div>
+          <div class="portal-shell">
+            <div class="portal-topbar">
+              <div class="brand-lockup">
+                <div class="brand-mark">DG</div>
+                <div>
+                  <strong>DevGate</strong>
+                  <span>Portail de validation - Mercure Studio</span>
+                </div>
+              </div>
+              <div class="user-pill">
+                <div class="avatar">MC</div>
+                <div>
+                  <strong>Marie Chevalier</strong>
+                  <div class="toolbar-label">Client X</div>
+                </div>
+              </div>
+            </div>
+            <div class="screen-body">
+              <div class="badge-row">
+                <span class="badge explicit">Explicite · portail agence</span>
+                <span class="badge explicit">Explicite · navigation par client</span>
+                <span class="badge inferred">Inféré · écran d’accueil de transition</span>
+              </div>
+              <div class="hero-banner">
+                <div>
+                  <h3 style="font-size:2.4rem;">Bonjour Marie, vos accès sont prêts.</h3>
+                  <p>
+                    Vous êtes connectée à l’espace de validation de
+                    <strong>Client X</strong>. Ouvrez la page client pour accéder
+                    aux ressources actuellement disponibles.
+                  </p>
+                  <div class="resource-actions">
+                    <button class="primary-btn">Ouvrir les ressources Client X</button>
+                    <button class="secondary-btn">Voir l’aide de connexion</button>
+                  </div>
+                </div>
+                <div class="hero-metrics">
+                  <div class="metric-card">
+                    <strong>Client actif</strong>
+                    <span>Client X</span>
+                  </div>
+                  <div class="metric-card">
+                    <strong>Ressources visibles</strong>
+                    <span>3 environnements</span>
+                  </div>
+                  <div class="metric-card">
+                    <strong>Session</strong>
+                    <span>Valide pendant 7 jours</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-section" id="client">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E4</div>
+            <h2>Page client</h2>
+            <p>Écran central de la v1. Il affiche directement les ressources du client, sans étage intermédiaire par projet dans le parcours standard.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">Client X - ressources accessibles</div>
+          </div>
+          <div class="portal-shell">
+            <div class="portal-topbar">
+              <div class="brand-lockup">
+                <div class="brand-mark">DG</div>
+                <div>
+                  <strong>DevGate</strong>
+                  <span>Vue client</span>
+                </div>
+              </div>
+              <div class="user-pill">
+                <div class="avatar">MC</div>
+                <div>
+                  <strong>Marie Chevalier</strong>
+                  <div class="toolbar-label">Client X</div>
+                </div>
+              </div>
+            </div>
+            <div class="portal-grid">
+              <aside class="sidebar">
+                <h4>Clients</h4>
+                <div class="client-nav">
+                  <div class="client-card active">
+                    <strong>Client X</strong>
+                    <span>3 ressources accessibles</span>
+                  </div>
+                  <div class="client-card">
+                    <strong>Mercure Studio</strong>
+                    <span>Vue interne agence · inféré</span>
+                  </div>
+                </div>
+              </aside>
+              <main class="main-panel">
+                <div class="badge-row">
+                  <span class="badge explicit">Explicite · ressources directes</span>
+                  <span class="badge explicit">Explicite · accès par client</span>
+                  <span class="badge placeholder">Placeholder · statut visible</span>
+                </div>
+                <div class="section-head" style="margin-bottom:0;">
+                  <div>
+                    <div class="section-tag">Client actif</div>
+                    <h2 style="font-size:2.3rem;">Client X</h2>
+                    <p>
+                      Retrouvez ici les ressources mises à votre disposition pour
+                      la validation. Certaines peuvent demander une
+                      authentification supplémentaire une fois ouvertes.
+                    </p>
+                  </div>
+                </div>
+                <div class="resource-grid">
+                  <article class="resource-card">
+                    <div class="resource-top">
+                      <div>
+                        <div class="resource-kind">Staging</div>
+                        <h3 style="margin-top:12px; font-size:1.7rem;">Refonte site - Staging</h3>
+                      </div>
+                      <div class="notice ok" style="padding:9px 12px;">Disponible</div>
+                    </div>
+                    <div class="resource-meta">
+                      <div>Ressource principale de recette avant mise en ligne.</div>
+                      <div>Projet : Refonte corporate 2026</div>
+                      <div>URL publique DevGate : client-x-staging.devgate.agence.com</div>
+                    </div>
+                    <div class="resource-actions">
+                      <button class="primary-btn">Ouvrir la ressource</button>
+                      <button class="secondary-btn">Voir les détails</button>
+                    </div>
+                  </article>
+
+                  <article class="resource-card">
+                    <div class="resource-top">
+                      <div>
+                        <div class="resource-kind">Preview</div>
+                        <h3 style="margin-top:12px; font-size:1.7rem;">Landing campagne Q2</h3>
+                      </div>
+                      <div class="notice warn" style="padding:9px 12px;">Auth app</div>
+                    </div>
+                    <div class="resource-meta">
+                      <div>Cette ressource demandera un login applicatif après l’ouverture.</div>
+                      <div>Projet : Campagne acquisition</div>
+                      <div>Usage : validation marketing et textes finaux</div>
+                    </div>
+                    <div class="resource-actions">
+                      <button class="primary-btn">Ouvrir la ressource</button>
+                      <button class="secondary-btn">Comprendre l’accès</button>
+                    </div>
+                  </article>
+
+                  <article class="resource-card">
+                    <div class="resource-top">
+                      <div>
+                        <div class="resource-kind">Preview</div>
+                        <h3 style="margin-top:12px; font-size:1.7rem;">Prototype espace membre</h3>
+                      </div>
+                      <div class="notice warn" style="padding:9px 12px;">Indisponible</div>
+                    </div>
+                    <div class="resource-meta">
+                      <div>Placeholder visuel : le statut visible au client reste encore à arbitrer.</div>
+                      <div>Projet : Espace membre</div>
+                      <div>Dernière mise à jour : il y a 2 h</div>
+                    </div>
+                    <div class="resource-actions">
+                      <button class="secondary-btn">Voir le message de maintenance</button>
+                    </div>
+                  </article>
+                </div>
+              </main>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-section" id="empty">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E5</div>
+            <h2>État vide / sans ressource</h2>
+            <p>Le portail ne doit jamais tomber sur un vide silencieux. Cet écran garde une posture claire et professionnelle.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">Aucune ressource visible</div>
+          </div>
+          <div class="screen-body empty-state">
+            <div class="state-card">
+              <div class="badge-row" style="justify-content:center;">
+                <span class="badge explicit">Explicite · état sans ressource</span>
+                <span class="badge inferred">Inféré · contact support contextualisé</span>
+              </div>
+              <div class="state-mark warn">…</div>
+              <h3>Aucune ressource n’est visible pour le moment</h3>
+              <p>
+                Votre accès a bien été reconnu, mais aucune ressource active n’est
+                actuellement disponible dans l’espace de <strong>Client X</strong>.
+                Si cela vous semble inattendu, contactez directement l’équipe de
+                l’agence.
+              </p>
+              <div class="state-actions">
+                <button class="primary-btn" style="width:auto;">Contacter l’agence</button>
+                <button class="secondary-btn" style="width:auto;">Actualiser l’espace</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-section" id="error">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E6</div>
+            <h2>Erreur de login</h2>
+            <p>Le produit doit expliquer simplement un lien expiré ou déjà consommé, sans verbiage technique ni sentiment de panne obscure.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">Lien invalide ou expiré</div>
+          </div>
+          <div class="screen-body error-state">
+            <div class="state-card">
+              <div class="badge-row" style="justify-content:center;">
+                <span class="badge explicit">Explicite · état erreur login</span>
+                <span class="badge explicit">Explicite · recommencer facilement</span>
+              </div>
+              <div class="state-mark danger">!</div>
+              <h3>Ce lien n’est plus valide</h3>
+              <p>
+                Le lien de connexion a probablement expiré ou a déjà été utilisé.
+                Vous pouvez relancer une connexion en quelques secondes avec votre
+                adresse email.
+              </p>
+              <div class="state-actions">
+                <button class="primary-btn" style="width:auto;">Demander un nouveau lien</button>
+                <button class="secondary-btn" style="width:auto;">Utiliser un code OTP</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen-section" id="auth-app">
+        <div class="section-head">
+          <div>
+            <div class="section-tag">E7</div>
+            <h2>Ressource avec authentification applicative</h2>
+            <p>État d’accompagnement pour éviter l’ambiguïté : DevGate ouvre bien la ressource, mais l’application peut ensuite demander sa propre auth.</p>
+          </div>
+        </div>
+        <div class="screen-frame">
+          <div class="screen-toolbar">
+            <div class="window-dots"><span></span><span></span><span></span></div>
+            <div class="toolbar-label">Ouverture de la ressource protégée</div>
+          </div>
+          <div class="screen-body auth-state">
+            <div class="state-card">
+              <div class="badge-row" style="justify-content:center;">
+                <span class="badge explicit">Explicite · auth applicative coexistante</span>
+                <span class="badge inferred">Inféré · écran d’accompagnement possible</span>
+              </div>
+              <div class="state-mark ok">↗</div>
+              <h3>La ressource va s’ouvrir</h3>
+              <p>
+                Votre accès à l’environnement a été validé par DevGate. Cette
+                ressource peut maintenant demander une authentification propre à
+                l’application, par exemple WordPress ou votre espace métier.
+              </p>
+              <div class="state-actions">
+                <button class="primary-btn" style="width:auto;">Continuer vers la ressource</button>
+                <button class="secondary-btn" style="width:auto;">Comprendre ce qui va se passer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footnote">
+        <strong>Note.</strong> Ce fichier reste un mockup de discussion. Les textes,
+        les intitulés de ressources, le niveau d’information affiché dans les
+        cartes et la visibilité des statuts sont encore des choix produits
+        inférés ou partiellement ouverts.
+      </div>
+    </div>
+  </body>
+</html>
