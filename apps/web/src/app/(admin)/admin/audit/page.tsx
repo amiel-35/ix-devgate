@@ -1,10 +1,23 @@
 // Back-office — Audit log
+import { redirect } from "next/navigation";
+import {
+  serverAdminApi,
+  AdminApiError,
+  type AdminAuditEvent,
+} from "@/lib/api/server-admin";
+import { AuditClient } from "./AuditClient";
+
 export default async function AdminAuditPage() {
-  // TODO: charger événements via adminApi.audit.list()
-  return (
-    <main>
-      {/* TODO: AuditList avec filtres (auth, accès, admin) + export CSV */}
-      <h1>Audit log</h1>
-    </main>
-  );
+  let events: AdminAuditEvent[];
+
+  try {
+    events = await serverAdminApi.auditEvents(100);
+  } catch (err) {
+    if (err instanceof AdminApiError && err.status === 401) redirect("/login");
+    if (err instanceof AdminApiError && err.status === 403)
+      redirect("/access-denied");
+    redirect("/session-expired");
+  }
+
+  return <AuditClient initialEvents={events} />;
 }

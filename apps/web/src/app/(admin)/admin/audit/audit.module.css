@@ -1,0 +1,24 @@
+.page { padding: 32px 36px; max-width: 1100px; }
+.pageTitle { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 2px; }
+.pageSub { font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px; }
+
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.filterLabel { font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
+.select { height: 34px; padding: 0 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px; background: var(--color-surface); color: var(--color-text); }
+
+.table { width: 100%; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); border-collapse: separate; border-spacing: 0; overflow: hidden; }
+.table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.4px; padding: 10px 16px; background: var(--color-surface-2); border-bottom: 1px solid var(--color-border); }
+.table td { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+
+.dateText { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
+.eventType { font-size: 11px; font-weight: 600; font-family: monospace; padding: 2px 7px; border-radius: var(--radius-sm); background: var(--color-surface-2); color: var(--color-text-muted); }
+.actorText { font-size: 12px; color: var(--color-text-muted); }
+
+/* Catégorie couleur */
+.catAuth .eventType { background: var(--color-warning-bg); color: var(--color-warning); }
+.catAdmin .eventType { background: var(--color-primary-s); color: var(--color-primary); }
+.catGateway .eventType { background: var(--color-success-bg); color: var(--color-success); }
+
+.emptyRow td { text-align: center; color: var(--color-text-muted); padding: 32px; font-size: 13px; }
+.countNote { font-size: 12px; color: var(--color-text-muted); margin-top: 10px; }
