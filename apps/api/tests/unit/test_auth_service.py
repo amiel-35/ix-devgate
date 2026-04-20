@@ -25,7 +25,10 @@ def test_start_login_known_email_creates_challenge(db_session):
     assert len(challenges) == 1
     assert challenges[0].type == "magic_link"
     assert challenges[0].used_at is None
-    assert challenges[0].expires_at > datetime.now(tz=timezone.utc)
+    expires_at = challenges[0].expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    assert expires_at > datetime.now(tz=timezone.utc)
 
     assert len(fake.sent) == 1
     assert fake.sent[0]["kind"] == "magic_link"
