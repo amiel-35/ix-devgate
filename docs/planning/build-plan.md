@@ -10,8 +10,8 @@ Transformer les specs et les mockups de reference en plan de build executable.
 
 Ce document part des bases suivantes :
 
-- `product-spec-devgate-lots-1-2.md`
-- `system-design-devgate-lots-3-4.md`
+- `docs/product/specification-lots-1-2.md`
+- `docs/architecture/system-design-lots-3-4.md`
 - `docs/ds/mockups/` comme reference visuelle prioritaire
 
 Le but n'est pas de refaire la spec.  
@@ -26,9 +26,10 @@ Le but est de definir :
 
 Approche recommande :
 
-- un **monolithe DevGate** en v1 ;
-- un **frontend portail + back-office** dans la meme app ;
-- un **gateway logique** integre a l'application ;
+- un **produit DevGate a deux apps** en v1 ;
+- un **frontend `Next.js`** pour portail + back-office ;
+- un **backend `FastAPI`** pour auth, API, audit et gateway ;
+- un **gateway logique** integre au backend ;
 - `PostgreSQL` comme stockage principal ;
 - `Cloudflare Tunnel` pour le transport ;
 - `Cloudflare Access` en service auth pour proteger les upstreams ;
@@ -63,6 +64,8 @@ Poser une base code + data solide avant de brancher les vrais flux.
 ### A construire
 
 - structure applicative initiale ;
+- squelette `Next.js` ;
+- squelette `FastAPI` ;
 - configuration des environnements ;
 - connexion `PostgreSQL` ;
 - migrations initiales ;
@@ -80,7 +83,8 @@ Poser une base code + data solide avant de brancher les vrais flux.
 
 ### Livrables
 
-- application qui demarre ;
+- web app qui demarre ;
+- API qui demarre ;
 - schema de base cree ;
 - migrations versionnees ;
 - donnees de demo suffisantes pour brancher le portail et le back-office ;
@@ -106,6 +110,7 @@ Rendre le login simple operationnel, sans encore ouvrir les vraies ressources.
 ### A construire
 
 - ecran `E01 Login` ;
+- integration login `Next.js` -> `FastAPI` ;
 - flow `magic link` ;
 - flow `OTP` ;
 - creation et consommation des `login_challenges` ;
@@ -154,6 +159,7 @@ Livrer le coeur visible du produit cote client.
 ### A construire
 
 - shell portail brande agence ;
+- web app `Next.js` structuree par surfaces ;
 - navigation par client ;
 - liste des clients accessibles ;
 - page client avec ressources directes ;
@@ -201,6 +207,7 @@ Permettre a l'agence d'exploiter le produit sans outillage externe.
 ### A construire
 
 - ecran back-office de reference ;
+- back-office web `Next.js` ;
 - creation client ;
 - creation utilisateur dans un client ;
 - creation ressource dans un client ;
@@ -250,7 +257,7 @@ Faire passer l'utilisateur de DevGate vers la ressource sans exposer directement
 ### A construire
 
 - resolution d'une ressource depuis une URL DevGate ;
-- gateway logique integre a l'app ;
+- gateway logique integre au backend `FastAPI` ;
 - verification session + droit d'acces ;
 - proxy HTTP vers l'upstream ;
 - interstitiel si la ressource a sa propre auth ;
@@ -362,6 +369,8 @@ Rendre la v1 exploitable proprement.
 ### Sprint 0
 
 - setup projet
+- setup `Next.js`
+- setup `FastAPI`
 - DB
 - migrations
 - seeds

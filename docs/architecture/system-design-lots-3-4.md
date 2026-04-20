@@ -60,10 +60,14 @@ Definir une architecture technique exploitable pour :
 
 ### Cible v1
 
-Architecture monolithique raisonnable :
+Architecture produit raisonnable :
 
-- `DevGate App`
-  - UI portail
+- `DevGate Web`
+  - `Next.js`
+  - portail utilisateur
+  - back-office web
+- `DevGate API`
+  - `FastAPI`
   - API admin
   - auth utilisateur
   - session
@@ -78,7 +82,9 @@ Architecture monolithique raisonnable :
 
 Le navigateur parle uniquement a des URLs publiques `devgate`.
 
-Le gateway DevGate :
+Le frontend `Next.js` parle au backend `FastAPI`.
+
+Le gateway DevGate dans `FastAPI` :
 
 - verifie la session utilisateur ;
 - determine la ressource cible ;
@@ -96,11 +102,12 @@ Donc :
 
 ```mermaid
 flowchart LR
-    U["Utilisateur"] --> DG["DevGate App"]
-    DG --> DB["PostgreSQL"]
-    DG --> MAIL["Email Provider"]
+    U["Utilisateur"] --> WEB["DevGate Web<br/>Next.js"]
+    WEB --> API["DevGate API<br/>FastAPI"]
+    API --> DB["PostgreSQL"]
+    API --> MAIL["Email Provider"]
 
-    DG --> GW["Gateway logique"]
+    API --> GW["Gateway logique"]
 
     GW --> CFACC["Cloudflare Access app"]
     CFACC --> CFT["Cloudflare Tunnel"]
@@ -110,19 +117,18 @@ flowchart LR
 
 ### Lecture
 
-- `DevGate App` et `Gateway logique` peuvent vivre dans le meme deploiement v1.
+- `Next.js` et `FastAPI` restent une seule architecture produit, pas des microservices.
 - `Cloudflare Access` ne sert pas de login utilisateur principal.
 - `Cloudflare Access` sert de **barriere edge** exigeant un credential de service sur chaque upstream.
 
 ## 5. Composants
 
-## 5.1 DevGate App
+## 5.1 DevGate API
 
 Responsabilites :
 
 - login
 - sessions
-- portail
 - back-office agence
 - grants d'acces par client
 - configuration des ressources
@@ -131,14 +137,29 @@ Responsabilites :
 
 ### Recommendation v1
 
-Un seul service applicatif.
+Un backend `FastAPI` unique.
 
 Pourquoi :
 
-- plus simple a deployer ;
 - plus simple a debugger ;
 - moins de friction pour les lots 3 et 4 ;
 - largement suffisant pour la cible de charge.
+
+## 5.1 bis DevGate Web
+
+Responsabilites :
+
+- login page
+- portail utilisateur
+- page client
+- detail ressource
+- interstitiel double auth
+- profil
+- back-office web
+
+### Recommendation v1
+
+Une web app `Next.js`.
 
 ## 5.2 Gateway logique
 
@@ -155,7 +176,7 @@ Responsabilites :
 
 ### Recommendation v1
 
-Le gateway est implemente dans l'application DevGate.
+Le gateway est implemente dans le backend `FastAPI`.
 
 ### A revisiter plus tard
 

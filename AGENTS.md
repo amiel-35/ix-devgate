@@ -15,14 +15,20 @@ Le produit vise en v1 :
 - un back-office agence sobre ;
 - un gateway applicatif vers des ressources protegees par `Cloudflare Tunnel` + `Cloudflare Access` en service auth.
 
+Stack retenue :
+
+- frontend web : `Next.js`
+- backend : `FastAPI`
+- base : `PostgreSQL`
+
 ## Sources de verite
 
 Ordre de priorite a respecter :
 
 1. `docs/ds/mockups/` pour la verite visuelle
-2. `product-spec-devgate-lots-1-2.md` pour les regles produit portail
-3. `system-design-devgate-lots-3-4.md` pour la cible technique
-4. `build-plan-devgate.md` pour l'ordre d'execution
+2. `docs/product/specification-lots-1-2.md` pour les regles produit portail
+3. `docs/architecture/system-design-lots-3-4.md` pour la cible technique
+4. `docs/planning/build-plan.md` pour l'ordre d'execution
 5. `docs/architecture/architecture-doctrine.md` pour les garde-fous structurels
 6. `docs/contributing/frontend-contribution.md`
 7. `docs/contributing/backend-contribution.md`
@@ -39,6 +45,7 @@ Ordre de priorite a respecter :
 ## Doctrine de build
 
 - Favoriser un **monolithe modulaire**.
+- Considerer `Next.js` + `FastAPI` comme une seule architecture produit, pas comme des microservices.
 - Decouper le code par capacites metier, pas par fourre-tout technique.
 - Garder distincts :
   - auth

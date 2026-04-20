@@ -7,10 +7,12 @@ Ce fichier sert de memo de travail projet pour les assistants qui vont implement
 Si tu dois faire un choix rapidement, prends celui-ci :
 
 - **monolithe modulaire**
+- **frontend `Next.js`**
+- **backend `FastAPI`**
 - **PostgreSQL**
 - **frontend pilote par mockups**
 - **backend source de verite**
-- **gateway integre a l'app**
+- **gateway integre au backend**
 - **Cloudflare Tunnel + Access en service auth**
 - **pas de microservices**
 - **pas de permissions fines par ressource en v1**
@@ -85,9 +87,9 @@ Il faut garder claire la couche qui :
 Considere les fichiers suivants comme la base :
 
 - `docs/ds/mockups/`
-- `product-spec-devgate-lots-1-2.md`
-- `system-design-devgate-lots-3-4.md`
-- `build-plan-devgate.md`
+- `docs/product/specification-lots-1-2.md`
+- `docs/architecture/system-design-lots-3-4.md`
+- `docs/planning/build-plan.md`
 - `docs/architecture/architecture-doctrine.md`
 - `docs/contributing/frontend-contribution.md`
 - `docs/contributing/backend-contribution.md`

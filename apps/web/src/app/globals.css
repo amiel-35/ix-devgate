@@ -1,0 +1,27 @@
+/* Tokens DevGate — référence : docs/ds/mockups/ */
+:root {
+  --color-bg:         #f4f6fa;
+  --color-surface:    #ffffff;
+  --color-surface-2:  #f0f2f7;
+  --color-border:     #e2e6ef;
+  --color-text:       #111827;
+  --color-text-muted: #6b7280;
+  --color-primary:    #2563eb;
+  --color-primary-h:  #1d4ed8;
+  --color-primary-s:  #eff6ff;
+  --color-success:    #16a34a;
+  --color-warning:    #d97706;
+  --color-danger:     #dc2626;
+  --font:             'Inter', system-ui, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}

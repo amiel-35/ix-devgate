@@ -21,8 +21,8 @@ Il pose la doctrine qui doit guider les choix de build, de revue et de refactor.
 Ordre de priorite recommande :
 
 1. besoin produit cadre
-2. regles d'acces et parcours dans `product-spec-devgate-lots-1-2.md`
-3. architecture cible et lots 3-4 dans `system-design-devgate-lots-3-4.md`
+2. regles d'acces et parcours dans `docs/product/specification-lots-1-2.md`
+3. architecture cible et lots 3-4 dans `docs/architecture/system-design-lots-3-4.md`
 4. mockups dans `docs/ds/mockups/` pour la verite visuelle
 5. present document pour les garde-fous d'implementation
 
@@ -45,22 +45,36 @@ Regle pratique :
 - Le navigateur utilisateur ne doit pas utiliser les hostnames Cloudflare bruts.
 - Le cout d'exploitation doit rester maitrise.
 
+## Stack retenue
+
+- frontend web : `Next.js`
+- backend : `FastAPI`
+- base de donnees : `PostgreSQL`
+
 ## Hypothese d'architecture retenue
 
 ### Cible v1
 
-Un **monolithe modulaire**.
+Un **produit monolithique modulaire a deux applications** :
 
-Il porte dans un meme deploiement :
+- une web app `Next.js`
+- une API `FastAPI`
+
+La web app porte :
 
 - portail utilisateur
 - back-office agence
+- experience brandee
+
+L'API porte :
+
 - auth et session
 - audit
 - gateway reverse proxy
 - API interne et admin
+- integration Cloudflare
 
-Autour de lui :
+Autour du noyau :
 
 - `PostgreSQL`
 - provider email
@@ -91,6 +105,9 @@ Ce sera a revisiter si :
 
 Tout nouveau code doit entrer dans une structure modulaire interne claire.  
 On n'extrait pas de service tant que le besoin n'est pas prouve.
+
+`Next.js` et `FastAPI` ne sont pas a traiter comme des microservices.  
+Ils forment une seule architecture produit avec deux runtimes.
 
 ### P2 - Le domaine produit pilote la structure
 
@@ -144,6 +161,12 @@ Tout flux critique doit produire des evenements auditables :
 
 Le frontend doit etre organise par **surfaces produit**, pas par spaghetti de composants.
 
+Stack cible :
+
+- `Next.js`
+- `React`
+- `TypeScript`
+
 Surfaces cibles :
 
 - login
@@ -171,6 +194,11 @@ Le backend porte :
 - l'audit ;
 - la resolution des ressources ;
 - l'appel vers l'upstream protege.
+
+Stack cible :
+
+- `FastAPI`
+- `Python`
 
 Le backend ne doit pas :
 

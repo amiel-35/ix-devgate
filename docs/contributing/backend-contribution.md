@@ -4,6 +4,12 @@
 
 Donner les regles de construction du backend DevGate pour garder une base simple, lisible et robuste.
 
+Stack retenue :
+
+- `FastAPI`
+- `Python`
+- `PostgreSQL`
+
 Ce document couvre :
 
 - domaine metier ;
@@ -18,16 +24,18 @@ Ce document couvre :
 
 Ordre de priorite :
 
-1. `system-design-devgate-lots-3-4.md`
-2. `product-spec-devgate-lots-1-2.md`
-3. `build-plan-devgate.md`
-4. `architecture-doctrine.md`
+1. `docs/architecture/system-design-lots-3-4.md`
+2. `docs/product/specification-lots-1-2.md`
+3. `docs/planning/build-plan.md`
+4. `docs/architecture/architecture-doctrine.md`
 
 ## Doctrine backend
 
 ### 1. Monolithe modulaire
 
 Le backend v1 est un monolithe modulaire.
+
+Dans le produit global, il coexiste avec une web app `Next.js`, mais reste l'unique backend de reference.
 
 On cherche :
 

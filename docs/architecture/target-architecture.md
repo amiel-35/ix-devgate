@@ -102,8 +102,13 @@ Donc :
 
 - impact exact de cette variante sur la facturation Access ;
 - niveau d'automatisation v1 du provisioning Tunnel / DNS / Access App ;
-- choix final de stack pour DevGate (`FastAPI` vs `Next.js` vs mix) ;
 - besoin exact en audit long terme.
+
+### 3.4 Stack retenue
+
+- frontend web : `Next.js`
+- backend : `FastAPI`
+- stockage : `PostgreSQL`
 
 ---
 
@@ -154,6 +159,12 @@ Responsabilites :
 - back-office agence ;
 - ecrans projet / environnement / acces / audit.
 
+Stack retenue :
+
+- `Next.js`
+- `React`
+- `TypeScript`
+
 Ne fait pas :
 
 - pas de tunneling ;
@@ -180,21 +191,12 @@ Il peut etre :
 
 ### Recommandation v1
 
-Commencer par un **monolithe DevGate** avec :
+Commencer par un produit DevGate a deux apps :
 
-- UI portail,
-- API admin,
-- auth,
-- gateway reverse proxy
+- `Next.js` pour le web
+- `FastAPI` pour l'API, l'auth et le gateway
 
-dans le meme deploiement logique.
-
-Cela simplifie :
-
-- la session,
-- les checks de droits,
-- le debugging,
-- la mise en production initiale.
+Le gateway vit dans `FastAPI`.
 
 ## 5.3 Cloudflare Tunnel
 
@@ -832,10 +834,6 @@ Critere de validation :
 ## 17. Questions ouvertes
 
 - Le cout de `Cloudflare Access` en usage service token only est-il compatible avec la cible economique ?
-- Le gateway sera-t-il mieux porte par :
-  - `FastAPI`,
-  - `Next.js + proxy`,
-  - ou un proxy dedie a cote ?
 - Faut-il du branding :
   - global agence,
   - ou differencie par client ?

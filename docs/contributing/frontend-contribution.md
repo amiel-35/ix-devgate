@@ -4,6 +4,12 @@
 
 Donner une ligne claire pour construire le frontend DevGate sans dette inutile.
 
+Stack retenue :
+
+- `Next.js`
+- `React`
+- `TypeScript`
+
 Ce document s'applique :
 
 - au portail utilisateur ;
@@ -18,9 +24,9 @@ Ce document s'applique :
 Ordre de priorite :
 
 1. `docs/ds/mockups/`
-2. `product-spec-devgate-lots-1-2.md`
-3. `build-plan-devgate.md`
-4. `architecture-doctrine.md`
+2. `docs/product/specification-lots-1-2.md`
+3. `docs/planning/build-plan.md`
+4. `docs/architecture/architecture-doctrine.md`
 
 Regle :
 
@@ -51,6 +57,8 @@ Il ne doit pas devenir la source de verite sur :
 - la ressource resolue ;
 - la logique Cloudflare ;
 - l'audit.
+
+Le backend de reference ici est `FastAPI`.
 
 ### 3. Les etats vides et erreurs sont des ecrans de premier rang
 
