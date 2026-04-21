@@ -211,7 +211,7 @@ def test_gateway_injects_cf_service_token(client, db_session, monkeypatch):
     import base64
     import json as _json
 
-    TEST_MASTER_KEY = base64.b64encode(b"devgate-test-key-32bytes-padding!").decode()
+    TEST_MASTER_KEY = base64.b64encode(b"a" * 32).decode()
     monkeypatch.setenv("DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
 
     _make_user(db_session)

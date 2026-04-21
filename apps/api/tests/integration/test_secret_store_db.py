@@ -11,7 +11,7 @@ from app.modules.secrets.store import (
 )
 
 # Clé de test fixe et déterministe (32 bytes en base64)
-TEST_MASTER_KEY = base64.b64encode(b"devgate-test-key-32bytes-padding!").decode()
+TEST_MASTER_KEY = base64.b64encode(b"a" * 32).decode()
 
 
 def _store(db_session) -> EncryptedDatabaseSecretStore:

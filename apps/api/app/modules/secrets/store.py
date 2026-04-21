@@ -12,10 +12,13 @@ Règles (ADR-002) :
 """
 import base64
 import json
+import logging
 import os
 import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
+
+logger = logging.getLogger(__name__)
 
 
 class SecretNotFoundError(Exception):
@@ -95,7 +98,11 @@ class EncryptedDatabaseSecretStore(SecretStore):
         from cryptography.hazmat.primitives import hashes
         from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-        master_key = base64.b64decode(master_key_b64)
+        master_key = base64.b64decode(master_key_b64, validate=True)
+        if len(master_key) != 32:
+            raise ValueError(
+                f"DEVGATE_MASTER_KEY doit décoder en 32 bytes — obtenu {len(master_key)} bytes"
+            )
         self._aes_key: bytes = HKDF(
             algorithm=hashes.SHA256(),
             length=32,
@@ -190,7 +197,11 @@ class EncryptedDatabaseSecretStore(SecretStore):
         try:
             plaintext_bytes = aesgcm.decrypt(nonce, ciphertext, aad)
         except InvalidTag as e:
-            raise SecretNotFoundError(f"Déchiffrement impossible pour {secret_ref}") from e
+            # Événement de sécurité : tag invalide peut indiquer une altération ou une mauvaise clé.
+            # On ne distingue pas cela d'un "non trouvé" à l'extérieur pour éviter les oracles,
+            # mais on log en WARNING pour que les opérateurs puissent détecter un problème.
+            logger.warning("Déchiffrement GCM échoué pour un secret existant en base", exc_info=False)
+            raise SecretNotFoundError("Déchiffrement impossible") from e
 
         return plaintext_bytes.decode()
 

@@ -357,7 +357,7 @@ def test_list_audit_events_limit_capped(client, db_session):
 
 import base64
 
-_TEST_MASTER_KEY_4 = base64.b64encode(b"devgate-test-key-32bytes-padding!").decode()
+_TEST_MASTER_KEY_4 = base64.b64encode(b"a" * 32).decode()
 
 
 def _make_env_for_token_test(db_session):
