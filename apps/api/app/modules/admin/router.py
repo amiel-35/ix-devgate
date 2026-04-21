@@ -5,10 +5,13 @@ Toutes les routes exigent agency_admin.
 import json
 from datetime import date, datetime, timezone
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session as DbSession, joinedload
 
+from app.config import settings
+from app.modules.cloudflare.client import CFClient
+from app.modules.cloudflare.sync import sync_tunnels
 from app.modules.gateway.health import check_environment_health
 
 from app.database import get_db
@@ -29,6 +32,7 @@ from app.shared.exceptions import NotFoundException
 from app.shared.models import (
     AccessGrant,
     AuditEvent,
+    DiscoveredTunnel,
     Environment,
     Organization,
     Project,
@@ -334,3 +338,26 @@ def list_audit_events(
         )
         for e in events
     ]
+
+
+# ── Cloudflare ────────────────────────────────────────────────────
+
+@router.post("/sync-tunnels", status_code=200)
+def trigger_cf_sync(
+    db: DbSession = Depends(get_db),
+    admin=Depends(require_agency_admin),
+):
+    """Déclenche manuellement la sync des tunnels CF.
+    Nécessite CF_API_TOKEN et CF_ACCOUNT_ID configurés.
+    """
+    if not settings.CF_API_TOKEN or not settings.CF_ACCOUNT_ID:
+        raise HTTPException(
+            status_code=503,
+            detail="CF_API_TOKEN ou CF_ACCOUNT_ID non configurés",
+        )
+    cf = CFClient(
+        api_token=settings.CF_API_TOKEN,
+        account_id=settings.CF_ACCOUNT_ID,
+        zone_id=settings.CF_ZONE_ID,
+    )
+    return sync_tunnels(db, cf)
