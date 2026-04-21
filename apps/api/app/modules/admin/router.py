@@ -3,6 +3,7 @@ Back-office agence — CRUD clients, projets, environnements, accès, audit, sta
 Toutes les routes exigent agency_admin.
 """
 import json
+import logging
 from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -42,6 +43,8 @@ from app.shared.models import (
     TunnelHealthSnapshot,
     User,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(require_agency_admin)])
 
@@ -498,7 +501,8 @@ def activate_environment(
     try:
         final_state = run_provisioning_job(job, env, cf, secret_store, db)
     except ProvisioningError as e:
-        return {"job_id": job.id, "state": job.state, "error": str(e)}
+        logger.error("Provisioning échoué pour env %s: %s", env_id, str(e))
+        return {"job_id": job.id, "state": job.state, "error": "Opération échouée — consultez les logs serveur"}
 
     audit(
         db,

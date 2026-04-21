@@ -131,12 +131,13 @@ def run_provisioning_job(
 
         return job.state
 
-    except ProvisioningError:
+    except ProvisioningError as e:
         # Erreur métier explicite
         import traceback
         job.state = "failed_recoverable"
         job.updated_at = datetime.now(tz=timezone.utc)
-        job.last_error = traceback.format_exc(limit=3)
+        logger.error("Provisioning error job %s: %s", job.id, traceback.format_exc(limit=3))
+        job.last_error = str(e)
         db.commit()
         raise
     except Exception as e:
