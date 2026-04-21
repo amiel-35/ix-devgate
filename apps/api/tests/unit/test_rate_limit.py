@@ -31,3 +31,11 @@ def test_keys_are_isolated():
     limiter = RateLimiter(max_requests=1, window_seconds=60)
     limiter.check("a@b.com")
     limiter.check("c@d.com")  # different key, must not raise
+
+
+def test_verify_limiter_instance_exists():
+    """login_verify_limiter est une instance RateLimiter avec les bons paramètres."""
+    from app.modules.auth.rate_limit import login_verify_limiter
+
+    assert login_verify_limiter.max_requests == 10
+    assert login_verify_limiter.window_seconds == 300

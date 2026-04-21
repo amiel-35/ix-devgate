@@ -32,3 +32,6 @@ class RateLimiter:
 
 # Shared instance for /auth/start — 5 attempts per 10 minutes
 login_start_limiter = RateLimiter(max_requests=5, window_seconds=600)
+
+# Shared instance for /auth/verify — 10 attempts per 5 minutes
+login_verify_limiter = RateLimiter(max_requests=10, window_seconds=300)

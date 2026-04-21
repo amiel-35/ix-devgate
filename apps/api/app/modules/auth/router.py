@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from app.config import settings
 from app.database import get_db
-from app.modules.auth.rate_limit import login_start_limiter
+from app.modules.auth import rate_limit as _rate_limit_mod
 from app.modules.auth.schemas import (
     LoginStartRequest, LoginStartResponse,
     LoginVerifyRequest, LoginVerifyResponse,
@@ -25,12 +25,14 @@ def login_start(
 ):
     normalized_email = body.email.strip().lower()
     key = f"{request.client.host if request.client else 'unknown'}|{normalized_email}"
-    login_start_limiter.check(key)
+    _rate_limit_mod.login_start_limiter.check(key)
     return start_login(body.email, db, method=body.method)
 
 
 @router.post("/verify", response_model=LoginVerifyResponse)
-def login_verify(body: LoginVerifyRequest, response: Response, db: DbSession = Depends(get_db)):
+def login_verify(body: LoginVerifyRequest, request: Request, response: Response, db: DbSession = Depends(get_db)):
+    key = request.client.host if request.client else "unknown"
+    _rate_limit_mod.login_verify_limiter.check(key)
     session = verify_token(body.token, db)
     response.set_cookie(
         key=SESSION_COOKIE,

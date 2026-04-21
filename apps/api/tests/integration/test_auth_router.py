@@ -80,3 +80,18 @@ def test_start_returns_429_over_rate_limit(client, db_session):
 
     res = client.post("/auth/start", json={"email": "user@example.com"})
     assert res.status_code == 429
+
+
+def test_verify_rate_limited(client, db_session, monkeypatch):
+    """POST /auth/verify retourne 429 après trop de tentatives depuis la même IP."""
+    from app.modules.auth import rate_limit as rl_mod
+    from app.modules.auth.rate_limit import RateLimiter
+
+    # Remplace le limiter par un limiter frais max=2 pour accélérer le test
+    monkeypatch.setattr(rl_mod, "login_verify_limiter", RateLimiter(max_requests=2, window_seconds=300))
+
+    for _ in range(2):
+        client.post("/auth/verify", json={"token": "wrong-token"})
+
+    res = client.post("/auth/verify", json={"token": "wrong-token"})
+    assert res.status_code == 429
