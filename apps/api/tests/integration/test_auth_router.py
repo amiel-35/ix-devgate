@@ -69,6 +69,31 @@ def test_logout_clears_cookie(client, db_session):
     assert res.status_code == 200
 
 
+def test_logout_revokes_session_in_db(client, db_session):
+    """Après logout, la session doit être supprimée en base."""
+    from app.shared.models import User, Session as DevSession
+    import uuid, datetime
+    user = User(id=str(uuid.uuid4()), email="logout-test@example.com",
+                kind="client", status="active")
+    db_session.add(user)
+    session = DevSession(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(days=7),
+    )
+    db_session.add(session)
+    db_session.commit()
+
+    response = client.post(
+        "/auth/logout",
+        cookies={"devgate_session": session.id},
+    )
+    assert response.status_code == 200
+
+    remaining = db_session.query(DevSession).filter(DevSession.id == session.id).first()
+    assert remaining is None, "La session doit être supprimée en base après logout"
+
+
 def test_start_returns_429_over_rate_limit(client, db_session):
     override_email_provider(FakeEmailProvider())
     _make_user(db_session)

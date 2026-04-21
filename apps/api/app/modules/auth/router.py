@@ -46,7 +46,13 @@ def login_verify(body: LoginVerifyRequest, request: Request, response: Response,
 
 
 @router.post("/logout")
-def logout(response: Response, current_session=Depends(get_current_session)):
+def logout(
+    response: Response,
+    current_session=Depends(get_current_session),
+    db: DbSession = Depends(get_db),
+):
+    db.delete(current_session)
+    db.commit()
     response.delete_cookie(
         SESSION_COOKIE,
         path="/",
