@@ -8,6 +8,7 @@ from app.modules.secrets.store import (
     SecretRevokedError,
     SecretStore,
 )
+from app.modules.secrets.deps import get_secret_store
 
 __all__ = [
     "SecretStore",
@@ -15,4 +16,5 @@ __all__ = [
     "EncryptedDatabaseSecretStore",
     "SecretNotFoundError",
     "SecretRevokedError",
+    "get_secret_store",
 ]
