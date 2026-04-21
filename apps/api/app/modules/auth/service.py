@@ -46,7 +46,8 @@ def start_login(email: str, db: DbSession, method: str = "magic_link") -> dict:
     """
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        audit(db, event_type="login.start.unknown_email", metadata={"email": email})
+        _hint = hashlib.sha256(email.lower().encode()).hexdigest()[:12]
+        audit(db, event_type="login.start.unknown_email", metadata={"email_hint": _hint})
         db.commit()
         return {"ok": True, "method": method}
 
