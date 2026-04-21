@@ -478,3 +478,61 @@ def activate_environment(
     )
     db.commit()
     return {"job_id": job.id, "state": final_state}
+
+
+# ── Gateway stats ─────────────────────────────────────────────────
+
+@router.get("/gateway-stats")
+def get_gateway_stats(db: DbSession = Depends(get_db)):
+    """Stats des requêtes gateway sur les 24 dernières heures.
+
+    Agrège les événements d'audit pour éviter un modèle supplémentaire.
+    Acceptable pour v1 (volume faible). Ne filtre pas par environnement.
+    """
+    from datetime import timedelta
+    since = datetime.now(tz=timezone.utc) - timedelta(hours=24)
+
+    accessed = (
+        db.query(AuditEvent)
+        .filter(
+            AuditEvent.event_type == "gateway.resource.accessed",
+            AuditEvent.created_at >= since,
+        )
+        .all()
+    )
+
+    upstream_unavailable = (
+        db.query(AuditEvent)
+        .filter(
+            AuditEvent.event_type == "gateway.request.failed",
+            AuditEvent.created_at >= since,
+        )
+        .count()
+    )
+
+    total = len(accessed) + upstream_unavailable
+    errors_5xx = sum(1 for e in accessed if e.metadata_json and e.metadata_json.get("is_5xx"))
+    cf_refused = sum(1 for e in accessed if e.metadata_json and e.metadata_json.get("is_cf_refused"))
+    latencies = [
+        e.metadata_json["latency_ms"]
+        for e in accessed
+        if e.metadata_json and isinstance(e.metadata_json.get("latency_ms"), int)
+    ]
+
+    avg_latency_ms: int | None = None
+    p95_latency_ms: int | None = None
+    if latencies:
+        avg_latency_ms = int(sum(latencies) / len(latencies))
+        sorted_latencies = sorted(latencies)
+        p95_idx = max(0, int(len(sorted_latencies) * 0.95) - 1)
+        p95_latency_ms = sorted_latencies[p95_idx]
+
+    return {
+        "since_hours": 24,
+        "total_requests": total,
+        "errors_5xx": errors_5xx,
+        "cf_refused": cf_refused,
+        "upstream_unavailable": upstream_unavailable,
+        "avg_latency_ms": avg_latency_ms,
+        "p95_latency_ms": p95_latency_ms,
+    }
