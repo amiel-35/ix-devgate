@@ -6,9 +6,9 @@ Portail d'accès sécurisé aux environnements de développement — sans expose
 
 ---
 
-| Connexion sans mot de passe | Back-office agence |
-|:---------------------------:|:-----------------:|
-| ![Écran de connexion](docs/screenshots/login.png) | ![Gestion des environnements](docs/screenshots/admin-environments.png) |
+| Connexion sans mot de passe | Portail client | Back-office agence |
+|:---------------------------:|:--------------:|:-----------------:|
+| ![Écran de connexion](docs/screenshots/login.png) | ![Portail client](docs/screenshots/portal-client.png) | ![Gestion des environnements](docs/screenshots/admin-environments.png) |
 
 ---
 
