@@ -126,6 +126,10 @@ async def gateway_ws_proxy(
     except RuntimeError:
         secret_store = None  # DEVGATE_MASTER_KEY absente — CF token non injecté
 
+    if env.service_token_ref and secret_store is None:
+        await websocket.close(code=1011)
+        return
+
     upstream_ws_url = f"wss://{env.upstream_hostname}/{path}"
 
     # Build upstream headers (includes CF Access credentials if configured)

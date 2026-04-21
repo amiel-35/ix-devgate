@@ -421,7 +421,8 @@ def _make_env_for_token_test(db_session):
 
 def test_store_service_token_sets_ref(client, db_session, monkeypatch):
     """PUT /admin/environments/{id}/service-token stocke le token et met à jour service_token_ref."""
-    monkeypatch.setenv("DEVGATE_MASTER_KEY", _TEST_MASTER_KEY_4)
+    import app.config as _cfg
+    monkeypatch.setattr(_cfg.settings, "DEVGATE_MASTER_KEY", _TEST_MASTER_KEY_4)
 
     _make_admin(db_session)
     _auth(client)
@@ -441,7 +442,8 @@ def test_store_service_token_sets_ref(client, db_session, monkeypatch):
 
 
 def test_store_service_token_unknown_env_returns_404(client, db_session, monkeypatch):
-    monkeypatch.setenv("DEVGATE_MASTER_KEY", _TEST_MASTER_KEY_4)
+    import app.config as _cfg
+    monkeypatch.setattr(_cfg.settings, "DEVGATE_MASTER_KEY", _TEST_MASTER_KEY_4)
     _make_admin(db_session)
     _auth(client)
 

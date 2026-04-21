@@ -26,8 +26,8 @@ def sync_tunnels(db: DbSession, cf) -> dict:
     try:
         tunnels = cf.list_tunnels()
     except Exception as e:
-        logger.warning("CF sync failed: %s", e, exc_info=True)
-        return {"error": str(e), "discovered": 0, "updated": 0, "orphaned": 0}
+        logger.error("CF sync failed: %s", e, exc_info=True)
+        return {"error": "Opération échouée — consultez les logs serveur", "discovered": 0, "updated": 0, "orphaned": 0}
 
     now = datetime.now(tz=timezone.utc)
     seen_ids: set[str] = set()

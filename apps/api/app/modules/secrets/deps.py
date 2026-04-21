@@ -1,16 +1,15 @@
 """Dépendance FastAPI pour obtenir le SecretStore configuré."""
-import os
-
+from app.config import settings
 from app.modules.secrets.store import EncryptedDatabaseSecretStore, SecretStore
 
 
 def get_secret_store(db) -> SecretStore:
     """Retourne un EncryptedDatabaseSecretStore configuré depuis DEVGATE_MASTER_KEY.
 
-    Lève RuntimeError si la variable d'environnement est absente.
+    Lève RuntimeError si la clé est absente.
     Ne doit jamais être appelé depuis le frontend ou les logs.
     """
-    master_key = os.environ.get("DEVGATE_MASTER_KEY")
+    master_key = settings.DEVGATE_MASTER_KEY
     if not master_key:
         raise RuntimeError(
             "DEVGATE_MASTER_KEY non configurée — impossible d'accéder au secret store"

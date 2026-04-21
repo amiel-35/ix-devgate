@@ -148,3 +148,12 @@ def test_verify_rate_limited(client, db_session, monkeypatch):
 
     res = client.post("/auth/verify", json={"token": "wrong-token"})
     assert res.status_code == 429
+
+
+def test_security_headers_present(client):
+    """Les réponses API doivent inclure les security headers."""
+    resp = client.get("/health")
+    assert "x-content-type-options" in resp.headers
+    assert resp.headers["x-content-type-options"] == "nosniff"
+    assert "x-frame-options" in resp.headers
+    assert resp.headers["x-frame-options"] == "DENY"
