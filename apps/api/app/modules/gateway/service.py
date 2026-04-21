@@ -9,6 +9,7 @@ Règles critiques :
 """
 import json
 import logging
+import time
 from datetime import timezone
 
 import httpx
@@ -113,6 +114,7 @@ async def proxy_request(
 
     proxy_headers = get_upstream_proxy_headers(env, user.id, headers, secret_store)
 
+    start = time.monotonic()
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
             response = await client.request(
@@ -122,9 +124,29 @@ async def proxy_request(
                 content=body,
             )
     except httpx.ConnectError as e:
+        audit(
+            db,
+            actor_user_id=user.id,
+            event_type="gateway.request.failed",
+            target_type="environment",
+            target_id=env.id,
+            metadata={"reason": "upstream_unavailable", "detail": str(e)[:200]},
+        )
+        db.commit()
         raise UpstreamUnavailableException(f"Impossible de joindre l'upstream : {e}") from e
     except httpx.TimeoutException as e:
+        audit(
+            db,
+            actor_user_id=user.id,
+            event_type="gateway.request.failed",
+            target_type="environment",
+            target_id=env.id,
+            metadata={"reason": "timeout"},
+        )
+        db.commit()
         raise UpstreamUnavailableException("L'upstream n'a pas répondu à temps") from e
+
+    latency_ms = int((time.monotonic() - start) * 1000)
 
     audit(
         db,
@@ -132,7 +154,13 @@ async def proxy_request(
         event_type="gateway.resource.accessed",
         target_type="environment",
         target_id=env.id,
-        metadata={"status_code": response.status_code, "path": path},
+        metadata={
+            "status_code": response.status_code,
+            "path": path,
+            "latency_ms": latency_ms,
+            "is_5xx": response.status_code >= 500,
+            "is_cf_refused": response.status_code == 403,
+        },
     )
     db.commit()
 

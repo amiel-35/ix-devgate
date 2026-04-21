@@ -239,3 +239,99 @@ def test_gateway_injects_cf_service_token(client, db_session, monkeypatch):
 
     assert captured_headers.get("cf-access-client-id") == "test-client-id"
     assert captured_headers.get("cf-access-client-secret") == "test-client-secret"
+
+
+@respx.mock
+def test_gateway_audit_includes_latency_ms(client, db_session):
+    """L'audit gateway.resource.accessed contient latency_ms, is_5xx, is_cf_refused."""
+    _make_user(db_session)
+    _make_session(db_session)
+    _make_env(db_session)
+
+    respx.get("https://upstream.cfargotunnel.com/").mock(
+        return_value=httpx.Response(200, content=b"ok")
+    )
+
+    client.cookies.set("devgate_session", "s-gw")
+    client.get("/gateway/env-gw/")
+
+    event = (
+        db_session.query(AuditEvent)
+        .filter(AuditEvent.event_type == "gateway.resource.accessed")
+        .first()
+    )
+    assert event is not None
+    assert "latency_ms" in event.metadata_json
+    assert isinstance(event.metadata_json["latency_ms"], int)
+    assert event.metadata_json["is_5xx"] is False
+    assert event.metadata_json["is_cf_refused"] is False
+
+
+@respx.mock
+def test_gateway_audit_marks_5xx(client, db_session):
+    """is_5xx=True quand l'upstream répond 500."""
+    _make_user(db_session)
+    _make_session(db_session)
+    _make_env(db_session)
+
+    respx.get("https://upstream.cfargotunnel.com/").mock(
+        return_value=httpx.Response(500, content=b"error")
+    )
+
+    client.cookies.set("devgate_session", "s-gw")
+    client.get("/gateway/env-gw/")
+
+    event = (
+        db_session.query(AuditEvent)
+        .filter(AuditEvent.event_type == "gateway.resource.accessed")
+        .first()
+    )
+    assert event.metadata_json["is_5xx"] is True
+    assert event.metadata_json["is_cf_refused"] is False
+
+
+@respx.mock
+def test_gateway_audit_marks_cf_refused(client, db_session):
+    """is_cf_refused=True quand l'upstream répond 403."""
+    _make_user(db_session)
+    _make_session(db_session)
+    _make_env(db_session)
+
+    respx.get("https://upstream.cfargotunnel.com/").mock(
+        return_value=httpx.Response(403, content=b"forbidden")
+    )
+
+    client.cookies.set("devgate_session", "s-gw")
+    client.get("/gateway/env-gw/")
+
+    event = (
+        db_session.query(AuditEvent)
+        .filter(AuditEvent.event_type == "gateway.resource.accessed")
+        .first()
+    )
+    assert event.metadata_json["is_cf_refused"] is True
+    assert event.metadata_json["is_5xx"] is False
+
+
+@respx.mock
+def test_gateway_unavailable_creates_failed_audit_event(client, db_session):
+    """ConnectError crée un événement gateway.request.failed."""
+    _make_user(db_session)
+    _make_session(db_session)
+    _make_env(db_session)
+
+    respx.get("https://upstream.cfargotunnel.com/").mock(
+        side_effect=httpx.ConnectError("refused")
+    )
+
+    client.cookies.set("devgate_session", "s-gw")
+    res = client.get("/gateway/env-gw/")
+    assert res.status_code == 502
+
+    event = (
+        db_session.query(AuditEvent)
+        .filter(AuditEvent.event_type == "gateway.request.failed")
+        .first()
+    )
+    assert event is not None
+    assert event.metadata_json["reason"] == "upstream_unavailable"
