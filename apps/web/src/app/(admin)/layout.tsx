@@ -13,9 +13,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   try {
     await serverAdminApi.stats();
   } catch (err) {
-    if (err instanceof AdminApiError && err.status === 401) redirect("/login");
     if (err instanceof AdminApiError && err.status === 403) redirect("/access-denied");
-    // Autre erreur : on laisse passer (API peut être momentanément indisponible)
+    // Tout autre cas (401, 500, timeout) : refuser l'accès
+    redirect("/login");
   }
 
   return (
