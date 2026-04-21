@@ -32,13 +32,25 @@ class FakeEmailProvider(EmailProvider):
 
 class SmtpEmailProvider(EmailProvider):
     """Provider SMTP — utilisé en dev avec Mailpit (host=mailpit:1025)
-    ou avec n'importe quel serveur SMTP local.
+    ou avec un serveur SMTP authentifié (Brevo, Mailgun, Amazon SES…).
+
+    Si SMTP_USER et SMTP_PASSWORD sont définis, STARTTLS + login sont activés.
+    Mailpit en dev ne nécessite pas d'auth — laisser user/password vides.
     """
 
-    def __init__(self, host: str, port: int, from_addr: str) -> None:
+    def __init__(
+        self,
+        host: str,
+        port: int,
+        from_addr: str,
+        user: str = "",
+        password: str = "",
+    ) -> None:
         self.host = host
         self.port = port
         self.from_addr = from_addr
+        self.user = user
+        self.password = password
 
     def _send(self, to: str, subject: str, body: str) -> None:
         msg = EmailMessage()
@@ -47,6 +59,9 @@ class SmtpEmailProvider(EmailProvider):
         msg["To"] = to
         msg.set_content(body)
         with smtplib.SMTP(self.host, self.port, timeout=10) as s:
+            if self.user and self.password:
+                s.starttls()
+                s.login(self.user, self.password)
             s.send_message(msg)
 
     def send_magic_link(self, to: str, link: str) -> None:

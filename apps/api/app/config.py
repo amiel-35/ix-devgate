@@ -17,10 +17,12 @@ class Settings(BaseSettings):
     EMAIL_PROVIDER: str = "fake"  # fake | smtp | resend
     RESEND_API_KEY: str = ""
 
-    # SMTP (dev : mailpit, prod : Resend remplacera)
+    # SMTP (dev : mailpit, prod : Brevo / Mailgun / Amazon SES…)
     SMTP_HOST: str = "localhost"
     SMTP_PORT: int = 1025
     SMTP_FROM: str = "DevGate <no-reply@devgate.local>"
+    SMTP_USER: str = ""      # Brevo : login SMTP (email du compte)
+    SMTP_PASSWORD: str = ""  # Brevo : clé API SMTP
 
     # Frontend URL (pour construire les magic links)
     FRONTEND_BASE_URL: str = "http://localhost:3000"

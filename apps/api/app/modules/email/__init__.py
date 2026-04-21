@@ -21,6 +21,8 @@ def _build_provider() -> EmailProvider:
             host=settings.SMTP_HOST,
             port=settings.SMTP_PORT,
             from_addr=settings.SMTP_FROM,
+            user=settings.SMTP_USER,
+            password=settings.SMTP_PASSWORD,
         )
     # Default / "fake" / "resend" (pas encore implémenté)
     return FakeEmailProvider()
