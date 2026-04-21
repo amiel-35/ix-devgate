@@ -2,7 +2,9 @@
 
 ## Statut
 
-Draft v1
+**v1 livrée — 2026-04-21**
+
+Toutes les phases (1–7) sont implémentées. La Definition of Done v1 est intégralement satisfaite.
 
 ## Objet
 
