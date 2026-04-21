@@ -77,7 +77,7 @@ def upgrade() -> None:
 
     # ── environments — nouvelles colonnes ─────────────────────────
     op.add_column("environments", sa.Column("discovered_tunnel_id", sa.String(), nullable=True))
-    op.add_column("environments", sa.Column("provisioning_status", sa.String(), nullable=True, server_default="pending"))
+    op.add_column("environments", sa.Column("provisioning_status", sa.String(), nullable=False, server_default="pending"))
     op.create_foreign_key(
         "fk_environments_discovered_tunnel",
         "environments", "discovered_tunnels",
