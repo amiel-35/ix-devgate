@@ -176,3 +176,24 @@ class TunnelHealthSnapshot(Base):
     metadata_json: Mapped[dict | None] = mapped_column(JSON)
 
     environment: Mapped["Environment"] = relationship(back_populates="health_snapshots")
+
+
+# ── EncryptedSecret ───────────────────────────────────────────────
+
+class EncryptedSecret(Base):
+    __tablename__ = "encrypted_secrets"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    secret_ref: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
+    secret_type: Mapped[str] = mapped_column(String, nullable=False)
+    owner_type: Mapped[str | None] = mapped_column(String)
+    owner_id: Mapped[str | None] = mapped_column(String)
+    key_id: Mapped[str] = mapped_column(String, nullable=False, default="v1")
+    # ciphertext contient le tag GCM en suffixe (format natif cryptography.AESGCM)
+    ciphertext: Mapped[str] = mapped_column(Text, nullable=False)   # base64
+    nonce: Mapped[str] = mapped_column(String, nullable=False)       # base64, 12 bytes
+    algorithm: Mapped[str] = mapped_column(String, nullable=False, default="AES-256-GCM")
+    metadata_json: Mapped[dict | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
