@@ -6,6 +6,7 @@ Le navigateur ne voit jamais l'upstream Cloudflare.
 import asyncio
 import logging
 from datetime import datetime, timezone
+from uuid import UUID
 
 import websockets
 import websockets.exceptions
@@ -37,13 +38,13 @@ _EXCLUDED_RESPONSE_HEADERS = frozenset({
     methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
 )
 async def gateway_proxy(
-    env_id: str,
+    env_id: UUID,
     path: str,
     request: Request,
     user: User = Depends(get_current_user),
     db: DbSession = Depends(get_db),
 ):
-    env = resolve_environment(env_id, user, db)
+    env = resolve_environment(str(env_id), user, db)
 
     try:
         secret_store = get_secret_store(db)
@@ -77,7 +78,7 @@ async def gateway_proxy(
 
 @router.websocket("/{env_id}/{path:path}")
 async def gateway_ws_proxy(
-    env_id: str,
+    env_id: UUID,
     path: str,
     websocket: WebSocket,
     db: DbSession = Depends(get_db),
@@ -110,7 +111,7 @@ async def gateway_ws_proxy(
         return
 
     try:
-        env = resolve_environment(env_id, user, db)
+        env = resolve_environment(str(env_id), user, db)
     except (NotFoundException, ForbiddenException):
         await websocket.accept()
         await websocket.close(code=1008)
@@ -140,7 +141,7 @@ async def gateway_ws_proxy(
         actor_user_id=user.id,
         event_type="gateway.resource.accessed",
         target_type="environment",
-        target_id=env_id,
+        target_id=str(env_id),
         metadata={"transport": "websocket"},
     )
     db.commit()

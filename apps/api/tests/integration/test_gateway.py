@@ -21,17 +21,28 @@ from app.shared.models import (
     User,
 )
 
+# Fixed UUIDs used in gateway test fixtures
+_GW_USER = "00000000-0000-0000-0002-000000000010"
+_GW_ORG = "00000000-0000-0000-0002-000000000020"
+_GW_PROJ = "00000000-0000-0000-0002-000000000030"
+_GW_ENV = "00000000-0000-0000-0002-000000000040"
+_GW_GRANT = "00000000-0000-0000-0002-000000000050"
+_GW_ENV_NOGRANT = "00000000-0000-0000-0002-000000000060"
+_GW_ORG_NOGRANT = "00000000-0000-0000-0002-000000000070"
+_GW_PROJ_NOGRANT = "00000000-0000-0000-0002-000000000080"
+_GW_ENV_NONEXISTENT = "00000000-0000-0000-0002-999999999999"
+
 
 # ── Fixtures helpers ─────────────────────────────────────────────
 
-def _make_user(db_session, user_id="u-gw", email="user@gw.test"):
+def _make_user(db_session, user_id=_GW_USER, email="user@gw.test"):
     u = User(id=user_id, email=email, display_name="GW User", kind="client", status="active")
     db_session.add(u)
     db_session.commit()
     return u
 
 
-def _make_session(db_session, user_id="u-gw", session_id="s-gw"):
+def _make_session(db_session, user_id=_GW_USER, session_id="s-gw"):
     s = SessionModel(
         id=session_id,
         user_id=user_id,
@@ -44,16 +55,16 @@ def _make_session(db_session, user_id="u-gw", session_id="s-gw"):
 
 def _make_env(
     db_session,
-    user_id="u-gw",
-    env_id="env-gw",
+    user_id=_GW_USER,
+    env_id=_GW_ENV,
     upstream="upstream.cfargotunnel.com",
     service_token_ref=None,
 ):
-    org = Organization(id="org-gw", name="GW Org", slug="gw-org")
-    proj = Project(id="proj-gw", organization_id="org-gw", name="GW Proj", slug="gw-proj")
+    org = Organization(id=_GW_ORG, name="GW Org", slug="gw-org")
+    proj = Project(id=_GW_PROJ, organization_id=_GW_ORG, name="GW Proj", slug="gw-proj")
     env = Environment(
         id=env_id,
-        project_id="proj-gw",
+        project_id=_GW_PROJ,
         name="GW Env",
         slug="gw-env",
         kind="staging",
@@ -64,9 +75,9 @@ def _make_env(
         status="active",
     )
     grant = AccessGrant(
-        id="grant-gw",
+        id=_GW_GRANT,
         user_id=user_id,
-        organization_id="org-gw",
+        organization_id=_GW_ORG,
         role="client_member",
     )
     db_session.add_all([org, proj, env, grant])
@@ -78,7 +89,7 @@ def _make_env(
 
 def test_gateway_requires_session(client):
     """Sans cookie de session, le gateway retourne 401."""
-    res = client.get("/gateway/env-gw/")
+    res = client.get(f"/gateway/{_GW_ENV}/")
     assert res.status_code == 401
 
 
@@ -90,7 +101,8 @@ def test_gateway_unknown_environment(client, db_session):
     _make_session(db_session)
     client.cookies.set("devgate_session", "s-gw")
 
-    res = client.get("/gateway/env-inexistant/")
+    # Use a valid UUID that doesn't exist in DB → should return 404
+    res = client.get(f"/gateway/{_GW_ENV_NONEXISTENT}/")
     assert res.status_code == 404
 
 
@@ -102,11 +114,11 @@ def test_gateway_forbidden_no_grant(client, db_session):
     _make_session(db_session)
 
     # Créer l'env sans grant pour cet utilisateur
-    org = Organization(id="org-nogrant", name="Other Org", slug="other-org")
-    proj = Project(id="proj-nogrant", organization_id="org-nogrant", name="P", slug="p")
+    org = Organization(id=_GW_ORG_NOGRANT, name="Other Org", slug="other-org")
+    proj = Project(id=_GW_PROJ_NOGRANT, organization_id=_GW_ORG_NOGRANT, name="P", slug="p")
     env = Environment(
-        id="env-nogrant",
-        project_id="proj-nogrant",
+        id=_GW_ENV_NOGRANT,
+        project_id=_GW_PROJ_NOGRANT,
         name="E",
         slug="e",
         kind="staging",
@@ -118,7 +130,7 @@ def test_gateway_forbidden_no_grant(client, db_session):
     db_session.commit()
 
     client.cookies.set("devgate_session", "s-gw")
-    res = client.get("/gateway/env-nogrant/")
+    res = client.get(f"/gateway/{_GW_ENV_NOGRANT}/")
     assert res.status_code == 403
 
 
@@ -140,7 +152,7 @@ def test_gateway_proxies_get_request(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    res = client.get("/gateway/env-gw/")
+    res = client.get(f"/gateway/{_GW_ENV}/")
 
     assert res.status_code == 200
     assert b"Hello from upstream" in res.content
@@ -158,7 +170,7 @@ def test_gateway_proxies_subpath(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    res = client.get("/gateway/env-gw/api/data")
+    res = client.get(f"/gateway/{_GW_ENV}/api/data")
 
     assert res.status_code == 200
     assert res.json() == {"key": "value"}
@@ -176,7 +188,7 @@ def test_gateway_creates_audit_event(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    client.get("/gateway/env-gw/")
+    client.get(f"/gateway/{_GW_ENV}/")
 
     event = (
         db_session.query(AuditEvent)
@@ -184,8 +196,8 @@ def test_gateway_creates_audit_event(client, db_session):
         .first()
     )
     assert event is not None
-    assert event.actor_user_id == "u-gw"
-    assert event.target_id == "env-gw"
+    assert event.actor_user_id == _GW_USER
+    assert event.target_id == _GW_ENV
 
 
 @respx.mock
@@ -200,7 +212,7 @@ def test_gateway_upstream_unavailable_returns_502(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    res = client.get("/gateway/env-gw/")
+    res = client.get(f"/gateway/{_GW_ENV}/")
 
     assert res.status_code == 502
 
@@ -221,7 +233,7 @@ def test_gateway_injects_cf_service_token(client, db_session, monkeypatch):
     from app.modules.secrets.store import EncryptedDatabaseSecretStore
     store = EncryptedDatabaseSecretStore(master_key_b64=TEST_MASTER_KEY, db=db_session)
     payload = _json.dumps({"client_id": "test-client-id", "client_secret": "test-client-secret"})
-    ref = store.put("cloudflare_service_token", payload, owner_type="environment", owner_id="env-gw")
+    ref = store.put("cloudflare_service_token", payload, owner_type="environment", owner_id=_GW_ENV)
     db_session.commit()
 
     _make_env(db_session, service_token_ref=ref)
@@ -235,7 +247,7 @@ def test_gateway_injects_cf_service_token(client, db_session, monkeypatch):
     respx.get("https://upstream.cfargotunnel.com/").mock(side_effect=capture)
 
     client.cookies.set("devgate_session", "s-gw")
-    client.get("/gateway/env-gw/")
+    client.get(f"/gateway/{_GW_ENV}/")
 
     assert captured_headers.get("cf-access-client-id") == "test-client-id"
     assert captured_headers.get("cf-access-client-secret") == "test-client-secret"
@@ -253,7 +265,7 @@ def test_gateway_audit_includes_latency_ms(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    client.get("/gateway/env-gw/")
+    client.get(f"/gateway/{_GW_ENV}/")
 
     event = (
         db_session.query(AuditEvent)
@@ -279,7 +291,7 @@ def test_gateway_audit_marks_5xx(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    client.get("/gateway/env-gw/")
+    client.get(f"/gateway/{_GW_ENV}/")
 
     event = (
         db_session.query(AuditEvent)
@@ -302,7 +314,7 @@ def test_gateway_audit_marks_cf_refused(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    client.get("/gateway/env-gw/")
+    client.get(f"/gateway/{_GW_ENV}/")
 
     event = (
         db_session.query(AuditEvent)
@@ -325,7 +337,7 @@ def test_gateway_unavailable_creates_failed_audit_event(client, db_session):
     )
 
     client.cookies.set("devgate_session", "s-gw")
-    res = client.get("/gateway/env-gw/")
+    res = client.get(f"/gateway/{_GW_ENV}/")
     assert res.status_code == 502
 
     event = (
