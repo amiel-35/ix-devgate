@@ -403,3 +403,54 @@ def test_store_service_token_unknown_env_returns_404(client, db_session, monkeyp
         json={"client_id": "x", "client_secret": "y"},
     )
     assert res.status_code == 404
+
+
+# ── GET /admin/environments — health_status ───────────────────────
+
+from datetime import datetime, timezone
+from app.shared.models import TunnelHealthSnapshot
+
+
+def _make_health_snapshot(db_session, env_id="env-1", status="online", latency_ms=95):
+    snap = TunnelHealthSnapshot(
+        id=f"snap-{env_id}",
+        environment_id=env_id,
+        status=status,
+        observed_at=datetime.now(tz=timezone.utc),
+        metadata_json={"latency_ms": latency_ms, "status_code": 200},
+    )
+    db_session.add(snap)
+    db_session.commit()
+    return snap
+
+
+def test_list_envs_health_status_null_when_no_snapshot(client, db_session):
+    """health_status est None si aucun snapshot n'existe."""
+    _make_admin(db_session)
+    _auth(client)
+    _make_org(db_session)
+    _make_project(db_session)
+    _make_env(db_session)
+
+    r = client.get("/admin/environments")
+    assert r.status_code == 200
+    envs = r.json()
+    assert len(envs) == 1
+    assert envs[0]["health_status"] is None
+    assert envs[0]["health_latency_ms"] is None
+
+
+def test_list_envs_health_status_reflects_latest_snapshot(client, db_session):
+    """health_status reflète le dernier snapshot disponible."""
+    _make_admin(db_session)
+    _auth(client)
+    _make_org(db_session)
+    _make_project(db_session)
+    _make_env(db_session)
+    _make_health_snapshot(db_session, env_id="env-1", status="online", latency_ms=95)
+
+    r = client.get("/admin/environments")
+    assert r.status_code == 200
+    envs = r.json()
+    assert envs[0]["health_status"] == "online"
+    assert envs[0]["health_latency_ms"] == 95

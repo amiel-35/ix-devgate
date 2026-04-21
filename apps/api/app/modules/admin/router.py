@@ -39,6 +39,7 @@ from app.shared.models import (
     Organization,
     Project,
     ProvisioningJob,
+    TunnelHealthSnapshot,
     User,
 )
 
@@ -147,6 +148,31 @@ def list_environments(db: DbSession = Depends(get_db)):
         .options(joinedload(Environment.project).joinedload(Project.organization))
         .all()
     )
+
+    # Dernier snapshot de santé par environnement (une seule requête groupée)
+    env_ids = [e.id for e in envs]
+    snap_by_env: dict = {}
+    if env_ids:
+        latest_subq = (
+            db.query(
+                TunnelHealthSnapshot.environment_id,
+                func.max(TunnelHealthSnapshot.observed_at).label("max_ts"),
+            )
+            .filter(TunnelHealthSnapshot.environment_id.in_(env_ids))
+            .group_by(TunnelHealthSnapshot.environment_id)
+            .subquery()
+        )
+        snaps = (
+            db.query(TunnelHealthSnapshot)
+            .join(
+                latest_subq,
+                (TunnelHealthSnapshot.environment_id == latest_subq.c.environment_id)
+                & (TunnelHealthSnapshot.observed_at == latest_subq.c.max_ts),
+            )
+            .all()
+        )
+        snap_by_env = {s.environment_id: s for s in snaps}
+
     return [
         {
             "id": e.id,
@@ -160,6 +186,12 @@ def list_environments(db: DbSession = Depends(get_db)):
             "cloudflare_tunnel_id": e.cloudflare_tunnel_id,
             "org_name": e.project.organization.name,
             "project_name": e.project.name,
+            "health_status": snap_by_env[e.id].status if e.id in snap_by_env else None,
+            "health_latency_ms": (
+                snap_by_env[e.id].metadata_json.get("latency_ms")
+                if e.id in snap_by_env and snap_by_env[e.id].metadata_json
+                else None
+            ),
         }
         for e in envs
     ]
