@@ -117,8 +117,8 @@ class EncryptedDatabaseSecretStore(SecretStore):
             {
                 "secret_ref": secret_ref,
                 "secret_type": secret_type,
-                "owner_type": owner_type or "",
-                "owner_id": owner_id or "",
+                "owner_type": owner_type,
+                "owner_id": owner_id,
                 "key_id": key_id,
             },
             sort_keys=True,
