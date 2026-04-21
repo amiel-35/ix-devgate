@@ -75,6 +75,8 @@ export type AdminEnvItem = {
   cloudflare_tunnel_id: string | null;
   org_name: string;
   project_name: string;
+  health_status: "online" | "offline" | "unknown" | null;
+  health_latency_ms: number | null;
 };
 
 export type GrantItem = {
