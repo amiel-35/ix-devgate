@@ -26,6 +26,10 @@ def get_current_session(
     if expires_at < datetime.now(tz=timezone.utc):
         raise UnauthorizedException()
 
+    user = db.query(User).filter(User.id == session.user_id).first()
+    if not user or user.status != "active":
+        raise UnauthorizedException("Compte désactivé")
+
     session.last_seen_at = datetime.now(tz=timezone.utc)
     db.commit()
     return session
@@ -38,6 +42,8 @@ def get_current_user(
     user = db.query(User).filter(User.id == session.user_id).first()
     if not user:
         raise UnauthorizedException()
+    if user.status != "active":
+        raise UnauthorizedException("Compte désactivé")
     return user
 
 

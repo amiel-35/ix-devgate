@@ -69,6 +69,34 @@ def test_logout_clears_cookie(client, db_session):
     assert res.status_code == 200
 
 
+def test_inactive_user_is_rejected(client, db_session):
+    """Un user inactif doit recevoir 401 même avec une session valide."""
+    from app.shared.models import User, Session as DevSession
+    import uuid, datetime
+    user = User(
+        id=str(uuid.uuid4()),
+        email="inactive@example.com",
+        kind="client",
+        status="inactive",
+    )
+    db_session.add(user)
+    session = DevSession(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(days=7),
+    )
+    db_session.add(session)
+    db_session.commit()
+
+    response = client.post(
+        "/auth/logout",
+        cookies={"devgate_session": session.id},
+    )
+    assert response.status_code == 401, (
+        f"Un user inactif doit être rejeté, got {response.status_code}"
+    )
+
+
 def test_logout_revokes_session_in_db(client, db_session):
     """Après logout, la session doit être supprimée en base."""
     from app.shared.models import User, Session as DevSession
