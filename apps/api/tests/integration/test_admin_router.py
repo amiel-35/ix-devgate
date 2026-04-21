@@ -351,3 +351,55 @@ def test_list_audit_events_limit_capped(client, db_session):
     r = client.get("/admin/audit-events?limit=999")
     # FastAPI retourne 422 si la valeur dépasse le max Query(le=200)
     assert r.status_code == 422
+
+
+# ── PUT /admin/environments/{id}/service-token ────────────────────
+
+import base64
+
+_TEST_MASTER_KEY_4 = base64.b64encode(b"devgate-test-key-32bytes-padding!").decode()
+
+
+def _make_env_for_token_test(db_session):
+    org = Organization(id="org-tok2", name="Token Org", slug="tok-org2")
+    proj = Project(id="proj-tok2", organization_id="org-tok2", name="P", slug="p2")
+    env = Environment(
+        id="env-tok2", project_id="proj-tok2", name="E", slug="e2",
+        kind="staging", public_hostname="e2.example.com",
+        upstream_hostname="upstream2.example.com", status="active",
+    )
+    db_session.add_all([org, proj, env])
+    db_session.commit()
+
+
+def test_store_service_token_sets_ref(client, db_session, monkeypatch):
+    """PUT /admin/environments/{id}/service-token stocke le token et met à jour service_token_ref."""
+    monkeypatch.setenv("DEVGATE_MASTER_KEY", _TEST_MASTER_KEY_4)
+
+    _make_admin(db_session)
+    _auth(client)
+    _make_env_for_token_test(db_session)
+
+    res = client.put(
+        "/admin/environments/env-tok2/service-token",
+        json={"client_id": "cf-id-123", "client_secret": "cf-secret-456"},
+    )
+    assert res.status_code == 200, res.text
+    assert res.json()["ok"] is True
+
+    db_session.expire_all()
+    env = db_session.query(Environment).filter(Environment.id == "env-tok2").first()
+    assert env.service_token_ref is not None
+    assert env.service_token_ref.startswith("sec_")
+
+
+def test_store_service_token_unknown_env_returns_404(client, db_session, monkeypatch):
+    monkeypatch.setenv("DEVGATE_MASTER_KEY", _TEST_MASTER_KEY_4)
+    _make_admin(db_session)
+    _auth(client)
+
+    res = client.put(
+        "/admin/environments/env-inexistant/service-token",
+        json={"client_id": "x", "client_secret": "y"},
+    )
+    assert res.status_code == 404

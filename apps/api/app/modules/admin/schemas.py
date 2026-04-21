@@ -51,3 +51,8 @@ class StatsResponse(BaseModel):
     active_envs: int
     active_users: int
     events_today: int
+
+
+class StoreServiceTokenRequest(BaseModel):
+    client_id: str
+    client_secret: str

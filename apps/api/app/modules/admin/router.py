@@ -2,6 +2,7 @@
 Back-office agence — CRUD clients, projets, environnements, accès, audit, stats.
 Toutes les routes exigent agency_admin.
 """
+import json
 from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, Query
@@ -18,8 +19,11 @@ from app.modules.admin.schemas import (
     CreateOrganizationRequest,
     CreateProjectRequest,
     StatsResponse,
+    StoreServiceTokenRequest,
 )
 from app.modules.audit.service import audit
+from app.modules.secrets.deps import get_secret_store
+from app.modules.secrets.store import SecretNotFoundError
 from app.shared.deps import require_agency_admin
 from app.shared.exceptions import NotFoundException
 from app.shared.models import (
@@ -189,6 +193,50 @@ async def ping_environment(
         "observed_at": snapshot.observed_at.isoformat(),
         "latency_ms": snapshot.metadata_json.get("latency_ms") if snapshot.metadata_json else None,
     }
+
+
+@router.put("/environments/{env_id}/service-token", status_code=200)
+def store_service_token(
+    env_id: str,
+    body: StoreServiceTokenRequest,
+    db: DbSession = Depends(get_db),
+    admin=Depends(require_agency_admin),
+):
+    """Stocke ou remplace le service token Cloudflare Access d'un environnement.
+    Le token est chiffré en base — jamais stocké en clair.
+    """
+    env = db.query(Environment).filter(Environment.id == env_id).first()
+    if not env:
+        raise NotFoundException()
+
+    secret_store = get_secret_store(db)
+
+    # Révoquer l'ancien token si présent
+    if env.service_token_ref:
+        try:
+            secret_store.revoke(env.service_token_ref)
+        except SecretNotFoundError:
+            pass  # Déjà absent, idempotent
+
+    payload = json.dumps({"client_id": body.client_id, "client_secret": body.client_secret})
+    ref = secret_store.put(
+        secret_type="cloudflare_service_token",
+        plaintext=payload,
+        owner_type="environment",
+        owner_id=env_id,
+    )
+    env.service_token_ref = ref
+
+    audit(
+        db,
+        actor_user_id=admin.id,
+        event_type="admin.service_token.stored",
+        target_type="environment",
+        target_id=env_id,
+        metadata={"has_token": True},
+    )
+    db.commit()
+    return {"ok": True}
 
 
 # ── Accès (grants) ────────────────────────────────────────────────
