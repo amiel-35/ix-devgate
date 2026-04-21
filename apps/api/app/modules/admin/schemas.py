@@ -56,3 +56,17 @@ class StatsResponse(BaseModel):
 class StoreServiceTokenRequest(BaseModel):
     client_id: str
     client_secret: str
+
+
+class DiscoveredTunnelItem(BaseModel):
+    id: str
+    cloudflare_tunnel_id: str
+    name: str
+    status: str
+    last_seen_at: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class AssignTunnelRequest(BaseModel):
+    environment_id: str

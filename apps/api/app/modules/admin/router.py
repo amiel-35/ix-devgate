@@ -16,6 +16,7 @@ from app.modules.gateway.health import check_environment_health
 
 from app.database import get_db
 from app.modules.admin.schemas import (
+    AssignTunnelRequest,
     AuditEventResponse,
     CreateAccessGrantRequest,
     CreateEnvironmentRequest,
@@ -361,3 +362,59 @@ def trigger_cf_sync(
         zone_id=settings.CF_ZONE_ID,
     )
     return sync_tunnels(db, cf)
+
+
+@router.get("/discovered-tunnels")
+def list_discovered_tunnels(
+    db: DbSession = Depends(get_db),
+    admin=Depends(require_agency_admin),
+):
+    """Liste tous les tunnels découverts, ordonnés par date de création décroissante."""
+    tunnels = (
+        db.query(DiscoveredTunnel)
+        .order_by(DiscoveredTunnel.created_at.desc())
+        .all()
+    )
+    return [
+        {
+            "id": t.id,
+            "cloudflare_tunnel_id": t.cloudflare_tunnel_id,
+            "name": t.name,
+            "status": t.status,
+            "last_seen_at": t.last_seen_at.isoformat() if t.last_seen_at else None,
+        }
+        for t in tunnels
+    ]
+
+
+@router.post("/discovered-tunnels/{tunnel_id}/assign", status_code=200)
+def assign_tunnel_to_environment(
+    tunnel_id: str,
+    body: AssignTunnelRequest,
+    db: DbSession = Depends(get_db),
+    admin=Depends(require_agency_admin),
+):
+    """Affecte un tunnel découvert à un environnement DevGate."""
+    tunnel = db.query(DiscoveredTunnel).filter(DiscoveredTunnel.id == tunnel_id).first()
+    if not tunnel:
+        raise NotFoundException()
+
+    env = db.query(Environment).filter(Environment.id == body.environment_id).first()
+    if not env:
+        raise NotFoundException()
+
+    tunnel.status = "assigned"
+    env.cloudflare_tunnel_id = tunnel.cloudflare_tunnel_id
+    env.upstream_hostname = f"{tunnel.cloudflare_tunnel_id}.cfargotunnel.com"
+    env.discovered_tunnel_id = tunnel.id
+
+    audit(
+        db,
+        actor_user_id=admin.id,
+        event_type="admin.tunnel.assigned",
+        target_type="environment",
+        target_id=env.id,
+        metadata={"tunnel_id": tunnel.cloudflare_tunnel_id, "tunnel_name": tunnel.name},
+    )
+    db.commit()
+    return {"ok": True}
