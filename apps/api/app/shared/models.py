@@ -96,6 +96,13 @@ class Environment(Base):
     project: Mapped["Project"] = relationship(back_populates="environments")
     health_snapshots: Mapped[list["TunnelHealthSnapshot"]] = relationship(back_populates="environment")
 
+    # Cloudflare — colonnes de provisioning
+    discovered_tunnel_id: Mapped[str | None] = mapped_column(ForeignKey("discovered_tunnels.id"))
+    provisioning_status: Mapped[str] = mapped_column(String, default="pending")
+    # provisioning_status : pending | provisioning | active | failed
+
+    provisioning_jobs: Mapped[list["ProvisioningJob"]] = relationship(back_populates="environment")
+
 
 # ── AccessGrant ───────────────────────────────────────────────────
 
@@ -197,3 +204,46 @@ class EncryptedSecret(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     rotated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+# ── DiscoveredTunnel ──────────────────────────────────────────────
+
+class DiscoveredTunnel(Base):
+    __tablename__ = "discovered_tunnels"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    cloudflare_tunnel_id: Mapped[str] = mapped_column(String, unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False, default="discovered")
+    # status : discovered | assigned | orphaned
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    metadata_json: Mapped[dict | None] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ── ProvisioningJob ───────────────────────────────────────────────
+
+class ProvisioningJob(Base):
+    __tablename__ = "provisioning_jobs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=new_uuid)
+    environment_id: Mapped[str] = mapped_column(ForeignKey("environments.id"), nullable=False, index=True)
+    provider: Mapped[str] = mapped_column(String, nullable=False, default="cloudflare")
+    state: Mapped[str] = mapped_column(String, nullable=False, default="pending")
+    # states : pending|creating_access_app|access_app_created|creating_policy|policy_created|
+    #          creating_service_token|service_token_created_unsealed|secret_persisted|
+    #          creating_dns|active|failed_recoverable|failed_terminal|compensating|rolled_back
+    attempt_count: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str | None] = mapped_column(Text)
+
+    cloudflare_access_app_id: Mapped[str | None] = mapped_column(String)
+    cloudflare_policy_id: Mapped[str | None] = mapped_column(String)
+    cloudflare_service_token_id: Mapped[str | None] = mapped_column(String)
+    dns_record_id: Mapped[str | None] = mapped_column(String)
+    secret_persisted: Mapped[bool] = mapped_column(Boolean, default=False)
+    dns_published: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    environment: Mapped["Environment"] = relationship(back_populates="provisioning_jobs")

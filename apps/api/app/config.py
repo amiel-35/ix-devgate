@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     # Cloudflare — jamais exposé vers le frontend
     CF_API_TOKEN: str = ""
     CF_ACCOUNT_ID: str = ""
+    CF_ZONE_ID: str = ""   # Zone DNS pour les routes hostname
 
 
 settings = Settings()
