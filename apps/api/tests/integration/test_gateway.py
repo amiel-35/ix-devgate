@@ -207,17 +207,28 @@ def test_gateway_upstream_unavailable_returns_502(client, db_session):
 
 @respx.mock
 def test_gateway_injects_cf_service_token(client, db_session, monkeypatch):
-    """Quand service_token_ref est défini, les headers CF-Access-* sont injectés."""
+    """Quand service_token_ref est défini, les headers CF-Access-* sont injectés via SecretStore."""
+    import base64
+    import json as _json
+
+    TEST_MASTER_KEY = base64.b64encode(b"devgate-test-key-32bytes-padding!").decode()
+    monkeypatch.setenv("DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
+
     _make_user(db_session)
     _make_session(db_session)
-    _make_env(db_session, service_token_ref="MY_TOKEN")
 
-    monkeypatch.setenv("CF_SERVICE_TOKEN_MY_TOKEN_ID", "test-client-id")
-    monkeypatch.setenv("CF_SERVICE_TOKEN_MY_TOKEN_SECRET", "test-client-secret")
+    # Stocker le token dans le SecretStore avant de créer l'env
+    from app.modules.secrets.store import EncryptedDatabaseSecretStore
+    store = EncryptedDatabaseSecretStore(master_key_b64=TEST_MASTER_KEY, db=db_session)
+    payload = _json.dumps({"client_id": "test-client-id", "client_secret": "test-client-secret"})
+    ref = store.put("cloudflare_service_token", payload, owner_type="environment", owner_id="env-gw")
+    db_session.commit()
+
+    _make_env(db_session, service_token_ref=ref)
 
     captured_headers: dict = {}
 
-    def capture(request: httpx.Request, *args, **kwargs) -> httpx.Response:
+    def capture(request: httpx.Request) -> httpx.Response:
         captured_headers.update(dict(request.headers))
         return httpx.Response(200, content=b"ok")
 

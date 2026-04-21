@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session as DbSession
 from app.database import get_db
 from app.modules.audit.service import audit
 from app.modules.gateway.service import proxy_request, resolve_environment, get_upstream_proxy_headers
+from app.modules.secrets.deps import get_secret_store
 from app.shared.deps import get_current_user
 from app.shared.exceptions import ForbiddenException, NotFoundException
 from app.shared.models import Session as SessionModel, User
@@ -44,6 +45,11 @@ async def gateway_proxy(
 ):
     env = resolve_environment(env_id, user, db)
 
+    try:
+        secret_store = get_secret_store(db)
+    except RuntimeError:
+        secret_store = None  # DEVGATE_MASTER_KEY absente — CF token non injecté
+
     body = await request.body()
     upstream_response = await proxy_request(
         env=env,
@@ -53,6 +59,7 @@ async def gateway_proxy(
         body=body or None,
         user=user,
         db=db,
+        secret_store=secret_store,
     )
 
     # Construire la réponse en préservant les headers multi-valeurs (Set-Cookie, etc.)
@@ -114,10 +121,15 @@ async def gateway_ws_proxy(
         await websocket.close(code=1011)  # Internal Error
         return
 
+    try:
+        secret_store = get_secret_store(db)
+    except RuntimeError:
+        secret_store = None  # DEVGATE_MASTER_KEY absente — CF token non injecté
+
     upstream_ws_url = f"wss://{env.upstream_hostname}/{path}"
 
     # Build upstream headers (includes CF Access credentials if configured)
-    upstream_headers = get_upstream_proxy_headers(env, user.id, {})
+    upstream_headers = get_upstream_proxy_headers(env, user.id, {}, secret_store)
     # Convert to list of (name, value) tuples for websockets library
     ws_extra_headers = list(upstream_headers.items())
 

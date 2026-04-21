@@ -7,12 +7,14 @@ Règles critiques :
 - ne renvoie jamais l'upstream_hostname ni le service_token au navigateur
 - distingue : non autorisé / ressource introuvable / upstream KO
 """
+import json
 from datetime import timezone
 
 import httpx
 from sqlalchemy.orm import Session as DbSession
 
 from app.modules.audit.service import audit
+from app.modules.secrets.store import SecretStore, SecretNotFoundError, SecretRevokedError
 from app.shared.exceptions import (
     ForbiddenException, NotFoundException, UpstreamUnavailableException,
 )
@@ -45,22 +47,30 @@ def resolve_environment(env_id: str, user: User, db: DbSession) -> Environment:
     return env
 
 
-def _get_service_token(token_ref: str) -> tuple[str, str]:
-    """Récupère le service token Cloudflare depuis le secret store.
-    En v1 : depuis les variables d'environnement.
+def _get_service_token(token_ref: str, secret_store: SecretStore) -> tuple[str, str]:
+    """Récupère les credentials CF Access depuis le SecretStore chiffré.
+
+    Retourne ("", "") si le token est absent, révoqué ou illisible.
+    Ne lève jamais d'exception — un token manquant doit résulter en un rejet CF, pas un crash.
     """
-    import os
-    client_id = os.environ.get(f"CF_SERVICE_TOKEN_{token_ref}_ID", "")
-    client_secret = os.environ.get(f"CF_SERVICE_TOKEN_{token_ref}_SECRET", "")
-    return client_id, client_secret
+    try:
+        payload = json.loads(secret_store.get(token_ref))
+        return payload.get("client_id", ""), payload.get("client_secret", "")
+    except (SecretNotFoundError, SecretRevokedError, Exception):
+        return "", ""
 
 
-def get_upstream_proxy_headers(env: Environment, user_id: str, request_headers: dict) -> dict:
+def get_upstream_proxy_headers(
+    env: Environment,
+    user_id: str,
+    request_headers: dict,
+    secret_store: SecretStore | None = None,
+) -> dict:
     """Construit les headers à envoyer à l'upstream.
 
     - Retire les headers de session et de transport
     - Empêche le spoofing de X-DevGate-User côté client
-    - Injecte les credentials CF Access si service_token_ref configuré
+    - Injecte les credentials CF Access via SecretStore si service_token_ref configuré
     """
     proxy_headers = {
         k: v for k, v in request_headers.items()
@@ -69,8 +79,8 @@ def get_upstream_proxy_headers(env: Environment, user_id: str, request_headers: 
     proxy_headers["Accept-Encoding"] = "identity"
     proxy_headers["X-DevGate-User"] = user_id
 
-    if env.service_token_ref:
-        cf_client_id, cf_client_secret = _get_service_token(env.service_token_ref)
+    if env.service_token_ref and secret_store is not None:
+        cf_client_id, cf_client_secret = _get_service_token(env.service_token_ref, secret_store)
         if cf_client_id:
             proxy_headers["CF-Access-Client-Id"] = cf_client_id
         if cf_client_secret:
@@ -87,6 +97,7 @@ async def proxy_request(
     body: bytes | None,
     user: User,
     db: DbSession,
+    secret_store: SecretStore | None = None,
 ) -> httpx.Response:
     """Proxifie la requête vers l'upstream Cloudflare protégé."""
     if not env.upstream_hostname:
@@ -94,7 +105,7 @@ async def proxy_request(
 
     upstream_url = f"https://{env.upstream_hostname}{path}"
 
-    proxy_headers = get_upstream_proxy_headers(env, user.id, headers)
+    proxy_headers = get_upstream_proxy_headers(env, user.id, headers, secret_store)
 
     try:
         async with httpx.AsyncClient(timeout=30.0, follow_redirects=False) as client:
