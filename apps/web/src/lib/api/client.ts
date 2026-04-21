@@ -156,6 +156,11 @@ export const adminApi = {
         method: "POST",
         body: JSON.stringify(data),
       }),
+    ping: (envId: string) =>
+      request<{ environment_id: string; status: string; observed_at: string; latency_ms: number | null }>(
+        `/admin/environments/${envId}/ping`,
+        { method: "POST" },
+      ),
   },
   grants: {
     list: () => request<GrantItem[]>("/admin/access-grants"),
