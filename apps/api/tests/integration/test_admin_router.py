@@ -40,7 +40,7 @@ def _make_admin(db_session, session_id="s-admin"):
     db_session.add(org_agency)
     grant = AccessGrant(
         id="grant-admin-1",
-        user_id="admin-1",
+        user_id=_UUID_ADMIN,
         organization_id="org-agency",
         role="agency_admin",
     )
@@ -171,7 +171,7 @@ def test_list_orgs_with_counts(client, db_session):
     orgs = r.json()
     # org-agency (admin grant) + org-1 (client) = 2
     assert len(orgs) == 2
-    client_org = next(o for o in orgs if o["id"] == "org-1")
+    client_org = next(o for o in orgs if o["id"] == _UUID_ORG_1)
     assert client_org["name"] == "Client X"
     assert client_org["env_count"] == 1
     assert client_org["user_count"] == 0
@@ -306,7 +306,7 @@ def test_list_grants_enriched(client, db_session):
     grants = r.json()
     # grant-admin-1 (agency_admin) + grant-1 (client_member) = 2
     assert len(grants) == 2
-    client_grant = next(g for g in grants if g["id"] == "grant-1")
+    client_grant = next(g for g in grants if g["id"] == _UUID_GRANT_1)
     assert client_grant["user_email"] == "client@test.com"
     assert client_grant["org_name"] == "Client X"
     assert client_grant["revoked_at"] is None
