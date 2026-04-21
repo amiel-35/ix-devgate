@@ -1,6 +1,6 @@
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, StringConstraints
 
 
 class LoginStartRequest(BaseModel):
@@ -14,7 +14,7 @@ class LoginStartResponse(BaseModel):
 
 
 class LoginVerifyRequest(BaseModel):
-    token: str
+    token: Annotated[str, StringConstraints(min_length=1, max_length=256)]
 
 
 class LoginVerifyResponse(BaseModel):
