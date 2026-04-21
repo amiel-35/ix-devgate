@@ -6,6 +6,12 @@ Portail d'accès sécurisé aux environnements de développement — sans expose
 
 ---
 
+| Connexion sans mot de passe | Back-office agence |
+|:---------------------------:|:-----------------:|
+| ![Écran de connexion](docs/screenshots/login.png) | ![Gestion des environnements](docs/screenshots/admin-environments.png) |
+
+---
+
 ## Présentation
 
 DevGate est un portail que les agences déploient pour donner à leurs clients un accès contrôlé à leurs environnements de dev, staging ou preview. L'utilisateur se connecte sur une interface brandée agence, voit les ressources auxquelles il a accès, et les ouvre directement depuis le portail — sans jamais connaître l'adresse réelle du serveur.
