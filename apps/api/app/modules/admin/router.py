@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as DbSession, joinedload
 
 from app.config import settings
 from app.modules.cloudflare.client import CFClient
+from app.modules.cloudflare.provisioner import ProvisioningError, run_provisioning_job
 from app.modules.cloudflare.sync import sync_tunnels
 from app.modules.gateway.health import check_environment_health
 
@@ -37,6 +38,7 @@ from app.shared.models import (
     Environment,
     Organization,
     Project,
+    ProvisioningJob,
     User,
 )
 
@@ -387,6 +389,20 @@ def list_discovered_tunnels(
     ]
 
 
+def _get_cf_client_for_activate():
+    """Crée le CFClient depuis la config. Séparé pour permettre le mock dans les tests."""
+    if not settings.CF_API_TOKEN or not settings.CF_ACCOUNT_ID:
+        raise HTTPException(
+            status_code=503,
+            detail="CF_API_TOKEN ou CF_ACCOUNT_ID non configurés",
+        )
+    return CFClient(
+        api_token=settings.CF_API_TOKEN,
+        account_id=settings.CF_ACCOUNT_ID,
+        zone_id=settings.CF_ZONE_ID,
+    )
+
+
 @router.post("/discovered-tunnels/{tunnel_id}/assign", status_code=200)
 def assign_tunnel_to_environment(
     tunnel_id: str,
@@ -418,3 +434,46 @@ def assign_tunnel_to_environment(
     )
     db.commit()
     return {"ok": True}
+
+
+@router.post("/environments/{env_id}/activate", status_code=200)
+def activate_environment(
+    env_id: str,
+    db: DbSession = Depends(get_db),
+    admin=Depends(require_agency_admin),
+):
+    """Lance le provisioning CF pour un environnement (ADR-001 saga).
+    Nécessite : CF credentials configurés + tunnel assigné sur l'environnement.
+    """
+    env = db.query(Environment).filter(Environment.id == env_id).first()
+    if not env:
+        raise NotFoundException()
+
+    if not env.cloudflare_tunnel_id:
+        raise HTTPException(
+            status_code=422,
+            detail="Aucun tunnel assigné à cet environnement — assignez d'abord un DiscoveredTunnel",
+        )
+
+    cf = _get_cf_client_for_activate()
+    secret_store = get_secret_store(db)
+
+    job = ProvisioningJob(environment_id=env_id, state="pending")
+    db.add(job)
+    db.flush()
+
+    try:
+        final_state = run_provisioning_job(job, env, cf, secret_store, db)
+    except ProvisioningError as e:
+        return {"job_id": job.id, "state": job.state, "error": str(e)}
+
+    audit(
+        db,
+        actor_user_id=admin.id,
+        event_type="admin.environment.activated",
+        target_type="environment",
+        target_id=env_id,
+        metadata={"job_id": job.id, "final_state": final_state},
+    )
+    db.commit()
+    return {"job_id": job.id, "state": final_state}

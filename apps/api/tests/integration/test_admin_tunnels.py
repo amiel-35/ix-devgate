@@ -99,3 +99,42 @@ def test_assign_tunnel_unknown_env_returns_404(client, db_session):
         json={"environment_id": "env-inexistant"},
     )
     assert res.status_code == 404
+
+
+import base64
+
+
+def test_activate_environment_runs_provisioner(client, db_session, monkeypatch):
+    """POST /admin/environments/{id}/activate crée un ProvisioningJob et le démarre."""
+    TEST_MASTER_KEY = base64.b64encode(b"a" * 32).decode()
+    monkeypatch.setenv("DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
+
+    # Setup env avec tunnel assigné
+    _setup_admin(db_session)
+    _auth(client, db_session)
+    tunnel = _make_tunnel(db_session, status="assigned")
+    env = _make_env(db_session)
+    env.cloudflare_tunnel_id = tunnel.cloudflare_tunnel_id
+    db_session.commit()
+
+    # Injecter un FakeCFClient pour ne pas appeler la vraie API
+    from app.modules.cloudflare.fake_client import FakeCFClient
+    fake = FakeCFClient()
+
+    monkeypatch.setattr(
+        "app.modules.admin.router._get_cf_client_for_activate",
+        lambda: fake,
+    )
+
+    res = client.post("/admin/environments/env-tun/activate")
+    assert res.status_code == 200, res.text
+    data = res.json()
+    assert data["state"] == "active"
+    assert data["job_id"] is not None
+
+    from app.shared.models import ProvisioningJob
+    job = db_session.query(ProvisioningJob).filter(
+        ProvisioningJob.environment_id == "env-tun"
+    ).first()
+    assert job is not None
+    assert job.state == "active"
