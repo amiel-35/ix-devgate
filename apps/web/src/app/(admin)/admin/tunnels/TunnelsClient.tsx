@@ -155,21 +155,23 @@ export function TunnelsClient({
                       </button>
                     </div>
                   )}
-                  {t.status === "assigned" && (
-                    <button
-                      onClick={() => {
-                        const envId = selectedEnv[t.id];
-                        if (envId) {
-                          handleActivate(envId);
-                        } else {
-                          setMessage("Sélectionnez l'environnement lié pour activer");
-                        }
-                      }}
-                      style={{ padding: "0.4rem 0.8rem", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.9em" }}
-                    >
-                      Activer
-                    </button>
-                  )}
+                  {t.status === "assigned" && (() => {
+                    const linkedEnv = envs.find((e) => e.cloudflare_tunnel_id === t.cloudflare_tunnel_id);
+                    return (
+                      <button
+                        onClick={() => {
+                          if (linkedEnv) {
+                            handleActivate(linkedEnv.id);
+                          } else {
+                            setMessage("Environnement lié introuvable — vérifiez l'assignation");
+                          }
+                        }}
+                        style={{ padding: "0.4rem 0.8rem", background: "#16a34a", color: "#fff", border: "none", borderRadius: "4px", cursor: "pointer", fontSize: "0.9em" }}
+                      >
+                        Activer
+                      </button>
+                    );
+                  })()}
                   {t.status === "orphaned" && (
                     <span style={{ color: "#dc2626", fontSize: "0.9em" }}>Orphelin — vérifier CF</span>
                   )}

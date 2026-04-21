@@ -157,6 +157,7 @@ def list_environments(db: DbSession = Depends(get_db)):
             "public_hostname": e.public_hostname,
             "requires_app_auth": e.requires_app_auth,
             "status": e.status,
+            "cloudflare_tunnel_id": e.cloudflare_tunnel_id,
             "org_name": e.project.organization.name,
             "project_name": e.project.name,
         }
