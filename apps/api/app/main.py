@@ -3,6 +3,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
 
 from app.config import settings
 from app.modules.auth.router import router as auth_router
@@ -27,6 +29,19 @@ async def lifespan(app):
     yield
 
 
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        if settings.COOKIE_SECURE:
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=63072000; includeSubDomains"
+            )
+        return response
+
+
 app = FastAPI(
     title="DevGate API",
     version="0.1.0",
@@ -35,6 +50,8 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan,
 )
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +68,11 @@ app.include_router(admin_router,   prefix="/admin",   tags=["admin"])
 app.include_router(gateway_router, prefix="/gateway", tags=["gateway"])
 
 
-@app.get("/healthz")
+@app.get("/health")
 def health():
+    return {"status": "ok"}
+
+
+@app.get("/healthz")
+def healthz():
     return {"ok": True}
