@@ -18,6 +18,7 @@ from app.modules.email import get_email_provider
 from app.shared.exceptions import (
     ChallengeAlreadyUsedException,
     ChallengeExpiredException,
+    ForbiddenException,
     NotFoundException,
 )
 from app.shared.models import LoginChallenge, Session, User
@@ -26,6 +27,7 @@ from app.shared.models import LoginChallenge, Session, User
 OTP_EXPIRY_MINUTES = 10
 MAGIC_LINK_EXPIRY_MINUTES = 15
 SESSION_TTL_DAYS = 7
+MAX_CHALLENGE_ATTEMPTS = 5
 
 
 def _hash_token(token: str) -> str:
@@ -96,10 +98,17 @@ def verify_token(token: str, db: DbSession) -> Session:
     if not challenge:
         raise NotFoundException("Token invalide")
 
+    if challenge.attempt_count >= MAX_CHALLENGE_ATTEMPTS:
+        raise ForbiddenException("Challenge verrouillé après trop de tentatives")
+
     now = datetime.now(tz=timezone.utc)
     if challenge.expires_at.replace(tzinfo=timezone.utc) < now:
+        challenge.attempt_count += 1
+        db.commit()
         raise ChallengeExpiredException()
     if challenge.used_at is not None:
+        challenge.attempt_count += 1
+        db.commit()
         raise ChallengeAlreadyUsedException()
 
     # Consommation
