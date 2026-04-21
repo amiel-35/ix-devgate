@@ -104,6 +104,14 @@ export type StatsResponse = {
   events_today: number;
 };
 
+export type DiscoveredTunnelItem = {
+  id: string;
+  cloudflare_tunnel_id: string;
+  name: string;
+  status: "discovered" | "assigned" | "orphaned";
+  last_seen_at: string | null;
+};
+
 // ── API Admin (server-side) ───────────────────────────────────────
 
 export const serverAdminApi = {
@@ -115,4 +123,20 @@ export const serverAdminApi = {
   grants: () => adminRequest<GrantItem[]>("/admin/access-grants"),
   auditEvents: (limit = 50, offset = 0) =>
     adminRequest<AdminAuditEvent[]>(`/admin/audit-events?limit=${limit}&offset=${offset}`),
+  discoveredTunnels: () => adminRequest<DiscoveredTunnelItem[]>("/admin/discovered-tunnels"),
+  syncTunnels: () =>
+    adminRequest<{ discovered: number; updated: number; orphaned: number; error?: string }>(
+      "/admin/sync-tunnels",
+      { method: "POST" },
+    ),
+  assignTunnel: (tunnelId: string, environmentId: string) =>
+    adminRequest<{ ok: boolean }>(`/admin/discovered-tunnels/${tunnelId}/assign`, {
+      method: "POST",
+      body: JSON.stringify({ environment_id: environmentId }),
+    }),
+  activateEnvironment: (envId: string) =>
+    adminRequest<{ job_id: string; state: string; error?: string }>(
+      `/admin/environments/${envId}/activate`,
+      { method: "POST" },
+    ),
 };
