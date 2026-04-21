@@ -106,7 +106,9 @@ class EncryptedDatabaseSecretStore(SecretStore):
         self._aes_key: bytes = HKDF(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=None,
+            salt=None,  # RFC 5869 §2.2 : salt=None équivaut à zéros de taille HashLen.
+                        # Dérivation déterministe : même DEVGATE_MASTER_KEY → même clé AES.
+                        # CONTRAINTE : rotation de DEVGATE_MASTER_KEY = re-chiffrement complet en base.
             info=b"devgate-secret-store-v1",
         ).derive(master_key)
         self._db = db

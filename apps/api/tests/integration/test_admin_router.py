@@ -11,12 +11,24 @@ from app.shared.models import (
     User,
 )
 
+# Fixed UUIDs used across test fixtures
+_UUID_ADMIN = "00000000-0000-0000-0000-000000000001"
+_UUID_ORG_1 = "00000000-0000-0000-0000-000000000010"
+_UUID_PROJ_1 = "00000000-0000-0000-0000-000000000020"
+_UUID_ENV_1 = "00000000-0000-0000-0000-000000000030"
+_UUID_CLIENT = "00000000-0000-0000-0000-000000000040"
+_UUID_GRANT_1 = "00000000-0000-0000-0000-000000000050"
+_UUID_ORG_TOK2 = "00000000-0000-0000-0000-000000000060"
+_UUID_PROJ_TOK2 = "00000000-0000-0000-0000-000000000070"
+_UUID_ENV_TOK2 = "00000000-0000-0000-0000-000000000080"
+_UUID_NONEXISTENT = "00000000-0000-0000-0000-999999999999"
+
 
 # ── Helpers ───────────────────────────────────────────────────────
 
 def _make_admin(db_session, session_id="s-admin"):
     admin = User(
-        id="admin-1",
+        id=_UUID_ADMIN,
         email="admin@agency.com",
         display_name="Admin Agence",
         kind="agency",
@@ -35,7 +47,7 @@ def _make_admin(db_session, session_id="s-admin"):
     db_session.add(grant)
     session = SessionModel(
         id=session_id,
-        user_id="admin-1",
+        user_id=_UUID_ADMIN,
         expires_at=datetime.now(tz=timezone.utc) + timedelta(days=7),
     )
     db_session.add(session)
@@ -43,21 +55,21 @@ def _make_admin(db_session, session_id="s-admin"):
     return admin
 
 
-def _make_org(db_session, org_id="org-1", name="Client X", slug="client-x"):
+def _make_org(db_session, org_id=_UUID_ORG_1, name="Client X", slug="client-x"):
     org = Organization(id=org_id, name=name, slug=slug)
     db_session.add(org)
     db_session.commit()
     return org
 
 
-def _make_project(db_session, proj_id="proj-1", org_id="org-1"):
+def _make_project(db_session, proj_id=_UUID_PROJ_1, org_id=_UUID_ORG_1):
     p = Project(id=proj_id, organization_id=org_id, name="Refonte", slug="refonte")
     db_session.add(p)
     db_session.commit()
     return p
 
 
-def _make_env(db_session, env_id="env-1", proj_id="proj-1"):
+def _make_env(db_session, env_id=_UUID_ENV_1, proj_id=_UUID_PROJ_1):
     e = Environment(
         id=env_id,
         project_id=proj_id,
@@ -188,7 +200,7 @@ def test_list_projects_filtered(client, db_session):
     _make_org(db_session)
     _make_project(db_session)
 
-    r = client.get("/admin/projects?org_id=org-1")
+    r = client.get(f"/admin/projects?org_id={_UUID_ORG_1}")
     assert r.status_code == 200
     projects = r.json()
     assert len(projects) == 1
@@ -201,7 +213,7 @@ def test_create_project(client, db_session):
     _make_org(db_session)
 
     r = client.post("/admin/projects", json={
-        "organization_id": "org-1",
+        "organization_id": _UUID_ORG_1,
         "name": "Nouveau projet",
         "slug": "nouveau-projet",
     })
@@ -248,7 +260,7 @@ def test_create_env(client, db_session):
     _make_project(db_session)
 
     r = client.post("/admin/environments", json={
-        "project_id": "proj-1",
+        "project_id": _UUID_PROJ_1,
         "name": "Production",
         "slug": "production",
         "kind": "staging",
@@ -278,12 +290,12 @@ def test_list_grants_enriched(client, db_session):
     _auth(client)
     _make_org(db_session)
 
-    user = User(id="u-client", email="client@test.com", kind="client", status="active")
+    user = User(id=_UUID_CLIENT, email="client@test.com", kind="client", status="active")
     db_session.add(user)
     grant = AccessGrant(
-        id="grant-1",
-        user_id="u-client",
-        organization_id="org-1",
+        id=_UUID_GRANT_1,
+        user_id=_UUID_CLIENT,
+        organization_id=_UUID_ORG_1,
         role="client_member",
     )
     db_session.add(grant)
@@ -309,7 +321,7 @@ def test_create_grant_creates_user_if_missing(client, db_session):
 
     r = client.post("/admin/access-grants", json={
         "email": "nouveau@client.com",
-        "organization_id": "org-1",
+        "organization_id": _UUID_ORG_1,
         "role": "client_member",
     })
     assert r.status_code == 201
@@ -334,13 +346,13 @@ def test_revoke_grant(client, db_session):
     _auth(client)
     _make_org(db_session)
 
-    user = User(id="u-client", email="client@test.com", kind="client", status="active")
+    user = User(id=_UUID_CLIENT, email="client@test.com", kind="client", status="active")
     db_session.add(user)
-    grant = AccessGrant(id="grant-1", user_id="u-client", organization_id="org-1", role="client_member")
+    grant = AccessGrant(id=_UUID_GRANT_1, user_id=_UUID_CLIENT, organization_id=_UUID_ORG_1, role="client_member")
     db_session.add(grant)
     db_session.commit()
 
-    r = client.delete("/admin/access-grants/grant-1")
+    r = client.delete(f"/admin/access-grants/{_UUID_GRANT_1}")
     assert r.status_code == 204
 
     db_session.refresh(grant)
@@ -353,21 +365,22 @@ def test_revoke_grant_idempotent(client, db_session):
     _auth(client)
     _make_org(db_session)
 
-    user = User(id="u-client", email="client@test.com", kind="client", status="active")
+    user = User(id=_UUID_CLIENT, email="client@test.com", kind="client", status="active")
     db_session.add(user)
-    grant = AccessGrant(id="grant-1", user_id="u-client", organization_id="org-1", role="client_member")
+    grant = AccessGrant(id=_UUID_GRANT_1, user_id=_UUID_CLIENT, organization_id=_UUID_ORG_1, role="client_member")
     db_session.add(grant)
     db_session.commit()
 
-    client.delete("/admin/access-grants/grant-1")
-    r = client.delete("/admin/access-grants/grant-1")
+    client.delete(f"/admin/access-grants/{_UUID_GRANT_1}")
+    r = client.delete(f"/admin/access-grants/{_UUID_GRANT_1}")
     assert r.status_code == 204
 
 
 def test_revoke_grant_not_found(client, db_session):
     _make_admin(db_session)
     _auth(client)
-    r = client.delete("/admin/access-grants/unknown")
+    # Use a valid UUID that doesn't exist in DB → should return 404
+    r = client.delete(f"/admin/access-grants/{_UUID_NONEXISTENT}")
     assert r.status_code == 404
 
 
@@ -380,7 +393,7 @@ def test_list_audit_events(client, db_session):
     evt = AuditEvent(
         id="evt-1",
         event_type="admin.organization.created",
-        actor_user_id="admin-1",
+        actor_user_id=_UUID_ADMIN,
     )
     db_session.add(evt)
     db_session.commit()
@@ -408,10 +421,10 @@ _TEST_MASTER_KEY_4 = base64.b64encode(b"a" * 32).decode()
 
 
 def _make_env_for_token_test(db_session):
-    org = Organization(id="org-tok2", name="Token Org", slug="tok-org2")
-    proj = Project(id="proj-tok2", organization_id="org-tok2", name="P", slug="p2")
+    org = Organization(id=_UUID_ORG_TOK2, name="Token Org", slug="tok-org2")
+    proj = Project(id=_UUID_PROJ_TOK2, organization_id=_UUID_ORG_TOK2, name="P", slug="p2")
     env = Environment(
-        id="env-tok2", project_id="proj-tok2", name="E", slug="e2",
+        id=_UUID_ENV_TOK2, project_id=_UUID_PROJ_TOK2, name="E", slug="e2",
         kind="staging", public_hostname="e2.example.com",
         upstream_hostname="upstream2.example.com", status="active",
     )
@@ -429,14 +442,14 @@ def test_store_service_token_sets_ref(client, db_session, monkeypatch):
     _make_env_for_token_test(db_session)
 
     res = client.put(
-        "/admin/environments/env-tok2/service-token",
+        f"/admin/environments/{_UUID_ENV_TOK2}/service-token",
         json={"client_id": "cf-id-123", "client_secret": "cf-secret-456"},
     )
     assert res.status_code == 200, res.text
     assert res.json()["ok"] is True
 
     db_session.expire_all()
-    env = db_session.query(Environment).filter(Environment.id == "env-tok2").first()
+    env = db_session.query(Environment).filter(Environment.id == _UUID_ENV_TOK2).first()
     assert env.service_token_ref is not None
     assert env.service_token_ref.startswith("sec_")
 
@@ -447,8 +460,9 @@ def test_store_service_token_unknown_env_returns_404(client, db_session, monkeyp
     _make_admin(db_session)
     _auth(client)
 
+    # Use a valid UUID that doesn't exist in DB → should return 404
     res = client.put(
-        "/admin/environments/env-inexistant/service-token",
+        f"/admin/environments/{_UUID_NONEXISTENT}/service-token",
         json={"client_id": "x", "client_secret": "y"},
     )
     assert res.status_code == 404
@@ -460,7 +474,7 @@ from datetime import datetime, timezone
 from app.shared.models import TunnelHealthSnapshot
 
 
-def _make_health_snapshot(db_session, env_id="env-1", status="online", latency_ms=95):
+def _make_health_snapshot(db_session, env_id=_UUID_ENV_1, status="online", latency_ms=95):
     snap = TunnelHealthSnapshot(
         id=f"snap-{env_id}",
         environment_id=env_id,
@@ -496,7 +510,7 @@ def test_list_envs_health_status_reflects_latest_snapshot(client, db_session):
     _make_org(db_session)
     _make_project(db_session)
     _make_env(db_session)
-    _make_health_snapshot(db_session, env_id="env-1", status="online", latency_ms=95)
+    _make_health_snapshot(db_session, env_id=_UUID_ENV_1, status="online", latency_ms=95)
 
     r = client.get("/admin/environments")
     assert r.status_code == 200
@@ -567,3 +581,29 @@ def test_gateway_stats_counts_events(client, db_session):
     assert data["upstream_unavailable"] == 1
     # latencies from accessed events: [100, 200, 50, 30] → avg = 95
     assert data["avg_latency_ms"] == 95
+
+
+# ── UUID validation (F-05) ────────────────────────────────────────
+
+def test_invalid_uuid_env_id_ping_returns_422(client, db_session):
+    """Un env_id non-UUID sur /admin/environments/{env_id}/ping doit retourner 422."""
+    _make_admin(db_session)
+    _auth(client)
+    resp = client.post("/admin/environments/not-a-uuid/ping")
+    assert resp.status_code == 422
+
+
+def test_invalid_uuid_env_id_activate_returns_422(client, db_session):
+    """Un env_id non-UUID sur /admin/environments/{env_id}/activate doit retourner 422."""
+    _make_admin(db_session)
+    _auth(client)
+    resp = client.post("/admin/environments/not-a-uuid/activate")
+    assert resp.status_code == 422
+
+
+def test_invalid_uuid_grant_id_revoke_returns_422(client, db_session):
+    """Un grant_id non-UUID sur /admin/access-grants/{grant_id} doit retourner 422."""
+    _make_admin(db_session)
+    _auth(client)
+    resp = client.delete("/admin/access-grants/not-a-uuid")
+    assert resp.status_code == 422

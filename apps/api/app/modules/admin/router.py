@@ -5,6 +5,7 @@ Toutes les routes exigent agency_admin.
 import json
 import logging
 from datetime import date, datetime, timezone
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -220,13 +221,13 @@ def create_environment(
 
 @router.post("/environments/{env_id}/ping", status_code=200)
 async def ping_environment(
-    env_id: str,
+    env_id: UUID,
     db: DbSession = Depends(get_db),
 ):
     """Déclenche un health check immédiat sur l'upstream d'un environnement.
     Retourne le statut observé. Ne contient jamais les credentials Cloudflare.
     """
-    env = db.query(Environment).filter(Environment.id == env_id).first()
+    env = db.query(Environment).filter(Environment.id == str(env_id)).first()
     if not env:
         raise NotFoundException()
     snapshot = await check_environment_health(env, db)
@@ -240,7 +241,7 @@ async def ping_environment(
 
 @router.put("/environments/{env_id}/service-token", status_code=200)
 def store_service_token(
-    env_id: str,
+    env_id: UUID,
     body: StoreServiceTokenRequest,
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
@@ -248,7 +249,8 @@ def store_service_token(
     """Stocke ou remplace le service token Cloudflare Access d'un environnement.
     Le token est chiffré en base — jamais stocké en clair.
     """
-    env = db.query(Environment).filter(Environment.id == env_id).first()
+    env_id_str = str(env_id)
+    env = db.query(Environment).filter(Environment.id == env_id_str).first()
     if not env:
         raise NotFoundException()
 
@@ -266,7 +268,7 @@ def store_service_token(
         secret_type="cloudflare_service_token",
         plaintext=payload,
         owner_type="environment",
-        owner_id=env_id,
+        owner_id=env_id_str,
     )
     env.service_token_ref = ref
 
@@ -275,7 +277,7 @@ def store_service_token(
         actor_user_id=admin.id,
         event_type="admin.service_token.stored",
         target_type="environment",
-        target_id=env_id,
+        target_id=env_id_str,
         metadata={"has_token": True},
     )
     db.commit()
@@ -334,11 +336,12 @@ def create_grant(
 
 @router.delete("/access-grants/{grant_id}", status_code=204)
 def revoke_grant(
-    grant_id: str,
+    grant_id: UUID,
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
 ):
-    grant = db.query(AccessGrant).filter(AccessGrant.id == grant_id).first()
+    grant_id_str = str(grant_id)
+    grant = db.query(AccessGrant).filter(AccessGrant.id == grant_id_str).first()
     if not grant:
         raise NotFoundException()
     if grant.revoked_at is not None:
@@ -346,7 +349,7 @@ def revoke_grant(
     grant.revoked_at = datetime.now(tz=timezone.utc)
     db.flush()
     audit(db, actor_user_id=admin.id, event_type="admin.access_grant.revoked",
-          target_type="access_grant", target_id=grant_id)
+          target_type="access_grant", target_id=grant_id_str)
     db.commit()
 
 
@@ -441,13 +444,13 @@ def _get_cf_client_for_activate():
 
 @router.post("/discovered-tunnels/{tunnel_id}/assign", status_code=200)
 def assign_tunnel_to_environment(
-    tunnel_id: str,
+    tunnel_id: UUID,
     body: AssignTunnelRequest,
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
 ):
     """Affecte un tunnel découvert à un environnement DevGate."""
-    tunnel = db.query(DiscoveredTunnel).filter(DiscoveredTunnel.id == tunnel_id).first()
+    tunnel = db.query(DiscoveredTunnel).filter(DiscoveredTunnel.id == str(tunnel_id)).first()
     if not tunnel:
         raise NotFoundException()
 
@@ -474,14 +477,15 @@ def assign_tunnel_to_environment(
 
 @router.post("/environments/{env_id}/activate", status_code=200)
 def activate_environment(
-    env_id: str,
+    env_id: UUID,
     db: DbSession = Depends(get_db),
     admin=Depends(require_agency_admin),
 ):
     """Lance le provisioning CF pour un environnement (ADR-001 saga).
     Nécessite : CF credentials configurés + tunnel assigné sur l'environnement.
     """
-    env = db.query(Environment).filter(Environment.id == env_id).first()
+    env_id_str = str(env_id)
+    env = db.query(Environment).filter(Environment.id == env_id_str).first()
     if not env:
         raise NotFoundException()
 
@@ -494,7 +498,7 @@ def activate_environment(
     cf = _get_cf_client_for_activate()
     secret_store = get_secret_store(db)
 
-    job = ProvisioningJob(environment_id=env_id, state="pending")
+    job = ProvisioningJob(environment_id=env_id_str, state="pending")
     db.add(job)
     db.flush()
 
@@ -509,7 +513,7 @@ def activate_environment(
         actor_user_id=admin.id,
         event_type="admin.environment.activated",
         target_type="environment",
-        target_id=env_id,
+        target_id=env_id_str,
         metadata={"job_id": job.id, "final_state": final_state},
     )
     db.commit()
