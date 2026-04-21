@@ -107,6 +107,16 @@ export type StatsResponse = {
   events_today: number;
 };
 
+export type GatewayStats = {
+  since_hours: number;
+  total_requests: number;
+  errors_5xx: number;
+  cf_refused: number;
+  upstream_unavailable: number;
+  avg_latency_ms: number | null;
+  p95_latency_ms: number | null;
+};
+
 export type DiscoveredTunnelItem = {
   id: string;
   cloudflare_tunnel_id: string;
@@ -126,6 +136,7 @@ export const serverAdminApi = {
   grants: () => adminRequest<GrantItem[]>("/admin/access-grants"),
   auditEvents: (limit = 50, offset = 0) =>
     adminRequest<AdminAuditEvent[]>(`/admin/audit-events?limit=${limit}&offset=${offset}`),
+  gatewayStats: () => adminRequest<GatewayStats>("/admin/gateway-stats"),
   discoveredTunnels: () => adminRequest<DiscoveredTunnelItem[]>("/admin/discovered-tunnels"),
   syncTunnels: () =>
     adminRequest<{ discovered: number; updated: number; orphaned: number; error?: string }>(

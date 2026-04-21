@@ -454,3 +454,67 @@ def test_list_envs_health_status_reflects_latest_snapshot(client, db_session):
     envs = r.json()
     assert envs[0]["health_status"] == "online"
     assert envs[0]["health_latency_ms"] == 95
+
+
+# ── GET /admin/gateway-stats ──────────────────────────────────────
+
+def test_gateway_stats_empty(client, db_session):
+    """GET /admin/gateway-stats retourne des zéros quand aucun événement gateway."""
+    _make_admin(db_session)
+    _auth(client)
+
+    r = client.get("/admin/gateway-stats")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_requests"] == 0
+    assert data["errors_5xx"] == 0
+    assert data["cf_refused"] == 0
+    assert data["upstream_unavailable"] == 0
+    assert data["avg_latency_ms"] is None
+    assert data["p95_latency_ms"] is None
+    assert data["since_hours"] == 24
+
+
+def test_gateway_stats_counts_events(client, db_session):
+    """GET /admin/gateway-stats agrège correctement les événements d'audit."""
+    from app.shared.models import AuditEvent
+
+    _make_admin(db_session)
+    _auth(client)
+
+    # 2 requêtes normales (accessed)
+    for i, lat in enumerate([100, 200]):
+        db_session.add(AuditEvent(
+            id=f"gw-ok-{i}",
+            event_type="gateway.resource.accessed",
+            metadata_json={"status_code": 200, "path": "/", "latency_ms": lat, "is_5xx": False, "is_cf_refused": False},
+        ))
+    # 1 erreur 5xx (accessed)
+    db_session.add(AuditEvent(
+        id="gw-5xx",
+        event_type="gateway.resource.accessed",
+        metadata_json={"status_code": 500, "path": "/", "latency_ms": 50, "is_5xx": True, "is_cf_refused": False},
+    ))
+    # 1 refus CF (accessed)
+    db_session.add(AuditEvent(
+        id="gw-cf",
+        event_type="gateway.resource.accessed",
+        metadata_json={"status_code": 403, "path": "/", "latency_ms": 30, "is_5xx": False, "is_cf_refused": True},
+    ))
+    # 1 upstream indisponible (failed)
+    db_session.add(AuditEvent(
+        id="gw-fail",
+        event_type="gateway.request.failed",
+        metadata_json={"reason": "upstream_unavailable"},
+    ))
+    db_session.commit()
+
+    r = client.get("/admin/gateway-stats")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["total_requests"] == 5  # 4 accessed + 1 failed
+    assert data["errors_5xx"] == 1
+    assert data["cf_refused"] == 1
+    assert data["upstream_unavailable"] == 1
+    # latencies from accessed events: [100, 200, 50, 30] → avg = 95
+    assert data["avg_latency_ms"] == 95

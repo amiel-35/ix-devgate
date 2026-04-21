@@ -1,7 +1,13 @@
 // Back-office — Dashboard
 // Référence visuelle : docs/ds/mockups/devgate-backoffice.mockup.html
 import { redirect } from "next/navigation";
-import { serverAdminApi, AdminApiError, type StatsResponse, type AdminAuditEvent } from "@/lib/api/server-admin";
+import {
+  serverAdminApi,
+  AdminApiError,
+  type StatsResponse,
+  type AdminAuditEvent,
+  type GatewayStats,
+} from "@/lib/api/server-admin";
 import styles from "./admin.module.css";
 
 function formatDate(iso: string) {
@@ -16,11 +22,13 @@ function formatDate(iso: string) {
 export default async function AdminDashboardPage() {
   let stats: StatsResponse;
   let events: AdminAuditEvent[];
+  let gatewayStats: GatewayStats;
 
   try {
-    [stats, events] = await Promise.all([
+    [stats, events, gatewayStats] = await Promise.all([
       serverAdminApi.stats(),
       serverAdminApi.auditEvents(10),
+      serverAdminApi.gatewayStats(),
     ]);
   } catch (err) {
     if (err instanceof AdminApiError && err.status === 401) redirect("/login");
@@ -33,6 +41,21 @@ export default async function AdminDashboardPage() {
     { label: "Environnements", value: stats.active_envs },
     { label: "Utilisateurs", value: stats.active_users },
     { label: "Événements aujourd'hui", value: stats.events_today },
+  ];
+
+  const GATEWAY_STATS = [
+    { label: "Requêtes (24h)", value: gatewayStats.total_requests },
+    { label: "Erreurs 5xx", value: gatewayStats.errors_5xx },
+    { label: "Refus CF Access", value: gatewayStats.cf_refused },
+    { label: "Upstream indispo", value: gatewayStats.upstream_unavailable },
+    {
+      label: "Latence moy.",
+      value: gatewayStats.avg_latency_ms !== null ? `${gatewayStats.avg_latency_ms}ms` : "—",
+    },
+    {
+      label: "Latence p95",
+      value: gatewayStats.p95_latency_ms !== null ? `${gatewayStats.p95_latency_ms}ms` : "—",
+    },
   ];
 
   return (
@@ -49,7 +72,19 @@ export default async function AdminDashboardPage() {
         ))}
       </div>
 
-      <div className={styles.sectionTitle}>Activité récente</div>
+      <div className={styles.sectionTitle} style={{ marginTop: "28px", marginBottom: "12px" }}>
+        Gateway — 24 dernières heures
+      </div>
+      <div className={styles.statsGrid}>
+        {GATEWAY_STATS.map((s) => (
+          <div key={s.label} className={styles.statCard}>
+            <div className={styles.statLabel}>{s.label}</div>
+            <div className={styles.statValue}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.sectionTitle} style={{ marginTop: "28px" }}>Activité récente</div>
       <table className={styles.table}>
         <thead>
           <tr>
