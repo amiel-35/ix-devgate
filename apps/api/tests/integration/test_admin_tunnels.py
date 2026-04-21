@@ -107,7 +107,8 @@ import base64
 def test_activate_environment_runs_provisioner(client, db_session, monkeypatch):
     """POST /admin/environments/{id}/activate crée un ProvisioningJob et le démarre."""
     TEST_MASTER_KEY = base64.b64encode(b"a" * 32).decode()
-    monkeypatch.setenv("DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
+    import app.config as _cfg
+    monkeypatch.setattr(_cfg.settings, "DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
 
     # Setup env avec tunnel assigné
     _setup_admin(db_session)

@@ -212,7 +212,8 @@ def test_gateway_injects_cf_service_token(client, db_session, monkeypatch):
     import json as _json
 
     TEST_MASTER_KEY = base64.b64encode(b"a" * 32).decode()
-    monkeypatch.setenv("DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
+    import app.config as _cfg
+    monkeypatch.setattr(_cfg.settings, "DEVGATE_MASTER_KEY", TEST_MASTER_KEY)
 
     _make_user(db_session)
     _make_session(db_session)
