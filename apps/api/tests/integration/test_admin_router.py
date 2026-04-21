@@ -23,6 +23,16 @@ def _make_admin(db_session, session_id="s-admin"):
         status="active",
     )
     db_session.add(admin)
+    # L'admin doit avoir un grant agency_admin actif (H-01)
+    org_agency = Organization(id="org-agency", name="Agence", slug="agence")
+    db_session.add(org_agency)
+    grant = AccessGrant(
+        id="grant-admin-1",
+        user_id="admin-1",
+        organization_id="org-agency",
+        role="agency_admin",
+    )
+    db_session.add(grant)
     session = SessionModel(
         id=session_id,
         user_id="admin-1",
@@ -66,6 +76,34 @@ def _auth(client, session_id="s-admin"):
     client.cookies.set("devgate_session", session_id)
 
 
+def test_agency_user_without_admin_grant_is_forbidden(client, db_session):
+    """Un user kind='agency' sans grant agency_admin doit recevoir 403."""
+    from app.shared.models import User, Session as DevSession
+    import uuid, datetime
+    user = User(
+        id=str(uuid.uuid4()),
+        email="agency-no-grant@example.com",
+        kind="agency",
+        status="active",
+    )
+    db_session.add(user)
+    session = DevSession(
+        id=str(uuid.uuid4()),
+        user_id=user.id,
+        expires_at=datetime.datetime.utcnow() + datetime.timedelta(days=7),
+    )
+    db_session.add(session)
+    db_session.commit()
+
+    response = client.get(
+        "/admin/stats",
+        cookies={"devgate_session": session.id},
+    )
+    assert response.status_code == 403, (
+        f"Un user agency sans grant doit être refusé, got {response.status_code}"
+    )
+
+
 # ── GET /admin/stats ──────────────────────────────────────────────
 
 def test_stats_empty(client, db_session):
@@ -74,7 +112,8 @@ def test_stats_empty(client, db_session):
     r = client.get("/admin/stats")
     assert r.status_code == 200
     data = r.json()
-    assert data["active_orgs"] == 0
+    # _make_admin crée org-agency pour le grant agency_admin (H-01)
+    assert data["active_orgs"] == 1
     assert data["active_envs"] == 0
     assert data["active_users"] == 1  # l'admin lui-même
     assert data["events_today"] >= 0
@@ -90,7 +129,8 @@ def test_stats_counts(client, db_session):
     r = client.get("/admin/stats")
     assert r.status_code == 200
     data = r.json()
-    assert data["active_orgs"] == 1
+    # org-agency (admin grant) + org-1 (client) = 2
+    assert data["active_orgs"] == 2
     assert data["active_envs"] == 1
 
 
@@ -101,7 +141,10 @@ def test_list_orgs_empty(client, db_session):
     _auth(client)
     r = client.get("/admin/organizations")
     assert r.status_code == 200
-    assert r.json() == []
+    # _make_admin crée org-agency pour le grant agency_admin (H-01)
+    orgs = r.json()
+    assert len(orgs) == 1
+    assert orgs[0]["id"] == "org-agency"
 
 
 def test_list_orgs_with_counts(client, db_session):
@@ -114,10 +157,12 @@ def test_list_orgs_with_counts(client, db_session):
     r = client.get("/admin/organizations")
     assert r.status_code == 200
     orgs = r.json()
-    assert len(orgs) == 1
-    assert orgs[0]["name"] == "Client X"
-    assert orgs[0]["env_count"] == 1
-    assert orgs[0]["user_count"] == 0
+    # org-agency (admin grant) + org-1 (client) = 2
+    assert len(orgs) == 2
+    client_org = next(o for o in orgs if o["id"] == "org-1")
+    assert client_org["name"] == "Client X"
+    assert client_org["env_count"] == 1
+    assert client_org["user_count"] == 0
 
 
 # ── POST /admin/organizations ─────────────────────────────────────
@@ -247,10 +292,12 @@ def test_list_grants_enriched(client, db_session):
     r = client.get("/admin/access-grants")
     assert r.status_code == 200
     grants = r.json()
-    assert len(grants) == 1
-    assert grants[0]["user_email"] == "client@test.com"
-    assert grants[0]["org_name"] == "Client X"
-    assert grants[0]["revoked_at"] is None
+    # grant-admin-1 (agency_admin) + grant-1 (client_member) = 2
+    assert len(grants) == 2
+    client_grant = next(g for g in grants if g["id"] == "grant-1")
+    assert client_grant["user_email"] == "client@test.com"
+    assert client_grant["org_name"] == "Client X"
+    assert client_grant["revoked_at"] is None
 
 
 # ── POST /admin/access-grants ─────────────────────────────────────

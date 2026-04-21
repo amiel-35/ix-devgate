@@ -42,10 +42,11 @@ def get_current_user(
 
 
 def require_agency_admin(user: User = Depends(get_current_user)) -> User:
-    """Vérifie que l'utilisateur est un admin agence.
-    La vérification reste côté backend — le frontend ne déduit jamais les droits.
-    """
-    has_admin_grant = any(g.role == "agency_admin" and not g.revoked_at for g in user.grants)
-    if not has_admin_grant and user.kind != "agency":
+    """Exige un grant agency_admin actif. Le champ `kind` n'est pas suffisant."""
+    has_admin_grant = any(
+        g.role == "agency_admin" and g.revoked_at is None
+        for g in user.grants
+    )
+    if not has_admin_grant:
         raise ForbiddenException("Réservé aux administrateurs agence")
     return user
