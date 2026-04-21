@@ -8,6 +8,7 @@ Règles critiques :
 - distingue : non autorisé / ressource introuvable / upstream KO
 """
 import json
+import logging
 from datetime import timezone
 
 import httpx
@@ -15,6 +16,8 @@ from sqlalchemy.orm import Session as DbSession
 
 from app.modules.audit.service import audit
 from app.modules.secrets.store import SecretStore, SecretNotFoundError, SecretRevokedError
+
+logger = logging.getLogger(__name__)
 from app.shared.exceptions import (
     ForbiddenException, NotFoundException, UpstreamUnavailableException,
 )
@@ -56,7 +59,10 @@ def _get_service_token(token_ref: str, secret_store: SecretStore) -> tuple[str, 
     try:
         payload = json.loads(secret_store.get(token_ref))
         return payload.get("client_id", ""), payload.get("client_secret", "")
-    except (SecretNotFoundError, SecretRevokedError, Exception):
+    except (SecretNotFoundError, SecretRevokedError):
+        return "", ""
+    except Exception:
+        logger.warning("Erreur inattendue lors de la lecture du service token %s", token_ref, exc_info=True)
         return "", ""
 
 
