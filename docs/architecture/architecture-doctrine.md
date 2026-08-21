@@ -244,7 +244,9 @@ Pourquoi :
 
 - les migrations sont versionnees ;
 - le schema suit le domaine, pas les ecrans ;
-- les secrets ne deviennent pas une source de verite primaire en base ;
+- les secrets ne sont jamais stockes en clair ;
+- le secret store v1 est interne et chiffre en base, avec master key hors base ;
+- les objets metier ne stockent que des references de secrets ;
 - les tables d'audit restent append-only autant que possible ;
 - les suppressions dures doivent etre rares et explicites.
 
@@ -266,6 +268,8 @@ Cloudflare est une **brique d'infrastructure**, pas le centre du produit.
 - login sans mot de passe partage ;
 - tokens de login a duree courte ;
 - rate limiting sur demarrage de login ;
+- secrets serveur accessibles uniquement via `SecretStore` ;
+- `DEVGATE_MASTER_KEY` hors base, hors repo et hors frontend ;
 - aucune fuite de secret Cloudflare vers le navigateur ;
 - aucune URL tunnel brute dans l'UI ;
 - traitement explicite des etats refuses, expires et invalides.
@@ -302,6 +306,7 @@ Cas typiques qui meritent un ADR ou une note de decision :
 - extraction d'un service ;
 - introduction de permissions par ressource ;
 - changement de stack de stockage ;
+- changement de modele de secret store ;
 - passage de Cloudflare service auth a un autre modele ;
 - ajout d'une seconde couche de personnalisation par client.
 

@@ -165,7 +165,9 @@ Regles :
 - `Access` pour la protection edge machine-to-machine ;
 - le login utilisateur reste chez DevGate ;
 - les references techniques Cloudflare sont stockees proprement ;
-- les secrets sont geres hors base comme source primaire.
+- les secrets passent par `SecretStore` ;
+- les secrets v1 sont chiffres en base avec une master key hors base ;
+- les objets metier stockent uniquement des references de secrets.
 
 En v1 :
 
