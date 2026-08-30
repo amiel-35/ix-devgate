@@ -60,6 +60,10 @@ La regle simple :
   Design technique du gateway, back-office, audit et exploitation.
 - `docs/architecture/architecture-doctrine.md`
   Regles d'architecture a respecter pendant l'implementation.
+- `docs/architecture/adr-001-cloudflare-autodiscovery.md`
+  Decision sur l'autodiscovery et le provisioning Cloudflare.
+- `docs/architecture/adr-002-secret-store-interne.md`
+  Decision sur le stockage chiffre des secrets en v1.
 
 ### Contribution
 

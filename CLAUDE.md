@@ -14,6 +14,8 @@ Si tu dois faire un choix rapidement, prends celui-ci :
 - **backend source de verite**
 - **gateway integre au backend**
 - **Cloudflare Tunnel + Access en service auth**
+- **secret store interne chiffre en base**
+- **master key hors base**
 - **pas de microservices**
 - **pas de permissions fines par ressource en v1**
 
@@ -52,7 +54,8 @@ Le backend decide :
 - quelle ressource est resolue ;
 - quelle session est valide ;
 - quel upstream appeler ;
-- quel evenement auditer.
+- quel evenement auditer ;
+- quelle reference de secret charger via `SecretStore`.
 
 ### Frontend = parcours
 
@@ -82,6 +85,18 @@ Il faut garder claire la couche qui :
 - proxifie ;
 - gere les erreurs upstream.
 
+### Secrets = backend only
+
+Le modele v1 est documente dans `docs/architecture/adr-002-secret-store-interne.md`.
+
+Regles :
+
+- utiliser `SecretStore` pour tout secret serveur ;
+- stocker les secrets chiffres en base ;
+- garder la master key hors base et hors repo ;
+- stocker des references dans les objets metier ;
+- ne jamais exposer les secrets dans le frontend, les logs, les erreurs ou l'audit.
+
 ## Sources de verite
 
 Considere les fichiers suivants comme la base :
@@ -91,6 +106,8 @@ Considere les fichiers suivants comme la base :
 - `docs/architecture/system-design-lots-3-4.md`
 - `docs/planning/build-plan.md`
 - `docs/architecture/architecture-doctrine.md`
+- `docs/architecture/adr-001-cloudflare-autodiscovery.md`
+- `docs/architecture/adr-002-secret-store-interne.md`
 - `docs/contributing/frontend-contribution.md`
 - `docs/contributing/backend-contribution.md`
 
@@ -110,6 +127,7 @@ Quand tu implementes une fonctionnalite :
 - pas de modele par ressource en v1 ;
 - pas d'automatisation Cloudflare lourde par defaut ;
 - pas d'admin IAM complexe ;
+- pas de vault externe obligatoire en v1 ;
 - pas d'abstraction prematuree des composants UI ;
 - pas de logique "juste pour preparer plus tard" si elle complique le present.
 
@@ -142,5 +160,6 @@ Remonte le point avant de continuer si la demande implique :
 - nouvelle couche de personnalisation par client ;
 - extraction d'un service ;
 - changement de stockage principal ;
+- changement de modele de stockage des secrets ;
 - remplacement du modele Cloudflare retenu ;
 - contournement du gateway DevGate.

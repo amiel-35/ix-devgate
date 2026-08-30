@@ -407,10 +407,10 @@ Typologie de secrets :
 
 ### Recommendation v1
 
-- DB pour les references ;
-- secret store simple au choix :
-  - variables d'environnement en POC ;
-  - `1Password`, `Vault`, `Doppler`, ou equivalent en prod.
+- secret store interne chiffre en base ;
+- master key fournie hors base par le runtime (`DEVGATE_MASTER_KEY`, secret de deploiement ou equivalent) ;
+- DB pour les references metier de secrets ;
+- abstraction `SecretStore` pour garder une migration possible vers `Infisical`, `Vault`, `1Password` ou equivalent.
 
 ---
 

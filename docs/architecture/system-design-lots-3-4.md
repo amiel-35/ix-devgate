@@ -262,10 +262,13 @@ Secrets a gerer :
 
 ### Recommendation v1
 
-- environnement + gestion securisee de deploiement pour POC / MVP controle ;
-- ou secret manager simple si disponible des maintenant.
+- secret store interne chiffre en base ;
+- master key fournie hors base par le runtime backend ;
+- abstraction `SecretStore` obligatoire pour ne pas coupler le gateway ni le provisioner au stockage physique.
 
 Ne pas stocker les secrets complets en clair en base comme source de verite primaire.
+
+Reference : `docs/architecture/adr-002-secret-store-interne.md`.
 
 ---
 

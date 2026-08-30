@@ -38,6 +38,8 @@ Ordre de priorite a respecter :
 - Ne pas redecider la navigation si un mockup existe deja.
 - Ne pas introduire de permissions fines par ressource en v1 sans demande explicite.
 - Ne pas exposer les hostnames Cloudflare ni les tokens au frontend.
+- Ne pas stocker de secret en clair en base, en log ou en fichier versionne.
+- Ne pas contourner `SecretStore` pour acceder aux secrets serveur.
 - Ne pas transformer la v1 en microservices.
 - Ne pas sur-concevoir l'automatisation Cloudflare.
 - Ne pas casser le principe : **le navigateur parle a DevGate, pas a Cloudflare**.
@@ -72,8 +74,20 @@ Ordre de priorite a respecter :
   - l'audit
   - la resolution des ressources
   - le proxy upstream
+  - le secret store serveur
 - `PostgreSQL` est le stockage de reference.
+- Les secrets v1 sont chiffres en base avec une master key hors base.
+- Les objets metier ne stockent que des references de secrets.
 - L'audit minimal v1 est obligatoire sur les flux critiques.
+
+## Secrets
+
+- Le modele retenu est `docs/architecture/adr-002-secret-store-interne.md`.
+- Tous les secrets serveur passent par `SecretStore`.
+- `DEVGATE_MASTER_KEY` reste uniquement cote runtime backend.
+- Aucun secret ne doit etre envoye au frontend, meme dans une API admin.
+- Aucun secret ne doit apparaitre dans les logs, erreurs, audits ou fixtures commitees.
+- Ne pas introduire Vault, Infisical ou 1Password comme dependance obligatoire sans nouvel ADR.
 
 ## Quand produire de la doc
 
@@ -102,4 +116,6 @@ Signaler explicitement si une demande :
 - contredit l'acces par client ;
 - transforme Cloudflare en login principal ;
 - introduit des secrets ou logiques infra cote browser ;
+- contourne le `SecretStore` ;
+- impose un vault externe obligatoire en v1 ;
 - augmente fortement le couplage.
